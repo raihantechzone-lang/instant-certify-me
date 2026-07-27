@@ -8,16 +8,16 @@ import { useCourses, useSiteSettings } from "@/lib/data";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gators Learning — University Admission & IELTS Courses" },
+      { title: "raihan" },
       {
         name: "description",
         content:
           "Live classes, recorded video lessons, PDF notes, exams and certificates for university admission and IELTS preparation.",
       },
-      { property: "og:title", content: "Gators Learning — University Admission & IELTS Courses" },
+      { property: "og:title", content: "raihan" },
       {
         property: "og:description",
-        content: "Live classes, recorded lessons, PDF notes, exams and certificates in one platform.",
+        content: "Live classes, recorded video lessons, PDF notes, exams and certificates for university admission and IELTS preparation.",
       },
     ],
   }),
