@@ -115,3 +115,18 @@ export function useSiteSettings() {
 
   return settings;
 }
+
+export interface EnrollmentRequest {
+  id: string;
+  user_id: string | null;
+  course_id: string;
+  full_name: string;
+  photo_url: string | null;
+  email: string;
+  mobile: string;
+  whatsapp: string | null;
+  transaction_id: string;
+  roll_number: string | null;
+  status: string;
+  created_at: string;
+}
