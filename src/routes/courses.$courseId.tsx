@@ -26,6 +26,8 @@ function CourseDetailPage() {
   const [contents, setContents] = useState<CourseContent[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [enrolled, setEnrolled] = useState(false);
+  const [pending, setPending] = useState(false);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -52,15 +54,36 @@ function CourseDetailPage() {
   }, [courseId]);
 
   useEffect(() => {
-    if (!user) return setEnrolled(false);
-    supabase
-      .from("enrollments")
-      .select("id, status")
-      .eq("profile_id", user.id)
-      .eq("course_id", courseId)
-      .maybeSingle()
-      .then(({ data }) => setEnrolled(!!data));
+    if (!user) {
+      setEnrolled(false);
+      setPending(false);
+      return;
+    }
+    const load = async () => {
+      const [{ data: en }, { data: req }] = await Promise.all([
+        supabase.from("enrollments").select("id, status").eq("profile_id", user.id).eq("course_id", courseId).maybeSingle(),
+        supabase
+          .from("enrollment_requests")
+          .select("id, status")
+          .eq("user_id", user.id)
+          .eq("course_id", courseId)
+          .eq("status", "pending")
+          .maybeSingle(),
+      ]);
+      setEnrolled(!!en);
+      setPending(!!req);
+    };
+    load();
+    const channel = supabase
+      .channel(`enroll-${courseId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "enrollments" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "enrollment_requests" }, () => load())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user, courseId]);
+
 
   const active = contents.find((c) => c.id === activeId) ?? null;
   const canWatch = enrolled || active?.is_free;
@@ -79,21 +102,30 @@ function CourseDetailPage() {
               <VideoPlayer youtubeId={vid} title={active.title} />
             ) : (
               <div className="aspect-video rounded-2xl bg-ink/90 flex flex-col items-center justify-center text-background text-center px-6">
-                <span className="text-4xl mb-3">🔒</span>
+                <span className="text-4xl mb-3">{pending ? "⏳" : "🔒"}</span>
                 <p className="font-bold">
-                  {contents.length === 0 ? "No lessons added yet." : "Enroll in this course to unlock the lessons."}
+                  {contents.length === 0
+                    ? "No lessons added yet."
+                    : pending
+                      ? "Payment verification pending"
+                      : "Enroll in this course to unlock the lessons."}
                 </p>
-                {!user && (
+                {pending ? (
+                  <p className="text-sm mt-2 font-bengali text-background/80">
+                    ১ ঘণ্টার মধ্যে পেমেন্ট কনফার্ম হলে কোর্সটি আনলক হয়ে যাবে।
+                  </p>
+                ) : (
                   <Link
-                    to="/auth"
-                    search={{ mode: "login" }}
+                    to="/enroll/$courseId"
+                    params={{ courseId }}
                     className="mt-4 px-6 py-3 rounded-xl bg-brand text-brand-foreground font-bold text-sm"
                   >
-                    Log in
+                    Enroll now
                   </Link>
                 )}
               </div>
             )}
+
 
             {active && canWatch && (
               <div className="rounded-2xl bg-background border border-border p-6 shadow-sm">

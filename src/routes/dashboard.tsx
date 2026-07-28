@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { InterstitialAd } from "@/components/site/InterstitialAd";
-import type { Course, Enrollment } from "@/lib/data";
+import type { Course, Enrollment, EnrollmentRequest } from "@/lib/data";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -26,6 +26,9 @@ function DashboardPage() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("courses");
   const [rows, setRows] = useState<(Enrollment & { courses: Course | null })[]>([]);
+  const [pendingReqs, setPendingReqs] = useState<EnrollmentRequest[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ full_name: "", photo_url: "" });
 
   useEffect(() => {
     if (!loading && !user) router.navigate({ to: "/auth", search: { mode: "login" }, replace: true });
@@ -53,6 +56,38 @@ function DashboardPage() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const load = () =>
+      supabase
+        .from("enrollment_requests")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .then(({ data }) => setPendingReqs((data as EnrollmentRequest[]) ?? []));
+    load();
+    const channel = supabase
+      .channel("my-requests-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "enrollment_requests" }, () => load())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  useEffect(() => {
+    setEditForm({ full_name: profile?.full_name ?? "", photo_url: String(profile?.photo_url ?? "") });
+  }, [profile?.full_name, profile?.photo_url]);
+
+  const saveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    await supabase
+      .from("profiles")
+      .upsert({ id: user.id, full_name: editForm.full_name, photo_url: editForm.photo_url || null }, { onConflict: "id" });
+    setEditing(false);
+  };
+
   const certifiedCourseIds = new Set(rows.filter((r) => r.status === "certified" && r.certificate_url).map((r) => r.course_id));
 
   if (loading || !user) {
@@ -70,8 +105,8 @@ function DashboardPage() {
 
       <main className="pt-32 sm:pt-40 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4 mb-8">
-          {profile?.avatar_url ? (
-            <img src={String(profile.avatar_url)} alt="" className="h-16 w-16 rounded-full object-cover" />
+          {profile?.photo_url || profile?.avatar_url ? (
+            <img src={String(profile.photo_url ?? profile.avatar_url)} alt="" className="h-16 w-16 rounded-full object-cover" />
           ) : (
             <div className="h-16 w-16 rounded-full bg-brand-soft text-brand text-xl font-bold flex items-center justify-center">
               {(profile?.full_name ?? user.email ?? "S").charAt(0).toUpperCase()}
@@ -80,8 +115,38 @@ function DashboardPage() {
           <div>
             <h1 className="text-2xl font-bold text-ink">{profile?.full_name ?? user.email}</h1>
             {profile?.roll_number && <p className="text-sm font-bold text-brand">Roll: {String(profile.roll_number)}</p>}
+            <button onClick={() => setEditing((v) => !v)} className="text-xs font-bold text-ink-muted hover:text-ink mt-1">
+              {editing ? "Cancel" : "Edit name / photo"}
+            </button>
           </div>
         </div>
+
+        {editing && (
+          <form onSubmit={saveProfile} className="mb-8 rounded-2xl bg-background border border-border p-5 space-y-3 max-w-md">
+            <input
+              className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-sm outline-none focus:border-brand"
+              placeholder="Full name"
+              value={editForm.full_name}
+              onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+            />
+            <input
+              className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-sm outline-none focus:border-brand"
+              placeholder="Profile picture URL"
+              value={editForm.photo_url}
+              onChange={(e) => setEditForm({ ...editForm, photo_url: e.target.value })}
+            />
+            <button className="px-5 py-3 rounded-xl bg-brand text-brand-foreground text-sm font-bold">Save profile</button>
+          </form>
+        )}
+
+        {pendingReqs.length > 0 && (
+          <div className="mb-8 rounded-2xl border-2 border-brand bg-brand-soft p-5">
+            <p className="font-bold text-ink">⏳ Payment verification pending ({pendingReqs.length})</p>
+            <p className="text-sm text-ink-muted font-bengali mt-1">
+              ১ ঘণ্টার মধ্যে অ্যাডমিন পেমেন্ট যাচাই করবেন। কনফার্ম হলে কোর্সটি এখানেই আনলক হয়ে যাবে।
+            </p>
+          </div>
+        )}
 
         <div className="flex gap-2 mb-8">
           {(["courses", "certificates"] as Tab[]).map((t) => (

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Course, CourseContent, Enrollment } from "@/lib/data";
+import type { Course, CourseContent, Enrollment, EnrollmentRequest } from "@/lib/data";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -17,10 +17,11 @@ export const Route = createFileRoute("/admin")({
 });
 
 const ADMIN_USER = "adel111";
+const ADMIN_EMAIL = "adel111@gmail.com";
 const ADMIN_PASS = "adel111";
 const SESSION_KEY = "gators-admin-session";
 
-type View = "courses" | "content" | "certificates" | "reviews" | "ads" | "settings";
+type View = "payments" | "courses" | "content" | "certificates" | "reviews" | "ads" | "settings";
 
 function AdminPage() {
   const [authed, setAuthed] = useState(false);
@@ -40,7 +41,8 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
+    const id = username.trim().toLowerCase();
+    if ((id === ADMIN_USER || id === ADMIN_EMAIL) && password === ADMIN_PASS) {
       localStorage.setItem(SESSION_KEY, "1");
       onSuccess();
     } else setError(true);
@@ -54,7 +56,7 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
+          placeholder="Username or email"
           className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-sm outline-none focus:border-brand"
         />
         <input
@@ -83,6 +85,7 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
   };
 
   const items: { key: View; label: string }[] = [
+    { key: "payments", label: "Payments" },
     { key: "courses", label: "Courses" },
     { key: "content", label: "Lessons & Live" },
     { key: "certificates", label: "Certificates" },
@@ -116,6 +119,7 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
         </nav>
 
         <section>
+          {view === "payments" && <PaymentsAdmin notify={notify} />}
           {view === "courses" && <CoursesAdmin notify={notify} />}
           {view === "content" && <ContentAdmin notify={notify} />}
           {view === "certificates" && <CertificatesAdmin notify={notify} />}
@@ -139,6 +143,100 @@ const input = "w-full rounded-xl border border-border bg-surface-alt px-4 py-3 t
 const btn = "px-5 py-3 rounded-xl bg-brand text-brand-foreground text-sm font-bold";
 
 type Notify = (msg: string) => void;
+
+function PaymentsAdmin({ notify }: { notify: Notify }) {
+  const [rows, setRows] = useState<EnrollmentRequest[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  const load = () =>
+    supabase
+      .from("enrollment_requests")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setRows((data as EnrollmentRequest[]) ?? []));
+
+  useEffect(() => {
+    load();
+    supabase
+      .from("courses")
+      .select("*")
+      .then(({ data }) => setCourses((data as Course[]) ?? []));
+    const channel = supabase
+      .channel("requests-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "enrollment_requests" }, () => load())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const courseTitle = (id: string) => courses.find((c) => c.id === id)?.title ?? id;
+
+  const decide = async (r: EnrollmentRequest, approve: boolean) => {
+    if (approve) {
+      if (!r.user_id) return notify("This request has no student account yet.");
+      const { error } = await supabase
+        .from("enrollments")
+        .insert({ profile_id: r.user_id, course_id: r.course_id, status: "active" });
+      if (error && !error.message.includes("duplicate")) return notify(error.message);
+    }
+    const { error } = await supabase
+      .from("enrollment_requests")
+      .update({ status: approve ? "approved" : "rejected" })
+      .eq("id", r.id);
+    notify(error ? error.message : approve ? "Payment verified — course unlocked" : "Request rejected");
+    load();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className={card}>
+        <h2 className="font-bold text-ink mb-1">Payment verification</h2>
+        <p className="text-sm text-ink-muted mb-4">
+          Verify the bKash transaction ID, then approve to unlock the course instantly.
+        </p>
+        <ul className="divide-y divide-border">
+          {rows.length === 0 && <li className="py-3 text-sm text-ink-muted">No enrollment requests yet.</li>}
+          {rows.map((r) => (
+            <li key={r.id} className="py-4 flex flex-wrap items-start justify-between gap-4">
+              <div className="flex gap-3">
+                {r.photo_url ? (
+                  <img src={r.photo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
+                ) : (
+                  <div className="h-12 w-12 rounded-full bg-brand-soft text-brand font-bold flex items-center justify-center">
+                    {r.full_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="text-sm">
+                  <p className="font-bold text-ink">
+                    {r.full_name} <span className="text-xs text-brand">Roll: {r.roll_number ?? "—"}</span>
+                  </p>
+                  <p className="text-ink-muted">📧 {r.email}</p>
+                  <p className="text-ink-muted">📞 {r.mobile} · 📱 {r.whatsapp ?? "—"}</p>
+                  <p className="text-ink-muted">📚 {courseTitle(r.course_id)}</p>
+                  <p className="font-bold text-ink mt-1">TrxID: {r.transaction_id}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold capitalize text-ink-muted">{r.status}</span>
+                {r.status === "pending" && (
+                  <>
+                    <button onClick={() => decide(r, true)} className={btn}>
+                      Approve
+                    </button>
+                    <button onClick={() => decide(r, false)} className="px-5 py-3 rounded-xl border-2 border-border text-sm font-bold text-destructive">
+                      Reject
+                    </button>
+                  </>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
 
 function CoursesAdmin({ notify }: { notify: Notify }) {
   const [courses, setCourses] = useState<Course[]>([]);

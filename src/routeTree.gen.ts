@@ -9,33 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ReviewsRouteImport } from './routes/reviews'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses.index'
+import { Route as EnrollCourseIdRouteImport } from './routes/enroll.$courseId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -43,14 +29,34 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReviewsRoute = ReviewsRouteImport.update({
-  id: '/reviews',
-  path: '/reviews',
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnrollCourseIdRoute = EnrollCourseIdRouteImport.update({
+  id: '/enroll/$courseId',
+  path: '/enroll/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/reviews': typeof ReviewsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/courses/': typeof CoursesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/reviews': typeof ReviewsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/courses': typeof CoursesIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/reviews': typeof ReviewsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/courses/': typeof CoursesIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/reviews'
     | '/courses/$courseId'
+    | '/enroll/$courseId'
     | '/courses/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/reviews'
     | '/courses/$courseId'
+    | '/enroll/$courseId'
     | '/courses'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/reviews'
     | '/courses/$courseId'
+    | '/enroll/$courseId'
     | '/courses/'
   fileRoutesById: FileRoutesById
 }
@@ -131,37 +143,17 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ReviewsRoute: typeof ReviewsRoute
   CoursesCourseIdRoute: typeof CoursesCourseIdRoute
+  EnrollCourseIdRoute: typeof EnrollCourseIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -171,11 +163,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reviews': {
-      id: '/reviews'
-      path: '/reviews'
-      fullPath: '/reviews'
-      preLoaderRoute: typeof ReviewsRouteImport
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/courses/': {
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/courses'
       fullPath: '/courses/'
       preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enroll/$courseId': {
+      id: '/enroll/$courseId'
+      path: '/enroll/$courseId'
+      fullPath: '/enroll/$courseId'
+      preLoaderRoute: typeof EnrollCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/courses/$courseId': {
@@ -203,18 +223,9 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ReviewsRoute: ReviewsRoute,
   CoursesCourseIdRoute: CoursesCourseIdRoute,
+  EnrollCourseIdRoute: EnrollCourseIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
