@@ -98,9 +98,15 @@ function AuthPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
+              placeholder={mode === "signup" ? "Password" : "Password or Roll number"}
               className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-sm outline-none focus:border-brand"
             />
+            {mode === "login" && (
+              <p className="text-xs text-ink-muted font-bengali">
+                কোর্স কেনার সময় পাওয়া Roll Number দিয়েই লগ ইন করতে পারবেন।
+              </p>
+            )}
+
             {error && <p className="text-sm text-destructive">{error}</p>}
             <button
               type="submit"
