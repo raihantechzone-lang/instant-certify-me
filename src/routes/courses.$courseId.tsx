@@ -26,6 +26,8 @@ function CourseDetailPage() {
   const [contents, setContents] = useState<CourseContent[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [enrolled, setEnrolled] = useState(false);
+  const [pending, setPending] = useState(false);
+
 
   useEffect(() => {
     let cancelled = false;
