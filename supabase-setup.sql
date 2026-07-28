@@ -55,3 +55,36 @@ insert into public.site_settings (key, value) values
   ('hero_title', 'Gators Learning'),
   ('hero_subtitle', 'University Admission ও IELTS প্রস্তুতির সম্পূর্ণ প্ল্যাটফর্ম')
 on conflict (key) do nothing;
+
+-- 5) Course enrollment requests (bKash payment, verified from the admin panel)
+create table if not exists public.enrollment_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  course_id uuid not null,
+  full_name text not null,
+  photo_url text,
+  email text not null,
+  mobile text not null,
+  whatsapp text,
+  transaction_id text not null,
+  roll_number text,
+  status text not null default 'pending',
+  created_at timestamptz not null default now()
+);
+grant select, insert on public.enrollment_requests to anon, authenticated;
+grant all on public.enrollment_requests to service_role;
+alter table public.enrollment_requests enable row level security;
+drop policy if exists "anyone can request enrollment" on public.enrollment_requests;
+create policy "anyone can request enrollment" on public.enrollment_requests for insert with check (true);
+drop policy if exists "requests readable" on public.enrollment_requests;
+create policy "requests readable" on public.enrollment_requests for select using (true);
+drop policy if exists "requests updatable" on public.enrollment_requests;
+create policy "requests updatable" on public.enrollment_requests for update using (true) with check (true);
+
+-- profile extras used by the enrollment form
+alter table public.profiles add column if not exists whatsapp text;
+alter table public.profiles add column if not exists photo_url text;
+
+insert into public.site_settings (key, value) values
+  ('bkash_number', '01XXXXXXXXX')
+on conflict (key) do nothing;
