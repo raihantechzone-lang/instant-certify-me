@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses.index'
+import { Route as EnrollCourseIdRouteImport } from './routes/enroll.$courseId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
 
 const ReviewsRoute = ReviewsRouteImport.update({
@@ -53,6 +54,11 @@ const CoursesIndexRoute = CoursesIndexRouteImport.update({
   path: '/courses/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnrollCourseIdRoute = EnrollCourseIdRouteImport.update({
+  id: '/enroll/$courseId',
+  path: '/enroll/$courseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
   id: '/courses/$courseId',
   path: '/courses/$courseId',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/reviews': typeof ReviewsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/courses/': typeof CoursesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/reviews': typeof ReviewsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/courses': typeof CoursesIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/reviews': typeof ReviewsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/courses/': typeof CoursesIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/reviews'
     | '/courses/$courseId'
+    | '/enroll/$courseId'
     | '/courses/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/reviews'
     | '/courses/$courseId'
+    | '/enroll/$courseId'
     | '/courses'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/reviews'
     | '/courses/$courseId'
+    | '/enroll/$courseId'
     | '/courses/'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ReviewsRoute: typeof ReviewsRoute
   CoursesCourseIdRoute: typeof CoursesCourseIdRoute
+  EnrollCourseIdRoute: typeof EnrollCourseIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
 }
 
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/enroll/$courseId': {
+      id: '/enroll/$courseId'
+      path: '/enroll/$courseId'
+      fullPath: '/enroll/$courseId'
+      preLoaderRoute: typeof EnrollCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/$courseId': {
       id: '/courses/$courseId'
       path: '/courses/$courseId'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ReviewsRoute: ReviewsRoute,
   CoursesCourseIdRoute: CoursesCourseIdRoute,
+  EnrollCourseIdRoute: EnrollCourseIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,
 }
 export const routeTree = rootRouteImport
