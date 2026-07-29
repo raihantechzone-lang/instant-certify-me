@@ -265,11 +265,12 @@
 
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: ld, error } = await supabase.auth.signInWithPassword({
         email: String(fd.get("email")),
         password: String(fd.get("password")),
       });
       if (error) return finish(error.message, "Login failed");
+      if (!ld?.session) return finish("Could not start a session.", "Login failed");
       form.reset();
       window.closeModal("authModal");
       window.location.href = "/dashboard";
