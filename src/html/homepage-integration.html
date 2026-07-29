@@ -220,7 +220,7 @@
       }
 
       if (type === "Signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data: sd, error } = await supabase.auth.signUp({
           email: String(fd.get("email")),
           password: String(fd.get("phone")),
           options: {
@@ -230,6 +230,15 @@
         });
         if (error) return finish(error.message, "Signup failed");
         form.reset();
+        // With email confirmation enabled signUp returns no session; sending the
+        // user to /dashboard would just bounce them back to the login page.
+        if (!sd?.session) {
+          window.closeModal("authModal");
+          return finish(
+            "Account created. Please confirm your email, then log in.",
+            "Check your inbox"
+          );
+        }
         window.closeModal("authModal");
         window.location.href = "/dashboard";
         return;
@@ -237,27 +246,31 @@
 
       if (type === "Roll") {
         const roll = String(fd.get("roll") || "").trim();
-        const { data: prof } = await supabase
+        const { data: prof, error: lookupErr } = await supabase
           .from("profiles")
           .select("email, roll_number")
           .eq("roll_number", roll)
           .maybeSingle();
+        if (lookupErr) return finish(lookupErr.message, "Login failed");
         if (!prof?.email) return finish("Roll number not found.", "Login failed");
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: rd, error } = await supabase.auth.signInWithPassword({
           email: prof.email,
           password: roll,
         });
         if (error) return finish(error.message, "Login failed");
+        if (!rd?.session) return finish("Could not start a session.", "Login failed");
         window.closeModal("authModal");
         window.location.href = "/dashboard";
         return;
+
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: ld, error } = await supabase.auth.signInWithPassword({
         email: String(fd.get("email")),
         password: String(fd.get("password")),
       });
       if (error) return finish(error.message, "Login failed");
+      if (!ld?.session) return finish("Could not start a session.", "Login failed");
       form.reset();
       window.closeModal("authModal");
       window.location.href = "/dashboard";
