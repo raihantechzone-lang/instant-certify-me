@@ -1,0 +1,303 @@
+<!-- Added only: authentication + database/backend wiring. No UI/design changes. -->
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const supabase = createClient(
+    "https://jouwcthdcjoegcqgwlpl.supabase.co",
+    "sb_publishable_Y1rY5LYRuDF9iqJNWS1blQ_9EqPBOp9",
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: "gators-learning-auth",
+      },
+    }
+  );
+  window.supabase = supabase;
+
+  let currentUser = null;
+  let currentProfile = null;
+
+  /* ---------- header auth state ---------- */
+  function renderAuthState() {
+    const authBtns = document.getElementById("auth-buttons");
+    const profileBtn = document.getElementById("profile-button");
+    if (!authBtns || !profileBtn) return;
+    if (currentUser) {
+      authBtns.classList.add("hidden");
+      authBtns.classList.remove("lg:flex");
+      profileBtn.classList.remove("hidden");
+      profileBtn.classList.add("lg:flex");
+      const name =
+        currentProfile?.full_name ||
+        currentUser.user_metadata?.full_name ||
+        currentUser.email ||
+        "Student";
+      const nameEl = document.getElementById("dropdown-user-name");
+      if (nameEl) nameEl.innerText = name;
+      const rollEl = document.getElementById("dropdown-roll-number");
+      if (rollEl) rollEl.innerText = currentProfile?.roll_number ? "Roll: " + currentProfile.roll_number : "";
+      const photo = currentProfile?.photo_url || currentUser.user_metadata?.avatar_url;
+      const img = document.getElementById("header-profile-img");
+      const icon = document.getElementById("header-profile-icon");
+      if (photo && img && icon) {
+        img.src = photo;
+        img.classList.remove("hidden");
+        icon.classList.add("hidden");
+      }
+    } else {
+      profileBtn.classList.add("hidden");
+      profileBtn.classList.remove("lg:flex");
+      authBtns.classList.remove("hidden");
+      authBtns.classList.add("lg:flex");
+    }
+  }
+
+  async function loadProfile() {
+    if (!currentUser) {
+      currentProfile = null;
+      return;
+    }
+    const { data } = await supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle();
+    currentProfile = data ?? null;
+  }
+
+  supabase.auth.onAuthStateChange(async (_e, session) => {
+    currentUser = session?.user ?? null;
+    await loadProfile();
+    renderAuthState();
+  });
+
+  /* ---------- database: site settings ---------- */
+  async function loadSettings() {
+    const { data } = await supabase.from("site_settings").select("key, value");
+    if (!data) return;
+    for (const row of data) {
+      if (!row.value) continue;
+      if (row.key === "hero_title") document.getElementById("dynamic-site-title").innerHTML = row.value;
+      if (row.key === "hero_subtitle") document.getElementById("dynamic-site-subtitle").innerHTML = row.value;
+    }
+  }
+
+  /* ---------- database: courses ---------- */
+  async function loadCourses() {
+    const { data: courses } = await supabase
+      .from("courses")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (!courses) return;
+    const { data: contents } = await supabase.from("course_contents").select("id, course_id");
+    const counts = {};
+    (contents || []).forEach((c) => {
+      counts[c.course_id] = (counts[c.course_id] || 0) + 1;
+    });
+
+    window.db.courses = courses.map((c) => ({
+      id: c.id,
+      name: c.category || "Course",
+      title: c.title,
+      category: (c.category || "versity").toLowerCase(),
+      price: c.price ?? c.discount_price ?? 0,
+      discountPrice: c.discount_price ?? c.price ?? 0,
+      thumbnail: c.thumbnail_url,
+      videos: new Array(counts[c.id] || 0),
+    }));
+
+    const grid = document.getElementById("courses-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    window.renderDynamicCourses();
+    // wire the enrol / details buttons of the rendered cards to real routes
+    Array.from(grid.children).forEach((card, i) => {
+      const course = window.db.courses[i];
+      if (!course) return;
+      card.querySelectorAll("button, img, h3").forEach((el) => {
+        el.addEventListener("click", () => {
+          window.location.href = el.tagName === "BUTTON" && el.innerText.includes("ভর্তি")
+            ? "/enroll/" + course.id
+            : "/courses/" + course.id;
+        });
+      });
+    });
+  }
+
+  /* ---------- database: approved reviews ---------- */
+  async function loadReviews() {
+    const { data } = await supabase
+      .from("reviews")
+      .select("student_name, student_photo, message, rating, created_at")
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
+    window.db.feedbacks = (data || []).map((r) => ({
+      name: r.student_name || "Student",
+      role: r.rating ? r.rating + " ★ Student Review" : "Student",
+      text: r.message,
+      status: "approved",
+      photo: r.student_photo,
+    }));
+    window.renderTestimonialsList();
+  }
+
+  /* ---------- feedback submission (login required) ---------- */
+  window.submitFeedback = async function (e) {
+    e.preventDefault();
+    if (!currentUser) {
+      window.showToast("Please log in first to submit a review.", "Login required");
+      window.openModal("authModal", "login");
+      return;
+    }
+    const name = document.getElementById("fb-name")?.value;
+    const text = document.getElementById("fb-text")?.value;
+    const { error } = await supabase.from("reviews").insert({
+      user_id: currentUser.id,
+      rating: 5,
+      message: text,
+      student_name: name || currentProfile?.full_name || currentUser.email,
+      student_photo: currentProfile?.photo_url || currentUser.user_metadata?.avatar_url || null,
+      status: "pending",
+    });
+    e.target.reset();
+    window.showToast(
+      error ? error.message : "Feedback submitted for review!",
+      error ? "Error" : "Thank You"
+    );
+  };
+
+  /* ---------- contact form -> database ---------- */
+  const originalContactHandler = window.handleGoogleScriptSubmit;
+  window.handleGoogleScriptSubmit = async function (e, formType) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+    btn.disabled = true;
+    const fd = new FormData(form);
+    const { error } = await supabase.from("contact_requests").insert({
+      name: fd.get("name"),
+      phone: fd.get("phone"),
+      message: fd.get("message"),
+      kind: formType,
+    });
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    if (!error) form.reset();
+    window.showToast(
+      error ? "Could not send right now, please WhatsApp us." : undefined,
+      error ? "Error" : "Success!"
+    );
+    window.closeModal("contactModal");
+  };
+
+  /* ---------- authentication ---------- */
+  window.handleAuthSubmit = async function (e, type) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+    btn.disabled = true;
+    const fd = new FormData(form);
+
+    const finish = (msg, title) => {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      if (msg) window.showToast(msg, title);
+    };
+
+    try {
+      if (type === "Admin") {
+        const id = String(fd.get("adminId") || "").trim();
+        const pass = String(fd.get("adminPass") || "");
+        if ((id === "adel111" || id === "adel111@gmail.com") && pass === "adel111") {
+          sessionStorage.setItem("gators-admin", "1");
+          window.location.href = "/admin";
+          return;
+        }
+        finish("Invalid admin credentials.", "Access denied");
+        return;
+      }
+
+      if (type === "Signup") {
+        const { error } = await supabase.auth.signUp({
+          email: String(fd.get("email")),
+          password: String(fd.get("phone")),
+          options: {
+            data: { full_name: fd.get("name"), phone: fd.get("phone") },
+            emailRedirectTo: window.location.origin + "/dashboard",
+          },
+        });
+        if (error) return finish(error.message, "Signup failed");
+        form.reset();
+        window.closeModal("authModal");
+        window.location.href = "/dashboard";
+        return;
+      }
+
+      if (type === "Roll") {
+        const roll = String(fd.get("roll") || "").trim();
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("email, roll_number")
+          .eq("roll_number", roll)
+          .maybeSingle();
+        if (!prof?.email) return finish("Roll number not found.", "Login failed");
+        const { error } = await supabase.auth.signInWithPassword({
+          email: prof.email,
+          password: roll,
+        });
+        if (error) return finish(error.message, "Login failed");
+        window.closeModal("authModal");
+        window.location.href = "/dashboard";
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: String(fd.get("email")),
+        password: String(fd.get("password")),
+      });
+      if (error) return finish(error.message, "Login failed");
+      form.reset();
+      window.closeModal("authModal");
+      window.location.href = "/dashboard";
+    } catch (err) {
+      finish(String(err), "Error");
+    }
+  };
+
+  window.signInWithGoogle = () =>
+    supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/dashboard" },
+    });
+
+  window.goToDashboard = function () {
+    window.location.href = currentUser ? "/dashboard" : "/auth?mode=login";
+  };
+
+  window.logoutUser = async function () {
+    await supabase.auth.signOut();
+    currentUser = null;
+    currentProfile = null;
+    renderAuthState();
+    window.showToast("You have been logged out.", "Signed out");
+  };
+
+  /* ---------- boot ---------- */
+  (async () => {
+    const { data } = await supabase.auth.getSession();
+    currentUser = data.session?.user ?? null;
+    await loadProfile();
+    renderAuthState();
+    await Promise.all([loadSettings(), loadCourses(), loadReviews()]);
+
+    // realtime updates from the admin panel
+    supabase
+      .channel("home-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "courses" }, loadCourses)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, loadSettings)
+      .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, loadReviews)
+      .subscribe();
+  })();
+</script>
