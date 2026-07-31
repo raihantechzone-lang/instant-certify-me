@@ -102,9 +102,24 @@ function AuthPage() {
               className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-sm outline-none focus:border-brand"
             />
             {mode === "login" && (
-              <p className="text-xs text-ink-muted font-bengali">
-                কোর্স কেনার সময় পাওয়া Roll Number দিয়েই লগ ইন করতে পারবেন।
-              </p>
+              <>
+                <p className="text-xs text-ink-muted font-bengali">
+                  কোর্স কেনার সময় পাওয়া Roll Number দিয়েই লগ ইন করতে পারবেন।
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!email) return setError("Enter your email first, then tap Forgot password.");
+                    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+                      redirectTo: window.location.origin + "/reset-password",
+                    });
+                    setError(err ? err.message : "Password reset link sent — check your email.");
+                  }}
+                  className="text-xs font-bold text-brand hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </>
             )}
 
             {error && <p className="text-sm text-destructive">{error}</p>}
