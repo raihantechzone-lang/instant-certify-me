@@ -71,7 +71,7 @@ function CoursesPage() {
   }, [courses]);
 
   const set = (patch: Partial<CoursesSearch>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: CoursesSearch) => ({ ...prev, ...patch }) });
 
   const filtered = useMemo(() => {
     const q = (search.q ?? "").trim().toLowerCase();
