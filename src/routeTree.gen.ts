@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as ReviewsRouteImport } from './routes/reviews'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as InstructorRouteImport } from './routes/instructor'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -32,6 +33,11 @@ const WishlistRoute = WishlistRouteImport.update({
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstructorRoute = InstructorRouteImport.update({
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/instructor': typeof InstructorRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/instructor': typeof InstructorRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/instructor': typeof InstructorRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/instructor'
+    | '/reset-password'
     | '/reviews'
     | '/wishlist'
     | '/courses/$courseId'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/instructor'
+    | '/reset-password'
     | '/reviews'
     | '/wishlist'
     | '/courses/$courseId'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/instructor'
+    | '/reset-password'
     | '/reviews'
     | '/wishlist'
     | '/courses/$courseId'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
   InstructorRoute: typeof InstructorRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewsRoute: typeof ReviewsRoute
   WishlistRoute: typeof WishlistRoute
   CoursesCourseIdRoute: typeof CoursesCourseIdRoute
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/reviews'
       preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/instructor': {
@@ -335,6 +355,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
   InstructorRoute: InstructorRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
   ReviewsRoute: ReviewsRoute,
   WishlistRoute: WishlistRoute,
   CoursesCourseIdRoute: CoursesCourseIdRoute,
