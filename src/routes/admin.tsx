@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Course, CourseContent, Enrollment, EnrollmentRequest } from "@/lib/data";
+import { uploadToImageKit } from "@/lib/imagekit";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -541,6 +543,7 @@ interface AdRow {
 function AdsAdmin({ notify }: { notify: Notify }) {
   const [rows, setRows] = useState<AdRow[]>([]);
   const [form, setForm] = useState({ title: "", image_url: "", link_url: "" });
+  const [uploading, setUploading] = useState(false);
 
   const load = () =>
     supabase
@@ -566,11 +569,38 @@ function AdsAdmin({ notify }: { notify: Notify }) {
         className={`${card} space-y-3`}
       >
         <h2 className="font-bold text-ink">Upload interstitial ad</h2>
+        <label className="block text-sm font-bold text-ink">
+          Ad photo
+          <input
+            type="file"
+            accept="image/*"
+            className={`${input} mt-2`}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setUploading(true);
+              try {
+                const url = await uploadToImageKit(file, "/ads");
+                setForm((f) => ({ ...f, image_url: url }));
+                notify("Photo uploaded");
+              } catch (err) {
+                notify(err instanceof Error ? err.message : "Upload failed");
+              } finally {
+                setUploading(false);
+              }
+            }}
+          />
+        </label>
+        {uploading && <p className="text-sm text-ink-muted">Uploading photo…</p>}
+        {form.image_url && (
+          <img src={form.image_url} alt="Ad preview" className="h-32 w-auto rounded-xl object-cover" />
+        )}
         <input required className={input} placeholder="Ad image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
         <input className={input} placeholder="Ad title (optional)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
         <input className={input} placeholder="Click-through link (optional)" value={form.link_url} onChange={(e) => setForm({ ...form, link_url: e.target.value })} />
-        <button className={btn}>Publish ad</button>
+        <button className={btn} disabled={uploading}>Publish ad</button>
       </form>
+
 
       <div className={card}>
         <h2 className="font-bold text-ink mb-4">Ads</h2>
