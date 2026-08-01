@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Course, CourseContent, Enrollment, EnrollmentRequest } from "@/lib/data";
+import { uploadToImageKit } from "@/lib/imagekit";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
