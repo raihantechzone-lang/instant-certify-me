@@ -206,18 +206,26 @@
       if (msg) window.showToast(msg, title);
     };
 
+    const isAdminCreds = (id, pass) =>
+      (String(id || "").trim().toLowerCase() === "adel111" ||
+        String(id || "").trim().toLowerCase() === "adel111@gmail.com") &&
+      String(pass || "") === "adel111";
+    const openAdmin = () => {
+      // Same key the /admin panel checks, so it opens straight away.
+      localStorage.setItem("gators-admin-session", "1");
+      window.location.href = "/admin";
+    };
+
     try {
       if (type === "Admin") {
-        const id = String(fd.get("adminId") || "").trim();
-        const pass = String(fd.get("adminPass") || "");
-        if ((id === "adel111" || id === "adel111@gmail.com") && pass === "adel111") {
-          sessionStorage.setItem("gators-admin", "1");
-          window.location.href = "/admin";
-          return;
-        }
+        if (isAdminCreds(fd.get("adminId"), fd.get("adminPass"))) return openAdmin();
         finish("Invalid admin credentials.", "Access denied");
         return;
       }
+
+      // Admin can also log in from the normal login form on the homepage.
+      if (type !== "Signup" && isAdminCreds(fd.get("email"), fd.get("password"))) return openAdmin();
+
 
       if (type === "Signup") {
         const { data: sd, error } = await supabase.auth.signUp({
@@ -297,13 +305,63 @@
     window.showToast("You have been logged out.", "Signed out");
   };
 
+  /* ---------- interstitial ad (uploaded from the admin panel) ---------- */
+  async function showInterstitialAd() {
+    if (document.getElementById("gl-interstitial-ad")) return;
+    const { data: ad } = await supabase
+      .from("ads")
+      .select("id, image_url, title, link_url")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!ad || !ad.image_url) return;
+
+    const overlay = document.createElement("div");
+    overlay.id = "gl-interstitial-ad";
+    overlay.style.cssText =
+      "position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);padding:16px;";
+    const box = document.createElement("div");
+    box.style.cssText =
+      "position:relative;width:100%;max-width:420px;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 25px 60px rgba(0,0,0,.35);";
+    const img = document.createElement("img");
+    img.src = ad.image_url;
+    img.alt = ad.title || "Advertisement";
+    img.style.cssText = "width:100%;height:auto;display:block;";
+    if (ad.link_url) {
+      const a = document.createElement("a");
+      a.href = ad.link_url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.appendChild(img);
+      box.appendChild(a);
+    } else box.appendChild(img);
+    if (ad.title) {
+      const cap = document.createElement("p");
+      cap.innerText = ad.title;
+      cap.style.cssText = "margin:0;padding:14px;text-align:center;font-weight:600;font-size:14px;color:#0f172a;";
+      box.appendChild(cap);
+    }
+    // Only the X in the top-right corner closes it.
+    const close = document.createElement("button");
+    close.innerHTML = "&times;";
+    close.setAttribute("aria-label", "Close ad");
+    close.style.cssText =
+      "position:absolute;top:10px;right:10px;z-index:2;width:36px;height:36px;border:0;border-radius:999px;background:rgba(15,23,42,.75);color:#fff;font-size:22px;line-height:1;cursor:pointer;";
+    close.onclick = () => overlay.remove();
+    box.appendChild(close);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+
   /* ---------- boot ---------- */
   (async () => {
     const { data } = await supabase.auth.getSession();
     currentUser = data.session?.user ?? null;
     await loadProfile();
     renderAuthState();
-    await Promise.all([loadSettings(), loadCourses(), loadReviews()]);
+    await Promise.all([loadSettings(), loadCourses(), loadReviews(), showInterstitialAd()]);
+
 
     // realtime updates from the admin panel
     supabase
