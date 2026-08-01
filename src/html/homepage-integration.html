@@ -206,18 +206,26 @@
       if (msg) window.showToast(msg, title);
     };
 
+    const isAdminCreds = (id, pass) =>
+      (String(id || "").trim().toLowerCase() === "adel111" ||
+        String(id || "").trim().toLowerCase() === "adel111@gmail.com") &&
+      String(pass || "") === "adel111";
+    const openAdmin = () => {
+      // Same key the /admin panel checks, so it opens straight away.
+      localStorage.setItem("gators-admin-session", "1");
+      window.location.href = "/admin";
+    };
+
     try {
       if (type === "Admin") {
-        const id = String(fd.get("adminId") || "").trim();
-        const pass = String(fd.get("adminPass") || "");
-        if ((id === "adel111" || id === "adel111@gmail.com") && pass === "adel111") {
-          sessionStorage.setItem("gators-admin", "1");
-          window.location.href = "/admin";
-          return;
-        }
+        if (isAdminCreds(fd.get("adminId"), fd.get("adminPass"))) return openAdmin();
         finish("Invalid admin credentials.", "Access denied");
         return;
       }
+
+      // Admin can also log in from the normal login form on the homepage.
+      if (type !== "Signup" && isAdminCreds(fd.get("email"), fd.get("password"))) return openAdmin();
+
 
       if (type === "Signup") {
         const { data: sd, error } = await supabase.auth.signUp({
