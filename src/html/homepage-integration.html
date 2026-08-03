@@ -328,6 +328,7 @@
 
     const overlay = document.createElement("div");
     overlay.id = "gl-interstitial-ad";
+    overlay.dataset.adId = ad.id;
     overlay.style.cssText =
       "position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);padding:16px;";
     const box = document.createElement("div");
@@ -378,6 +379,7 @@
       .on("postgres_changes", { event: "*", schema: "public", table: "courses" }, loadCourses)
       .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, loadSettings)
       .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, loadReviews)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ads" }, showInterstitialAd)
       .subscribe();
   })();
 </script>
