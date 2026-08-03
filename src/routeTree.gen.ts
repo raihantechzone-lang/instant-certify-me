@@ -20,10 +20,15 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses.index'
+import { Route as InstructorStudentsRouteImport } from './routes/instructor.students'
+import { Route as InstructorEarningsRouteImport } from './routes/instructor.earnings'
 import { Route as InstructorCoursesRouteImport } from './routes/instructor.courses'
 import { Route as InstructorApplyRouteImport } from './routes/instructor.apply'
+import { Route as InstructorAnnouncementsRouteImport } from './routes/instructor.announcements'
+import { Route as InstructorAnalyticsRouteImport } from './routes/instructor.analytics'
 import { Route as EnrollCourseIdRouteImport } from './routes/enroll.$courseId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
+import { Route as InstructorCoursesCourseIdRouteImport } from './routes/instructor.courses.$courseId'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -80,6 +85,16 @@ const CoursesIndexRoute = CoursesIndexRouteImport.update({
   path: '/courses/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InstructorStudentsRoute = InstructorStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorEarningsRoute = InstructorEarningsRouteImport.update({
+  id: '/earnings',
+  path: '/earnings',
+  getParentRoute: () => InstructorRoute,
+} as any)
 const InstructorCoursesRoute = InstructorCoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -88,6 +103,16 @@ const InstructorCoursesRoute = InstructorCoursesRouteImport.update({
 const InstructorApplyRoute = InstructorApplyRouteImport.update({
   id: '/apply',
   path: '/apply',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorAnnouncementsRoute = InstructorAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorAnalyticsRoute = InstructorAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => InstructorRoute,
 } as any)
 const EnrollCourseIdRoute = EnrollCourseIdRouteImport.update({
@@ -100,6 +125,12 @@ const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
   path: '/courses/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InstructorCoursesCourseIdRoute =
+  InstructorCoursesCourseIdRouteImport.update({
+    id: '/$courseId',
+    path: '/$courseId',
+    getParentRoute: () => InstructorCoursesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -114,9 +145,14 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/announcements': typeof InstructorAnnouncementsRoute
   '/instructor/apply': typeof InstructorApplyRoute
-  '/instructor/courses': typeof InstructorCoursesRoute
+  '/instructor/courses': typeof InstructorCoursesRouteWithChildren
+  '/instructor/earnings': typeof InstructorEarningsRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/courses/': typeof CoursesIndexRoute
+  '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -131,9 +167,14 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/announcements': typeof InstructorAnnouncementsRoute
   '/instructor/apply': typeof InstructorApplyRoute
-  '/instructor/courses': typeof InstructorCoursesRoute
+  '/instructor/courses': typeof InstructorCoursesRouteWithChildren
+  '/instructor/earnings': typeof InstructorEarningsRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/courses': typeof CoursesIndexRoute
+  '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,9 +190,14 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/announcements': typeof InstructorAnnouncementsRoute
   '/instructor/apply': typeof InstructorApplyRoute
-  '/instructor/courses': typeof InstructorCoursesRoute
+  '/instructor/courses': typeof InstructorCoursesRouteWithChildren
+  '/instructor/earnings': typeof InstructorEarningsRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/courses/': typeof CoursesIndexRoute
+  '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,9 +214,14 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/courses/$courseId'
     | '/enroll/$courseId'
+    | '/instructor/analytics'
+    | '/instructor/announcements'
     | '/instructor/apply'
     | '/instructor/courses'
+    | '/instructor/earnings'
+    | '/instructor/students'
     | '/courses/'
+    | '/instructor/courses/$courseId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -185,9 +236,14 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/courses/$courseId'
     | '/enroll/$courseId'
+    | '/instructor/analytics'
+    | '/instructor/announcements'
     | '/instructor/apply'
     | '/instructor/courses'
+    | '/instructor/earnings'
+    | '/instructor/students'
     | '/courses'
+    | '/instructor/courses/$courseId'
   id:
     | '__root__'
     | '/'
@@ -202,9 +258,14 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/courses/$courseId'
     | '/enroll/$courseId'
+    | '/instructor/analytics'
+    | '/instructor/announcements'
     | '/instructor/apply'
     | '/instructor/courses'
+    | '/instructor/earnings'
+    | '/instructor/students'
     | '/courses/'
+    | '/instructor/courses/$courseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -302,6 +363,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/instructor/students': {
+      id: '/instructor/students'
+      path: '/students'
+      fullPath: '/instructor/students'
+      preLoaderRoute: typeof InstructorStudentsRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/earnings': {
+      id: '/instructor/earnings'
+      path: '/earnings'
+      fullPath: '/instructor/earnings'
+      preLoaderRoute: typeof InstructorEarningsRouteImport
+      parentRoute: typeof InstructorRoute
+    }
     '/instructor/courses': {
       id: '/instructor/courses'
       path: '/courses'
@@ -314,6 +389,20 @@ declare module '@tanstack/react-router' {
       path: '/apply'
       fullPath: '/instructor/apply'
       preLoaderRoute: typeof InstructorApplyRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/announcements': {
+      id: '/instructor/announcements'
+      path: '/announcements'
+      fullPath: '/instructor/announcements'
+      preLoaderRoute: typeof InstructorAnnouncementsRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/analytics': {
+      id: '/instructor/analytics'
+      path: '/analytics'
+      fullPath: '/instructor/analytics'
+      preLoaderRoute: typeof InstructorAnalyticsRouteImport
       parentRoute: typeof InstructorRoute
     }
     '/enroll/$courseId': {
@@ -330,17 +419,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/instructor/courses/$courseId': {
+      id: '/instructor/courses/$courseId'
+      path: '/$courseId'
+      fullPath: '/instructor/courses/$courseId'
+      preLoaderRoute: typeof InstructorCoursesCourseIdRouteImport
+      parentRoute: typeof InstructorCoursesRoute
+    }
   }
 }
 
+interface InstructorCoursesRouteChildren {
+  InstructorCoursesCourseIdRoute: typeof InstructorCoursesCourseIdRoute
+}
+
+const InstructorCoursesRouteChildren: InstructorCoursesRouteChildren = {
+  InstructorCoursesCourseIdRoute: InstructorCoursesCourseIdRoute,
+}
+
+const InstructorCoursesRouteWithChildren =
+  InstructorCoursesRoute._addFileChildren(InstructorCoursesRouteChildren)
+
 interface InstructorRouteChildren {
+  InstructorAnalyticsRoute: typeof InstructorAnalyticsRoute
+  InstructorAnnouncementsRoute: typeof InstructorAnnouncementsRoute
   InstructorApplyRoute: typeof InstructorApplyRoute
-  InstructorCoursesRoute: typeof InstructorCoursesRoute
+  InstructorCoursesRoute: typeof InstructorCoursesRouteWithChildren
+  InstructorEarningsRoute: typeof InstructorEarningsRoute
+  InstructorStudentsRoute: typeof InstructorStudentsRoute
 }
 
 const InstructorRouteChildren: InstructorRouteChildren = {
+  InstructorAnalyticsRoute: InstructorAnalyticsRoute,
+  InstructorAnnouncementsRoute: InstructorAnnouncementsRoute,
   InstructorApplyRoute: InstructorApplyRoute,
-  InstructorCoursesRoute: InstructorCoursesRoute,
+  InstructorCoursesRoute: InstructorCoursesRouteWithChildren,
+  InstructorEarningsRoute: InstructorEarningsRoute,
+  InstructorStudentsRoute: InstructorStudentsRoute,
 }
 
 const InstructorRouteWithChildren = InstructorRoute._addFileChildren(
