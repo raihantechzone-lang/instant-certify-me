@@ -307,7 +307,7 @@
 
   /* ---------- interstitial ad (uploaded from the admin panel) ---------- */
   async function showInterstitialAd() {
-    if (document.getElementById("gl-interstitial-ad")) return;
+    const existing = document.getElementById("gl-interstitial-ad");
     const { data: ad } = await supabase
       .from("ads")
       .select("id, image_url, title, link_url")
@@ -315,10 +315,20 @@
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (!ad || !ad.image_url) return;
+    if (!ad || !ad.image_url) {
+      // deleted or paused from the admin panel -> drop the overlay right away
+      if (existing) existing.remove();
+      return;
+    }
+    if (existing) {
+      if (existing.dataset.adId === ad.id) return;
+      existing.remove();
+    }
+
 
     const overlay = document.createElement("div");
     overlay.id = "gl-interstitial-ad";
+    overlay.dataset.adId = ad.id;
     overlay.style.cssText =
       "position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);padding:16px;";
     const box = document.createElement("div");
@@ -369,6 +379,7 @@
       .on("postgres_changes", { event: "*", schema: "public", table: "courses" }, loadCourses)
       .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, loadSettings)
       .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, loadReviews)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ads" }, showInterstitialAd)
       .subscribe();
   })();
 </script>
