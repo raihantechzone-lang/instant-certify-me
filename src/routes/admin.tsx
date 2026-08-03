@@ -624,8 +624,9 @@ function AdsAdmin({ notify }: { notify: Notify }) {
                 </button>
                 <button
                   onClick={async () => {
-                    await supabase.from("ads").delete().eq("id", a.id);
-                    notify("Ad deleted");
+                    if (!window.confirm("Delete this ad? It will disappear from the homepage right away.")) return;
+                    const { error } = await supabase.from("ads").delete().eq("id", a.id);
+                    notify(error ? error.message : "Ad deleted");
                     load();
                   }}
                   className="text-sm font-bold text-destructive"
