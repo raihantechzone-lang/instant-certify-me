@@ -19,23 +19,36 @@ export function InterstitialAd({ placement }: { placement: "home" | "dashboard" 
 
   useEffect(() => {
     let cancelled = false;
-    supabase
-      .from("ads")
-      .select("id, image_url, title, link_url")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled && data) {
-          setAd(data as Ad);
-          setOpen(true);
-        }
-      });
+    const load = () =>
+      supabase
+        .from("ads")
+        .select("id, image_url, title, link_url")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (cancelled) return;
+          if (data) {
+            setAd(data as Ad);
+            setOpen(true);
+          } else {
+            // deleted / paused in the admin panel — remove the overlay at once
+            setAd(null);
+            setOpen(false);
+          }
+        });
+    load();
+    const channel = supabase
+      .channel("ads-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "ads" }, () => load())
+      .subscribe();
     return () => {
       cancelled = true;
+      supabase.removeChannel(channel);
     };
   }, [placement]);
+
 
   if (!ad || !open) return null;
 
