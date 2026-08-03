@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PurchasesRouteImport } from './routes/purchases'
 import { Route as InstructorRouteImport } from './routes/instructor'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -20,6 +21,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses.index'
+import { Route as InstructorsInstructorIdRouteImport } from './routes/instructors.$instructorId'
 import { Route as InstructorStudentsRouteImport } from './routes/instructor.students'
 import { Route as InstructorEarningsRouteImport } from './routes/instructor.earnings'
 import { Route as InstructorCoursesRouteImport } from './routes/instructor.courses'
@@ -43,6 +45,11 @@ const ReviewsRoute = ReviewsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PurchasesRoute = PurchasesRouteImport.update({
+  id: '/purchases',
+  path: '/purchases',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstructorRoute = InstructorRouteImport.update({
@@ -83,6 +90,11 @@ const IndexRoute = IndexRouteImport.update({
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstructorsInstructorIdRoute = InstructorsInstructorIdRouteImport.update({
+  id: '/instructors/$instructorId',
+  path: '/instructors/$instructorId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstructorStudentsRoute = InstructorStudentsRouteImport.update({
@@ -140,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/instructor': typeof InstructorRouteWithChildren
+  '/purchases': typeof PurchasesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
@@ -151,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/instructor/courses': typeof InstructorCoursesRouteWithChildren
   '/instructor/earnings': typeof InstructorEarningsRoute
   '/instructor/students': typeof InstructorStudentsRoute
+  '/instructors/$instructorId': typeof InstructorsInstructorIdRoute
   '/courses/': typeof CoursesIndexRoute
   '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
@@ -162,6 +176,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/instructor': typeof InstructorRouteWithChildren
+  '/purchases': typeof PurchasesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
@@ -173,6 +188,7 @@ export interface FileRoutesByTo {
   '/instructor/courses': typeof InstructorCoursesRouteWithChildren
   '/instructor/earnings': typeof InstructorEarningsRoute
   '/instructor/students': typeof InstructorStudentsRoute
+  '/instructors/$instructorId': typeof InstructorsInstructorIdRoute
   '/courses': typeof CoursesIndexRoute
   '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
@@ -185,6 +201,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/instructor': typeof InstructorRouteWithChildren
+  '/purchases': typeof PurchasesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
@@ -196,6 +213,7 @@ export interface FileRoutesById {
   '/instructor/courses': typeof InstructorCoursesRouteWithChildren
   '/instructor/earnings': typeof InstructorEarningsRoute
   '/instructor/students': typeof InstructorStudentsRoute
+  '/instructors/$instructorId': typeof InstructorsInstructorIdRoute
   '/courses/': typeof CoursesIndexRoute
   '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
@@ -209,6 +227,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/instructor'
+    | '/purchases'
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
@@ -220,6 +239,7 @@ export interface FileRouteTypes {
     | '/instructor/courses'
     | '/instructor/earnings'
     | '/instructor/students'
+    | '/instructors/$instructorId'
     | '/courses/'
     | '/instructor/courses/$courseId'
   fileRoutesByTo: FileRoutesByTo
@@ -231,6 +251,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/instructor'
+    | '/purchases'
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
@@ -242,6 +263,7 @@ export interface FileRouteTypes {
     | '/instructor/courses'
     | '/instructor/earnings'
     | '/instructor/students'
+    | '/instructors/$instructorId'
     | '/courses'
     | '/instructor/courses/$courseId'
   id:
@@ -253,6 +275,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/instructor'
+    | '/purchases'
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
@@ -264,6 +287,7 @@ export interface FileRouteTypes {
     | '/instructor/courses'
     | '/instructor/earnings'
     | '/instructor/students'
+    | '/instructors/$instructorId'
     | '/courses/'
     | '/instructor/courses/$courseId'
   fileRoutesById: FileRoutesById
@@ -276,11 +300,13 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
   InstructorRoute: typeof InstructorRouteWithChildren
+  PurchasesRoute: typeof PurchasesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewsRoute: typeof ReviewsRoute
   WishlistRoute: typeof WishlistRoute
   CoursesCourseIdRoute: typeof CoursesCourseIdRoute
   EnrollCourseIdRoute: typeof EnrollCourseIdRoute
+  InstructorsInstructorIdRoute: typeof InstructorsInstructorIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
 }
 
@@ -305,6 +331,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/purchases': {
+      id: '/purchases'
+      path: '/purchases'
+      fullPath: '/purchases'
+      preLoaderRoute: typeof PurchasesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/instructor': {
@@ -361,6 +394,13 @@ declare module '@tanstack/react-router' {
       path: '/courses'
       fullPath: '/courses/'
       preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instructors/$instructorId': {
+      id: '/instructors/$instructorId'
+      path: '/instructors/$instructorId'
+      fullPath: '/instructors/$instructorId'
+      preLoaderRoute: typeof InstructorsInstructorIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/instructor/students': {
@@ -470,23 +510,15 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
   InstructorRoute: InstructorRouteWithChildren,
+  PurchasesRoute: PurchasesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ReviewsRoute: ReviewsRoute,
   WishlistRoute: WishlistRoute,
   CoursesCourseIdRoute: CoursesCourseIdRoute,
   EnrollCourseIdRoute: EnrollCourseIdRoute,
+  InstructorsInstructorIdRoute: InstructorsInstructorIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
