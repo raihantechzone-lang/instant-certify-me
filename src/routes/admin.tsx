@@ -609,19 +609,29 @@ function AdsAdmin({ notify }: { notify: Notify }) {
             <li key={a.id} className="py-3 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <img src={a.image_url ?? ""} alt="" className="h-12 w-20 object-cover rounded-lg" />
-                <span className="text-sm font-bold text-ink">{a.title ?? "Untitled ad"}</span>
+                <div>
+                  <span className="text-sm font-bold text-ink block">{a.title ?? "Untitled ad"}</span>
+                  <span
+                    className={`inline-block mt-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                      a.is_active ? "bg-brand/10 text-brand" : "bg-muted text-ink-muted"
+                    }`}
+                  >
+                    {a.is_active ? "Live" : "Paused"}
+                  </span>
+                </div>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={async () => {
-                    await supabase.from("ads").update({ is_active: !a.is_active }).eq("id", a.id);
-                    notify(a.is_active ? "Ad paused" : "Ad activated");
+                    const { error } = await supabase.from("ads").update({ is_active: !a.is_active }).eq("id", a.id);
+                    notify(error ? error.message : a.is_active ? "Ad paused — hidden from the site" : "Ad resumed — live again");
                     load();
                   }}
                   className="text-sm font-bold text-brand"
                 >
-                  {a.is_active ? "Pause" : "Activate"}
+                  {a.is_active ? "Pause" : "Resume"}
                 </button>
+
                 <button
                   onClick={async () => {
                     if (!window.confirm("Delete this ad? It will disappear from the homepage right away.")) return;
