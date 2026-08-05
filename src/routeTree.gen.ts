@@ -36,6 +36,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
 import { Route as AdminCoursesRouteImport } from './routes/admin/courses'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
+import { Route as AdminCertificatesRouteImport } from './routes/admin/certificates'
 import { Route as InstructorCoursesCourseIdRouteImport } from './routes/instructor.courses.$courseId'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -173,6 +174,11 @@ const AdminContentRoute = AdminContentRouteImport.update({
   path: '/content',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCertificatesRoute = AdminCertificatesRouteImport.update({
+  id: '/certificates',
+  path: '/certificates',
+  getParentRoute: () => AdminRoute,
+} as any)
 const InstructorCoursesCourseIdRoute =
   InstructorCoursesCourseIdRouteImport.update({
     id: '/$courseId',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/certificates': typeof AdminCertificatesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/certificates': typeof AdminCertificatesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/certificates': typeof AdminCertificatesRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/certificates'
     | '/admin/content'
     | '/admin/courses'
     | '/admin/reviews'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/certificates'
     | '/admin/content'
     | '/admin/courses'
     | '/admin/reviews'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/certificates'
     | '/admin/content'
     | '/admin/courses'
     | '/admin/reviews'
@@ -571,6 +583,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/certificates': {
+      id: '/admin/certificates'
+      path: '/certificates'
+      fullPath: '/admin/certificates'
+      preLoaderRoute: typeof AdminCertificatesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/instructor/courses/$courseId': {
       id: '/instructor/courses/$courseId'
       path: '/$courseId'
@@ -582,6 +601,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminCertificatesRoute: typeof AdminCertificatesRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminCoursesRoute: typeof AdminCoursesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
@@ -591,6 +611,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCertificatesRoute: AdminCertificatesRoute,
   AdminContentRoute: AdminContentRoute,
   AdminCoursesRoute: AdminCoursesRoute,
   AdminReviewsRoute: AdminReviewsRoute,

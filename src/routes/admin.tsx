@@ -33,7 +33,9 @@ function AdminGuard() {
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Students & Payments", href: "/admin/students", icon: Users },
+    { name: "Certificates", href: "/admin/certificates", icon: Award },
     { name: "Content & Exams", href: "/admin/content", icon: FileText },
+
     { name: "Reviews & Ads", href: "/admin/reviews", icon: Star },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
