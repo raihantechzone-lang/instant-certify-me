@@ -87,13 +87,13 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
   };
 
   const items: { key: View; label: string }[] = [
-    { key: "payments", label: "Payments" },
-    { key: "courses", label: "Courses" },
-    { key: "content", label: "Lessons & Live" },
+    { key: "payments", label: "Enrollments & Payments" },
+    { key: "courses", label: "Manage Courses" },
+    { key: "content", label: "Lessons, Exams & Live" },
     { key: "certificates", label: "Certificates" },
-    { key: "reviews", label: "Reviews" },
+    { key: "reviews", label: "Student Reviews" },
     { key: "ads", label: "Interstitial Ads" },
-    { key: "settings", label: "Site Title" },
+    { key: "settings", label: "Site Settings" },
   ];
 
   return (

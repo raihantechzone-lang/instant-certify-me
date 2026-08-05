@@ -17,7 +17,9 @@ export interface CourseContent {
   course_id: string;
   title: string;
   youtube_url: string | null;
+  thumbnail_url?: string | null;
   exam_link: string | null;
+  exam_enabled?: boolean;
   pdf_url?: string | null;
   live_url?: string | null;
   live_expires_at?: string | null;
