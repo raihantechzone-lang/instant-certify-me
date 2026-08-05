@@ -220,13 +220,14 @@ function DashboardPage() {
                     <div className="grid grid-cols-2 gap-6">
                        <div className="space-y-2">
                           <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
-                          <input type="text" defaultValue={String(profile?.full_name || "")} className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold" />
+                          <input type="text" defaultValue={profile?.full_name || ""} className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold" />
                        </div>
                        <div className="space-y-2">
                           <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp</label>
                           <input type="text" defaultValue={profile?.whatsapp_number || ""} className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold" />
                        </div>
                     </div>
+
                     <div className="space-y-2">
                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
                        <input type="email" value={user?.email || ""} disabled className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-slate-400" />
