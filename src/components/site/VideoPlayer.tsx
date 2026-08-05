@@ -194,7 +194,9 @@ function YouTubePlayer({
   const showUi = () => {
     setUiVisible(true);
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setUiVisible(false), 3000);
+    timer.current = setTimeout(() => {
+      setUiVisible(false);
+    }, 3000);
   };
 
   useEffect(() => {
@@ -341,7 +343,10 @@ function YouTubePlayer({
     <div
       ref={containerRef}
       className="relative w-full aspect-video overflow-hidden rounded-2xl bg-ink"
-      onClick={showUi}
+      onClick={() => {
+        if (!uiVisible) showUi();
+        else togglePlay();
+      }}
       onMouseMove={showUi}
       onContextMenu={(e) => e.preventDefault()}
     >
@@ -474,7 +479,10 @@ function NativeVideoPlayer({
     <div
       ref={containerRef}
       className="relative w-full aspect-video overflow-hidden rounded-2xl bg-ink"
-      onClick={showUi}
+      onClick={() => {
+        if (!uiVisible) showUi();
+        else togglePlay();
+      }}
       onMouseMove={showUi}
       onContextMenu={(e) => e.preventDefault()}
     >
