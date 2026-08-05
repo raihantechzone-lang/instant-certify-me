@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminLogin } from "@/components/admin/AdminLogin";
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Star, FileText } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Star, FileText, Award } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminGuard,
