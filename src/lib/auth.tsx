@@ -8,8 +8,11 @@ export interface Profile {
   photo_url?: string | null;
   roll_number?: string | null;
   phone?: string | null;
+  whatsapp_number?: string | null;
+  email?: string | null;
   [key: string]: unknown;
 }
+
 
 interface AuthState {
   session: Session | null;
