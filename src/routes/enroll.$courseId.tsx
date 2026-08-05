@@ -132,7 +132,7 @@ function EnrollPage() {
     setStep(3);
   };
 
-  const bkash = settings.bkash_number ?? "01XXXXXXXXX";
+  const bkash = settings.settings?.bkash_number ?? "01XXXXXXXXX";
 
   return (
     <div className="min-h-screen bg-surface-alt">
