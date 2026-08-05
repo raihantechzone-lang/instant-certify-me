@@ -31,6 +31,8 @@ import { Route as InstructorAnnouncementsRouteImport } from './routes/instructor
 import { Route as InstructorAnalyticsRouteImport } from './routes/instructor.analytics'
 import { Route as EnrollCourseIdRouteImport } from './routes/enroll.$courseId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
+import { Route as AdminStudentsRouteImport } from './routes/admin/students'
+import { Route as AdminCoursesRouteImport } from './routes/admin/courses'
 import { Route as InstructorCoursesCourseIdRouteImport } from './routes/instructor.courses.$courseId'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -143,6 +145,16 @@ const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
   path: '/courses/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminStudentsRoute = AdminStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCoursesRoute = AdminCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => AdminRoute,
+} as any)
 const InstructorCoursesCourseIdRoute =
   InstructorCoursesCourseIdRouteImport.update({
     id: '/$courseId',
@@ -162,6 +174,8 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/courses': typeof AdminCoursesRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
@@ -186,6 +200,8 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/courses': typeof AdminCoursesRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
@@ -212,6 +228,8 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/courses': typeof AdminCoursesRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
@@ -239,6 +257,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/courses'
+    | '/admin/students'
     | '/courses/$courseId'
     | '/enroll/$courseId'
     | '/instructor/analytics'
@@ -263,6 +283,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/courses'
+    | '/admin/students'
     | '/courses/$courseId'
     | '/enroll/$courseId'
     | '/instructor/analytics'
@@ -288,6 +310,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/courses'
+    | '/admin/students'
     | '/courses/$courseId'
     | '/enroll/$courseId'
     | '/instructor/analytics'
@@ -476,6 +500,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/students': {
+      id: '/admin/students'
+      path: '/students'
+      fullPath: '/admin/students'
+      preLoaderRoute: typeof AdminStudentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/courses': {
+      id: '/admin/courses'
+      path: '/courses'
+      fullPath: '/admin/courses'
+      preLoaderRoute: typeof AdminCoursesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/instructor/courses/$courseId': {
       id: '/instructor/courses/$courseId'
       path: '/$courseId'
@@ -487,10 +525,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminCoursesRoute: typeof AdminCoursesRoute
+  AdminStudentsRoute: typeof AdminStudentsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCoursesRoute: AdminCoursesRoute,
+  AdminStudentsRoute: AdminStudentsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
