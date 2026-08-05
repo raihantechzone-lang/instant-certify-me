@@ -32,6 +32,7 @@ import { Route as InstructorAnalyticsRouteImport } from './routes/instructor.ana
 import { Route as EnrollCourseIdRouteImport } from './routes/enroll.$courseId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
 import { Route as AdminStudentsRouteImport } from './routes/admin/students'
+import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
 import { Route as AdminCoursesRouteImport } from './routes/admin/courses'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
 import { Route as InstructorCoursesCourseIdRouteImport } from './routes/instructor.courses.$courseId'
@@ -151,6 +152,11 @@ const AdminStudentsRoute = AdminStudentsRouteImport.update({
   path: '/students',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCoursesRoute = AdminCoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/reviews'
     | '/admin/students'
     | '/courses/$courseId'
     | '/enroll/$courseId'
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/reviews'
     | '/admin/students'
     | '/courses/$courseId'
     | '/enroll/$courseId'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/reviews'
     | '/admin/students'
     | '/courses/$courseId'
     | '/enroll/$courseId'
@@ -519,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStudentsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/courses': {
       id: '/admin/courses'
       path: '/courses'
@@ -546,6 +565,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminContentRoute: typeof AdminContentRoute
   AdminCoursesRoute: typeof AdminCoursesRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -553,6 +573,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminContentRoute: AdminContentRoute,
   AdminCoursesRoute: AdminCoursesRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
