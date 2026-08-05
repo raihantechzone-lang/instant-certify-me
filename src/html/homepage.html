@@ -110,6 +110,9 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
         }
 
+        .language-selector-wrapper { position: relative; }
+        .language-selector-wrapper button { display: flex; items-center: center; gap: 4px; font-weight: 600; color: #1e293b; }
+
         .profile-dropdown { display: none; }
         .profile-dropdown.show { display: block; }
 
@@ -174,7 +177,12 @@
                 </div>
             </div>
 
-            <div class="flex justify-end items-center relative">
+            <div class="flex justify-end items-center relative gap-4">
+                <div class="hidden lg:block language-selector-wrapper">
+                    <button class="text-xs">
+                        <i class="fa-solid fa-globe"></i> Enable Supabase for this project.
+                    </button>
+                </div>
                 
                 <div id="auth-buttons" class="hidden lg:flex items-center space-x-3">
                     <button onclick="openModal('authModal', 'signup')" class="px-5 py-2.5 rounded-xl border-2 border-gray-100 bg-white text-sm font-bold text-rs-dark hover:border-gray-200 transition shadow-sm whitespace-nowrap">Sign up</button>
