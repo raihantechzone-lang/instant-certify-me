@@ -33,6 +33,7 @@ import { Route as EnrollCourseIdRouteImport } from './routes/enroll.$courseId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
 import { Route as AdminStudentsRouteImport } from './routes/admin/students'
 import { Route as AdminCoursesRouteImport } from './routes/admin/courses'
+import { Route as AdminContentRouteImport } from './routes/admin/content'
 import { Route as InstructorCoursesCourseIdRouteImport } from './routes/instructor.courses.$courseId'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -155,6 +156,11 @@ const AdminCoursesRoute = AdminCoursesRouteImport.update({
   path: '/courses',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
 const InstructorCoursesCourseIdRoute =
   InstructorCoursesCourseIdRouteImport.update({
     id: '/$courseId',
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
@@ -200,6 +207,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/content'
     | '/admin/courses'
     | '/admin/students'
     | '/courses/$courseId'
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/content'
     | '/admin/courses'
     | '/admin/students'
     | '/courses/$courseId'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/content'
     | '/admin/courses'
     | '/admin/students'
     | '/courses/$courseId'
@@ -514,6 +526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCoursesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/instructor/courses/$courseId': {
       id: '/instructor/courses/$courseId'
       path: '/$courseId'
@@ -525,12 +544,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminContentRoute: typeof AdminContentRoute
   AdminCoursesRoute: typeof AdminCoursesRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminContentRoute: AdminContentRoute,
   AdminCoursesRoute: AdminCoursesRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminIndexRoute: AdminIndexRoute,
