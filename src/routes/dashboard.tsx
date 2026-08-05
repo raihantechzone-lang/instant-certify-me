@@ -24,7 +24,7 @@ function DashboardPage() {
   const [results, setResults] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!loading && !user) router.navigate({ to: "/auth", replace: true });
+    if (!loading && !user) router.navigate({ to: "/auth", search: { mode: "login" }, replace: true });
   }, [loading, user, router]);
 
   useEffect(() => {
