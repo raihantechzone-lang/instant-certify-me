@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Category {
@@ -75,8 +76,36 @@ export function isLiveLinkActive(content: CourseContent) {
   return new Date(content.live_expires_at) > new Date();
 }
 
-export function youtubeId(url: string | null) {
+export function youtubeId(url: string | null | undefined) {
   if (!url) return null;
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?/ ]{11})/);
   return match ? match[1] : null;
+}
+
+export function useCourses() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.from("courses").select("*").order("created_at", { ascending: false }).then(({ data }) => {
+      setCourses(data as Course[] || []);
+      setLoading(false);
+    });
+  }, []);
+
+  return { courses, loading };
+}
+
+export function useSiteSettings() {
+  const [settings, setSettings] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.from("site_settings").select("*").single().then(({ data }) => {
+      setSettings(data);
+      setLoading(false);
+    });
+  }, []);
+
+  return { settings, loading };
 }
