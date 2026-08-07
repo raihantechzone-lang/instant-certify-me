@@ -121,9 +121,31 @@ function CoursesAdmin() {
                    )}
                 </div>
                 <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
-                   <button className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-sm hover:bg-brand hover:text-white transition">
-                     <Edit2 size={16} /> Edit
-                   </button>
+                    <button 
+                      onClick={() => {
+                        const newTitle = window.prompt("Update Course Title:", course.title);
+                        const newPrice = window.prompt("Update Price:", course.price.toString());
+                        const newCategory = window.prompt("Update Category:", course.category || "");
+                        
+                        if (newTitle !== null) {
+                          supabase
+                            .from("courses")
+                            .update({ 
+                              title: newTitle, 
+                              price: parseFloat(newPrice || "0"),
+                              category: newCategory
+                            })
+                            .eq("id", course.id)
+                            .then(() => {
+                              queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+                              toast.success("Course updated");
+                            });
+                        }
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-sm hover:bg-brand hover:text-white transition"
+                    >
+                      <Edit2 size={16} /> Edit
+                    </button>
                    <button 
                      onClick={() => window.confirm("Are you sure?") && deleteMutation.mutate(course.id)}
                      className="p-2.5 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition"

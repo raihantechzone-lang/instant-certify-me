@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Video, FileText, Globe, Plus, Trash2, Link as LinkIcon, Calendar, CheckSquare } from "lucide-react";
+import { Video, FileText, Globe, Plus, Trash2, Edit2, Link as LinkIcon, Calendar, CheckSquare } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -195,13 +195,34 @@ function ContentAdmin() {
                                {content.exam_link && <CheckSquare size={14} className="text-indigo-500" />}
                             </div>
                          </div>
-                      </div>
+                   </div>
+                   <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          const newTitle = window.prompt("Edit Lesson Title:", content.title);
+                          const newYoutube = window.prompt("Edit YouTube URL:", content.youtube_url || "");
+                          if (newTitle !== null) {
+                            supabase
+                              .from("course_contents")
+                              .update({ title: newTitle, youtube_url: newYoutube })
+                              .eq("id", content.id)
+                              .then(() => {
+                                queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
+                                toast.success("Lesson updated");
+                              });
+                          }
+                        }}
+                        className="p-2 rounded-lg text-slate-300 hover:text-brand hover:bg-brand/10 transition opacity-0 group-hover:opacity-100"
+                      >
+                        <Edit2 size={18} />
+                      </button>
                       <button 
                         onClick={() => window.confirm("Delete this lesson?") && deleteMutation.mutate(content.id)}
                         className="p-2 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition opacity-0 group-hover:opacity-100"
                       >
                         <Trash2 size={18} />
                       </button>
+                   </div>
                    </div>
                  ))}
                </div>
