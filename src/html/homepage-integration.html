@@ -555,13 +555,6 @@
     await Promise.all([loadSettings(), loadCourses(), loadReviews(), showInterstitialAd()]);
 
 
-    // realtime updates from the admin panel
-    supabase
-      .channel("home-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "courses" }, loadCourses)
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, loadSettings)
-      .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, loadReviews)
-      .on("postgres_changes", { event: "*", schema: "public", table: "ads" }, showInterstitialAd)
-      .subscribe();
+    // Redundant listeners removed. The 'public-site-sync' channel in loadCourses handles updates globally.
   })();
 </script>
