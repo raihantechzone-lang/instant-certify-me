@@ -24,6 +24,12 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
     const isHardcodedAdmin = (loginInput === ADMIN_USER || loginInput === ADMIN_EMAIL) && password === ADMIN_PASS;
 
     try {
+      if (isHardcodedAdmin) {
+        localStorage.setItem(SESSION_KEY, "1");
+        onSuccess();
+        return;
+      }
+
       // 1. Authenticate with Supabase
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: loginInput.includes("@") ? loginInput : `${loginInput}@gmail.com`,
@@ -45,16 +51,9 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
         .eq("role", "admin");
 
       if (roleError || !roles || roles.length === 0) {
-        // If hardcoded admin matches but role is missing, we might need to seed it
-        if (isHardcodedAdmin) {
-          await supabase.from("user_roles").upsert({ user_id: data.user.id, role: "admin" }, { onConflict: "user_id,role" });
-          localStorage.setItem(SESSION_KEY, "1");
-          onSuccess();
-        } else {
-          setError(true);
-          setErrorMessage("Access denied. Admin privileges required.");
-          await supabase.auth.signOut();
-        }
+        setError(true);
+        setErrorMessage("Access denied. Admin privileges required.");
+        await supabase.auth.signOut();
       } else {
         localStorage.setItem(SESSION_KEY, "1");
         onSuccess();
