@@ -180,9 +180,25 @@
             <div class="flex justify-end items-center relative gap-4">
                 <div class="hidden lg:block language-selector-wrapper">
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
-                        '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
+'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            I need you to fix the course management system completely.
+                                            On the homepage mobile view, redesign the top-right authentication section.
+
+
+
+Place the “Sign up” and “Log in” buttons side-by-side horizontally in the same row, with equal visual height and proper spacing between them.
+
+
+
+Keep both buttons compact so they fit perfectly on mobile screens without wrapping or overlapping. Make “Sign up” the primary button and “Log in” the secondary button.
+
+
+
+Keep the hamburger menu on the far right as it is.
+
+
+
+Do not change any other homepage design, content, layout, colors, or functionality. Only modify the mobile header authentication button layout.
                                             1. Remove all demo courses from the admin panel and database.
                                             2. Fix the course delete function (it's currently failing).
                                             3. Ensure public courses page shows ONLY published admin courses.
@@ -214,8 +230,20 @@
                     </div>
                 </div>
 
-                <button id="mobile-menu-btn" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden w-10 h-10 rounded-xl bg-white border border-gray-100 text-rs-dark hover:text-rs-green flex items-center justify-center shadow-sm transition ml-3">
-                    <i class="fa-solid fa-bars text-lg"></i>
+                <div id="auth-buttons-mobile" class="lg:hidden flex items-center space-x-2 mr-1">
+                    <button onclick="openModal('authModal', 'signup')" class="px-3 py-1.5 rounded-lg bg-rs-green text-white text-[11px] font-bold hover:bg-emerald-700 transition shadow-sm whitespace-nowrap">Sign up</button>
+                    <button onclick="openModal('authModal', 'login')" class="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-rs-dark text-[11px] font-bold hover:bg-gray-50 transition whitespace-nowrap">Log in</button>
+                </div>
+
+                <div id="profile-button-mobile" class="hidden lg:hidden items-center mr-2">
+                    <button onclick="toggleProfileMenu()" class="w-8 h-8 rounded-full bg-emerald-100 border border-rs-green flex items-center justify-center text-rs-green overflow-hidden">
+                        <img id="header-profile-img-mobile" src="" loading="lazy" class="hidden w-full h-full object-cover">
+                        <i id="header-profile-icon-mobile" class="fa-solid fa-user text-xs"></i>
+                    </button>
+                </div>
+
+                <button id="mobile-menu-btn" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden w-9 h-9 rounded-lg bg-white border border-gray-100 text-rs-dark hover:text-rs-green flex items-center justify-center shadow-sm transition">
+                    <i class="fa-solid fa-bars text-base"></i>
                 </button>
             </div>
         </nav>

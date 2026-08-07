@@ -23,12 +23,28 @@
   function renderAuthState() {
     const authBtns = document.getElementById("auth-buttons");
     const profileBtn = document.getElementById("profile-button");
-    if (!authBtns || !profileBtn) return;
+    const authBtnsMobile = document.getElementById("auth-buttons-mobile");
+    const profileBtnMobile = document.getElementById("profile-button-mobile");
+    
     if (currentUser) {
-      authBtns.classList.add("hidden");
-      authBtns.classList.remove("lg:flex");
-      profileBtn.classList.remove("hidden");
-      profileBtn.classList.add("lg:flex");
+      if (authBtns) {
+        authBtns.classList.add("hidden");
+        authBtns.classList.remove("lg:flex");
+      }
+      if (authBtnsMobile) {
+        authBtnsMobile.classList.add("hidden");
+        authBtnsMobile.classList.remove("flex");
+      }
+      
+      if (profileBtn) {
+        profileBtn.classList.remove("hidden");
+        profileBtn.classList.add("lg:flex");
+      }
+      if (profileBtnMobile) {
+        profileBtnMobile.classList.remove("hidden");
+        profileBtnMobile.classList.add("flex");
+      }
+
       const name =
         currentProfile?.full_name ||
         currentUser.user_metadata?.full_name ||
@@ -38,7 +54,10 @@
       if (nameEl) nameEl.innerText = name;
       const rollEl = document.getElementById("dropdown-roll-number");
       if (rollEl) rollEl.innerText = currentProfile?.roll_number ? "Roll: " + currentProfile.roll_number : "";
+      
       const photo = currentProfile?.photo_url || currentUser.user_metadata?.avatar_url;
+      
+      // Update desktop profile
       const img = document.getElementById("header-profile-img");
       const icon = document.getElementById("header-profile-icon");
       if (photo && img && icon) {
@@ -46,11 +65,34 @@
         img.classList.remove("hidden");
         icon.classList.add("hidden");
       }
+      
+      // Update mobile profile
+      const imgMobile = document.getElementById("header-profile-img-mobile");
+      const iconMobile = document.getElementById("header-profile-icon-mobile");
+      if (photo && imgMobile && iconMobile) {
+        imgMobile.src = photo;
+        imgMobile.classList.remove("hidden");
+        iconMobile.classList.add("hidden");
+      }
+
     } else {
-      profileBtn.classList.add("hidden");
-      profileBtn.classList.remove("lg:flex");
-      authBtns.classList.remove("hidden");
-      authBtns.classList.add("lg:flex");
+      if (profileBtn) {
+        profileBtn.classList.add("hidden");
+        profileBtn.classList.remove("lg:flex");
+      }
+      if (profileBtnMobile) {
+        profileBtnMobile.classList.add("hidden");
+        profileBtnMobile.classList.remove("flex");
+      }
+      
+      if (authBtns) {
+        authBtns.classList.remove("hidden");
+        authBtns.classList.add("lg:flex");
+      }
+      if (authBtnsMobile) {
+        authBtnsMobile.classList.remove("hidden");
+        authBtnsMobile.classList.add("flex");
+      }
     }
   }
 
