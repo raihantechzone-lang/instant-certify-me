@@ -119,16 +119,21 @@
     if (!window.hasSiteSync) {
        window.hasSiteSync = true;
        supabase.channel('public-site-sync')
-         .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, () => {
-           console.log('Realtime update: Courses changed');
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'courses' }, (payload) => {
+           console.log('Realtime update: Course updated', payload.new);
+           if (window.showToast) window.showToast(`Course "${payload.new.title}" updated in real time.`, "Live Update");
            loadCourses();
          })
-         .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, () => {
-           console.log('Realtime update: Settings changed');
+         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'site_settings' }, (payload) => {
+           console.log('Realtime update: Settings changed', payload.new);
+           if (window.showToast) window.showToast(`Site setting "${payload.new.key}" updated.`, "Live Update");
            loadSettings();
          })
-         .on('postgres_changes', { event: '*', schema: 'public', table: 'course_contents' }, () => {
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'course_contents' }, (payload) => {
            console.log('Realtime update: Course content changed');
+           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+             if (window.showToast) window.showToast(`New content added or updated.`, "Live Update");
+           }
            if (window.currentCourseId) loadCourseDetails(window.currentCourseId);
            loadCourses(); // Recount lessons on home
          })
