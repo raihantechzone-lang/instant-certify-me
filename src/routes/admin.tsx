@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-rout
 import { useEffect, useState } from "react";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Star, FileText, Award } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({
   component: AdminGuard,
@@ -11,20 +12,58 @@ const SESSION_KEY = "gators-admin-session";
 
 function AdminGuard() {
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [checkingRole, setCheckingRole] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isAuthed = localStorage.getItem(SESSION_KEY) === "1";
-    setAuthed(isAuthed);
+    async function checkAdmin() {
+      const isAuthed = localStorage.getItem(SESSION_KEY) === "1";
+      if (!isAuthed) {
+        setAuthed(false);
+        setCheckingRole(false);
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        localStorage.removeItem(SESSION_KEY);
+        setAuthed(false);
+        setCheckingRole(false);
+        return;
+      }
+
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin");
+
+      if (!roles || roles.length === 0) {
+        localStorage.removeItem(SESSION_KEY);
+        setAuthed(false);
+      } else {
+        setAuthed(true);
+      }
+      setCheckingRole(false);
+    }
+
+    checkAdmin();
   }, []);
 
-  if (authed === null) return null;
+  if (authed === null || checkingRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-alt">
+        <div className="w-10 h-10 border-4 border-brand/30 border-t-brand rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!authed) {
     return <AdminLogin onSuccess={() => setAuthed(true)} />;
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem(SESSION_KEY);
     setAuthed(false);
     navigate({ to: "/admin" });
