@@ -33,6 +33,32 @@ function DashboardPage() {
       setEnrollments((enc as any) ?? []);
     };
     load();
+
+    // Subscribe to enrollment changes (specifically for certificates)
+    const channel = supabase
+      .channel('enrollment-updates')
+      .on(
+        'postgres_changes',
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'enrollments',
+          filter: `profile_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Real-time enrollment update:', payload);
+          // If a certificate_url was added (unlocked)
+          if (!payload.old.certificate_url && payload.new.certificate_url) {
+            showToast("Congratulations! Your certificate is now unlocked and available for download.", "Certificate Unlocked!");
+          }
+          load(); // Refresh the list to show the badge
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const showToast = (desc: string, title = "Notification") => {
