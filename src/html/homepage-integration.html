@@ -132,12 +132,10 @@
            if (window.currentCourseId) loadCourseDetails(window.currentCourseId);
            loadCourses(); // Recount lessons on home
          })
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => loadReviews())
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, () => showInterstitialAd())
          .subscribe();
     }
-    supabase.channel('public-site-sync')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => loadReviews())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, () => showInterstitialAd())
-      .subscribe();
 
     // wire the enrol / details buttons of the rendered cards to real routes
     Array.from(grid.children).forEach((card, i) => {
