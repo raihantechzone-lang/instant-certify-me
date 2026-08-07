@@ -104,7 +104,7 @@
       category: (c.category || "versity").toLowerCase(),
       price: c.price ?? c.discount_price ?? 0,
       discountPrice: c.discount_price ?? c.price ?? 0,
-      thumbnail: c.thumbnail_url || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+      thumbnail: c.thumbnail_url || "https://ik.imagekit.io/n7rgjyaxh/default-course.jpg",
       videos: new Array(counts[c.id] || 0),
     }));
 
@@ -309,6 +309,13 @@
        const list = contentContainer.querySelector('.flex.flex-col');
        if (list) {
           list.innerHTML = "";
+          if (contents.length === 0) {
+            list.innerHTML = `
+              <div class="p-8 text-center text-slate-400 font-bengali">
+                <i class="fa-solid fa-box-open text-3xl mb-3 block opacity-20"></i>
+                এখনও কোনো কন্টেন্ট আপলোড করা হয়নি।
+              </div>`;
+          }
           contents.forEach((c, idx) => {
              const isLocked = !c.is_free;
              const item = document.createElement("div");
@@ -347,8 +354,35 @@
                    window.showToast("Enroll to unlock this lesson.", "Locked Content");
                 }
              };
-             list.appendChild(item);
+           list.appendChild(item);
           });
+
+          // Update Materials (PDFs) section as well
+          const materialsContainer = document.getElementById('materials-container');
+          if (materialsContainer) {
+              const pdfs = contents.filter(c => c.lesson_type === 'pdf' || c.pdf_url);
+              materialsContainer.innerHTML = "";
+              if (pdfs.length === 0) {
+                  materialsContainer.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">কোনো কন্টেন্ট নেই</p>';
+              } else {
+                  pdfs.forEach(p => {
+                      const isLocked = !p.is_free;
+                      const div = document.createElement("div");
+                      div.className = "flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100";
+                      div.innerHTML = `
+                          <span class="font-medium text-sm text-slate-600 truncate mr-3">${p.title}</span>
+                          <button class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center note-btn">
+                            <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-download'} text-xs"></i>
+                          </button>
+                      `;
+                      div.onclick = () => {
+                          if (!isLocked && p.pdf_url) window.open(p.pdf_url, '_blank');
+                          else if (isLocked) window.showToast("Enroll to download materials.", "Locked");
+                      };
+                      materialsContainer.appendChild(div);
+                  });
+              }
+          }
        }
     }
   }
