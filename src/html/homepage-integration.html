@@ -81,6 +81,10 @@
   }
 
   /* ---------- database: courses ---------- */
+  let allCourses = [];
+  let currentFilter = 'all';
+  let searchQuery = '';
+
   async function loadCourses() {
     const { data: courses } = await supabase
       .from("courses")
@@ -93,7 +97,7 @@
       counts[c.course_id] = (counts[c.course_id] || 0) + 1;
     });
 
-    window.db.courses = courses.map((c) => ({
+    allCourses = courses.map((c) => ({
       id: c.id,
       name: c.category || "Course",
       title: c.title,
@@ -104,47 +108,56 @@
       videos: new Array(counts[c.id] || 0),
     }));
 
-    const grid = document.getElementById("courses-grid");
-    if (!grid) return;
-    grid.innerHTML = "";
-    window.renderDynamicCourses();
-    const isDetailsPage = window.location.pathname.includes('/details/');
-    const isEnrollPage = window.location.pathname.includes('/enroll/');
-    
-    if (window.currentCourseId) {
-       loadCourseDetails(window.currentCourseId);
-    }
+    window.db.courses = allCourses;
+    renderFilteredCourses();
     
     // Global real-time synchronization
     if (!window.hasSiteSync) {
-       window.hasSiteSync = true;
-       supabase.channel('public-site-sync')
+        window.hasSiteSync = true;
+        supabase.channel('public-site-sync')
           .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'courses' }, (payload) => {
-           console.log('Realtime update: Course updated', payload.new);
-           if (window.showToast) window.showToast(`Course "${payload.new.title}" updated in real time.`, "Live Update");
-           loadCourses();
-         })
-         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'site_settings' }, (payload) => {
-           console.log('Realtime update: Settings changed', payload.new);
-           if (window.showToast) window.showToast(`Site setting "${payload.new.key}" updated.`, "Live Update");
-           loadSettings();
-         })
-         .on('postgres_changes', { event: '*', schema: 'public', table: 'course_contents' }, (payload) => {
-           console.log('Realtime update: Course content changed');
-           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-             if (window.showToast) window.showToast(`New content added or updated.`, "Live Update");
-           }
-           if (window.currentCourseId) loadCourseDetails(window.currentCourseId);
-           loadCourses(); // Recount lessons on home
-         })
-         .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => loadReviews())
-         .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, () => showInterstitialAd())
-         .subscribe();
+            console.log('Realtime update: Course updated', payload.new);
+            if (window.showToast) window.showToast(`Course "${payload.new.title}" updated in real time.`, "Live Update");
+            loadCourses();
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'site_settings' }, (payload) => {
+            console.log('Realtime update: Settings changed', payload.new);
+            if (window.showToast) window.showToast(`Site setting "${payload.new.key}" updated.`, "Live Update");
+            loadSettings();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'course_contents' }, (payload) => {
+            console.log('Realtime update: Course content changed');
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              if (window.showToast) window.showToast(`New content added or updated.`, "Live Update");
+            }
+            if (window.currentCourseId) loadCourseDetails(window.currentCourseId);
+            loadCourses();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => loadReviews())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, () => showInterstitialAd())
+          .subscribe();
     }
+  }
 
-    // wire the enrol / details buttons of the rendered cards to real routes
+  function renderFilteredCourses() {
+    const grid = document.getElementById("courses-grid");
+    if (!grid) return;
+
+    // Filter courses based on currentFilter and searchQuery
+    const filtered = allCourses.filter(c => {
+      const matchesFilter = currentFilter === 'all' || c.category === currentFilter;
+      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           (c.name && c.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesFilter && matchesSearch;
+    });
+
+    window.db.courses = filtered;
+    grid.innerHTML = "";
+    window.renderDynamicCourses();
+
+    // Wire events
     Array.from(grid.children).forEach((card, i) => {
-      const course = window.db.courses[i];
+      const course = filtered[i];
       if (!course) return;
       card.querySelectorAll("button, img, h3").forEach((el) => {
         el.addEventListener("click", () => {
@@ -154,6 +167,33 @@
         });
       });
     });
+  }
+
+  window.filterCourses = (cat) => {
+    currentFilter = cat.toLowerCase();
+    
+    // Update active tab UI
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+      if (tab.id === `tab-${currentFilter}`) {
+        tab.classList.add('active', 'bg-white', 'text-rs-dark', 'shadow-sm');
+        tab.classList.remove('text-gray-500');
+      } else {
+        tab.classList.remove('active', 'bg-white', 'text-rs-dark', 'shadow-sm');
+        tab.classList.add('text-gray-500');
+      }
+    });
+    
+    renderFilteredCourses();
+  };
+
+  window.searchCourses = (val) => {
+    searchQuery = val;
+    renderFilteredCourses();
+  };
+
+  if (window.currentCourseId) {
+    loadCourseDetails(window.currentCourseId);
   }
 
   async function loadCourseDetails(id) {
