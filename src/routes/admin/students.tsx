@@ -30,7 +30,25 @@ function StudentsAdmin() {
 
   const verifyMutation = useMutation({
     mutationFn: async ({ id, profile_id, course_id }: { id: string; profile_id: string; course_id: string }) => {
-      // 1. Create enrollment
+      // 1. Check if enrollment already exists to prevent duplicates
+      const { data: existing } = await supabase
+        .from("enrollments")
+        .select("id")
+        .eq("profile_id", profile_id)
+        .eq("course_id", course_id)
+        .maybeSingle();
+
+      if (existing) {
+        // Just update the request status if enrollment already exists
+        const { error: requestError } = await supabase
+          .from("enrollment_requests")
+          .update({ status: "verified" })
+          .eq("id", id);
+        if (requestError) throw requestError;
+        return;
+      }
+
+      // 2. Create enrollment
       const { error: enrollError } = await supabase.from("enrollments").insert({
         profile_id,
         course_id,
@@ -38,7 +56,7 @@ function StudentsAdmin() {
       });
       if (enrollError) throw enrollError;
 
-      // 2. Update request status
+      // 3. Update request status
       const { error: requestError } = await supabase
         .from("enrollment_requests")
         .update({ status: "verified" })
