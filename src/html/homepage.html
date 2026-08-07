@@ -1582,7 +1582,16 @@ After making the change, inspect the rendered mobile header and verify that exac
             coursesSection.scrollIntoView({ behavior: 'smooth' });
         }
 
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        function goToDashboard() {
+            window.location.href = '/dashboard';
+        }
+
         initApp();
+
     </script>
 </body>
 </html>
