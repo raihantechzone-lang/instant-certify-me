@@ -1108,11 +1108,18 @@ Ami ja ja bolechi ta bade barti Kono kiso poriborton korbe na
         window.addEventListener('scroll', handleScrollAnimations);
 
         function initApp() {
-            document.getElementById('dynamic-site-title').innerHTML = db.siteSettings.title;
-            document.getElementById('dynamic-site-subtitle').innerHTML = db.siteSettings.subtitle;
+            // Set dynamic title and subtitle from database settings or default
+            const titleEl = document.getElementById('dynamic-site-title');
+            const subtitleEl = document.getElementById('dynamic-site-subtitle');
+            if (titleEl) titleEl.innerHTML = db.siteSettings.title;
+            if (subtitleEl) subtitleEl.innerHTML = db.siteSettings.subtitle;
             
+            // Initial render - these will be replaced by real-time data from integration script
             renderDynamicCourses();
             renderTestimonialsList(); 
+            
+            // Check for existing session
+            isLoggedIn = !!localStorage.getItem('gators-learning-auth');
             
             setTimeout(handleScrollAnimations, 100); 
         }
@@ -1246,8 +1253,9 @@ Ami ja ja bolechi ta bade barti Kono kiso poriborton korbe na
         }
 
         function nextTestimonial() {
+            const container = document.getElementById('testimonial-content');
             if(mergedTestimonials.length === 0) {
-                document.getElementById('testimonial-content').innerHTML = '<div class="py-10 text-center text-gray-400 font-bengali">শিক্ষার্থীদের মতামত শীঘ্রই যুক্ত করা হবে...</div>';
+                if (container) container.innerHTML = '<div class="py-10 text-center text-gray-400 font-bengali">শিক্ষার্থীদের মতামত শীঘ্রই যুক্ত করা হবে...</div>';
                 return;
             }
             currentIdx = (currentIdx + 1) % mergedTestimonials.length;
