@@ -365,7 +365,7 @@
           });
 
           // Update Materials (PDFs) section as well
-          const materialsContainer = document.getElementById('materials-container');
+          const materialsContainer = document.getElementById('materials-container') || document.getElementById('materials-container-enroll');
           if (materialsContainer) {
               const pdfs = contents.filter(c => c.lesson_type === 'pdf' || c.pdf_url);
               materialsContainer.innerHTML = "";
