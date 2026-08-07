@@ -1,0 +1,2 @@
+DELETE FROM public.courses WHERE title ILIKE '%Demo%' OR title ILIKE '%Sample%' OR title ILIKE '%Placeholder%' OR details ILIKE '%demo%';
+UPDATE public.courses SET is_published = false WHERE is_published IS NULL;
