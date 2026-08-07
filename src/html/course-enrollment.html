@@ -210,44 +210,9 @@
                         <!-- List -->
                         <div class="flex flex-col">
                             <!-- Free / Active Item -->
-                            <div onclick="playVideo('১. Orientation & Guideline Class')" class="group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 relative overflow-hidden">
-                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 group-hover:bg-brand-100 transition-colors">
-                                        <i class="fa-solid fa-play text-sm"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bengali font-semibold text-surface-900 text-base group-hover:text-brand-600 transition-colors">১. Orientation & Guideline Class</h4>
-                                        <p class="text-xs text-slate-400 font-medium mt-1">45:00 min • Free Preview</p>
-                                    </div>
-                                </div>
-                                <span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>
-                            </div>
-
-                            <!-- Locked Item 1 -->
-                            <div onclick="promptEnrollment()" class="group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 opacity-80">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
-                                        <i class="fa-solid fa-lock text-sm"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bengali font-medium text-slate-700">২. Bangla Grammatical Rules & MCQ</h4>
-                                        <p class="text-xs text-slate-400 font-medium mt-1">45:00 min • Locked</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Locked Item 2 -->
-                            <div onclick="promptEnrollment()" class="group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 opacity-80">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
-                                        <i class="fa-solid fa-lock text-sm"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bengali font-medium text-slate-700">৩. English Grammar Masterclass</h4>
-                                        <p class="text-xs text-slate-400 font-medium mt-1">50:00 min • Locked</p>
-                                    </div>
-                                </div>
+                            <div class="flex flex-col min-h-[100px] items-center justify-center p-8 text-slate-400 font-bengali opacity-60">
+                                <i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i>
+                                লোড হচ্ছে...
                             </div>
                         </div>
                     </div>
@@ -263,15 +228,8 @@
                         <h3 class="font-semibold text-lg text-surface-900 mb-2">Class Materials</h3>
                         <p class="text-sm text-slate-500 font-bengali mb-6 flex-grow">প্রতিটি ক্লাসের পিডিএফ নোটস এবং লেকচার শিট ডাউনলোড করুন।</p>
                         
-                        <div class="flex flex-col gap-3">
-                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                <span class="font-medium text-sm text-slate-600 truncate mr-3">Lecture 01 - PDF Notes</span>
-                                <button class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center note-btn" onclick="promptEnrollment()"><i class="fa-solid fa-lock text-xs"></i></button>
-                            </div>
-                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                <span class="font-medium text-sm text-slate-600 truncate mr-3">Grammar Formula Sheet</span>
-                                <button class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center note-btn" onclick="promptEnrollment()"><i class="fa-solid fa-lock text-xs"></i></button>
-                            </div>
+                        <div class="flex flex-col gap-3" id="materials-container-enroll">
+                            <p class="text-xs text-slate-400 py-4 text-center">লোড হচ্ছে...</p>
                         </div>
                     </div>
 
