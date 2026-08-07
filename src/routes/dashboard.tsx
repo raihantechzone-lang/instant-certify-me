@@ -20,6 +20,7 @@ function DashboardPage() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("courses");
   const [enrollments, setEnrollments] = useState<(Enrollment & { courses: Course | null, certificate_url?: string | null })[]>([]);
   const [toast, setToast] = useState<{ title: string, desc: string, show: boolean }>({ title: "", desc: "", show: false });
+  const [newlyUnlockedCertId, setNewlyUnlockedCertId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -50,6 +51,8 @@ function DashboardPage() {
           // If a certificate_url was added (unlocked)
           if (!payload.old.certificate_url && payload.new.certificate_url) {
             showToast("Congratulations! Your certificate is now unlocked and available for download.", "Certificate Unlocked!");
+            setNewlyUnlockedCertId(payload.new.id);
+            setTimeout(() => setNewlyUnlockedCertId(null), 5000); // Clear highlight after 5s
           }
           load(); // Refresh the list to show the badge
         }
@@ -237,7 +240,11 @@ function DashboardPage() {
                                  >
                                     কন্টিনিউ করুন <ChevronRight size={14} />
                                  </Link>
-                                 {e.certificate_url && <Award className="text-[#0f9d58]" size={20} />}
+                                  {e.certificate_url && (
+                                    <div className={`${newlyUnlockedCertId === e.id ? 'animate-bounce scale-125' : ''} transition-all duration-700`}>
+                                       <Award className="text-[#0f9d58]" size={20} />
+                                    </div>
+                                  )}
                               </div>
                            </div>
                         </div>
