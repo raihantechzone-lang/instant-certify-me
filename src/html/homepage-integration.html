@@ -108,6 +108,9 @@
     if (!grid) return;
     grid.innerHTML = "";
     window.renderDynamicCourses();
+    if (window.currentCourseId) {
+       loadCourseDetails(window.currentCourseId);
+    }
     // wire the enrol / details buttons of the rendered cards to real routes
     Array.from(grid.children).forEach((card, i) => {
       const course = window.db.courses[i];
@@ -116,13 +119,102 @@
         el.addEventListener("click", () => {
           window.location.href = el.tagName === "BUTTON" && el.innerText.includes("ভর্তি")
             ? "/enroll/" + course.id
-            : "/courses/" + course.id;
+            : "/details/" + course.id;
         });
       });
     });
   }
 
-  /* ---------- database: approved reviews ---------- */
+  async function loadCourseDetails(id) {
+    const { data: course } = await supabase.from("courses").select("*").eq("id", id).maybeSingle();
+    if (!course) return;
+    
+    // Update basic UI info
+    const titleEl = document.querySelector('h1');
+    if (titleEl) titleEl.innerText = course.title;
+    
+    const descEl = document.querySelector('main p.font-bengali');
+    if (descEl) descEl.innerText = course.description || "";
+
+    const priceEls = document.querySelectorAll('h2');
+    priceEls.forEach(el => {
+      if (el.innerText.includes("৳")) el.innerText = "৳" + (course.discount_price || course.price);
+    });
+    
+    const oldPriceEl = document.querySelector('.line-through');
+    if (oldPriceEl) oldPriceEl.innerText = "৳" + course.price;
+
+    const posterImg = document.getElementById('vid-poster');
+    if (posterImg) posterImg.src = course.thumbnail_url;
+
+    // Enrollment logic integration
+    const enrollBtn = document.getElementById('enroll-main-btn');
+    if (enrollBtn) {
+       enrollBtn.onclick = () => {
+         if (currentUser) {
+            window.location.href = "/enroll/" + id;
+         } else {
+            window.showToast("Please log in to enroll.", "Login Required");
+            window.openModal("authModal", "login");
+         }
+       };
+    }
+
+    // Load contents and populate the list
+    const { data: contents } = await supabase.from("course_contents")
+      .select("*")
+      .eq("course_id", id)
+      .order("position", { ascending: true });
+    
+    const contentContainer = document.querySelector('section .bg-white.border.border-slate-200\\/60.rounded-3xl');
+    if (contentContainer && contents) {
+       const list = contentContainer.querySelector('.flex.flex-col');
+       if (list) {
+          list.innerHTML = "";
+          contents.forEach((c, idx) => {
+             const isLocked = !c.is_free;
+             const item = document.createElement("div");
+             item.className = `group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${isLocked ? 'opacity-80' : 'relative overflow-hidden'}`;
+             if (!isLocked) {
+                item.innerHTML = `<div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>`;
+             }
+             item.innerHTML += `
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-100 text-slate-400' : 'bg-brand-50 text-brand-600'} flex items-center justify-center shrink-0">
+                        <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-play'} text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bengali ${isLocked ? 'font-medium text-slate-700' : 'font-semibold text-surface-900'} text-base">${c.title}</h4>
+                        <p class="text-xs text-slate-400 font-medium mt-1">${isLocked ? 'Locked' : 'Free Preview'}</p>
+                    </div>
+                </div>
+                ${!isLocked ? '<span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>' : ''}
+             `;
+             item.onclick = () => {
+                if (!isLocked) {
+                   // Video player logic
+                   const vidId = (url) => {
+                      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                      const match = url?.match(regExp);
+                      return (match && match[2].length === 11) ? match[2] : null;
+                   };
+                   const vId = vidId(c.youtube_url);
+                   if (vId) {
+                      const container = document.querySelector('.aspect-video');
+                      if (container) {
+                         container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                      }
+                   }
+                } else {
+                   window.showToast("Enroll to unlock this lesson.", "Locked Content");
+                }
+             };
+             list.appendChild(item);
+          });
+       }
+    }
+  }
+
   async function loadReviews() {
     const { data } = await supabase
       .from("reviews")

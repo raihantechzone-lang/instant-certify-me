@@ -30,6 +30,7 @@ import { Route as InstructorApplyRouteImport } from './routes/instructor.apply'
 import { Route as InstructorAnnouncementsRouteImport } from './routes/instructor.announcements'
 import { Route as InstructorAnalyticsRouteImport } from './routes/instructor.analytics'
 import { Route as EnrollCourseIdRouteImport } from './routes/enroll.$courseId'
+import { Route as DetailsCourseIdRouteImport } from './routes/details.$courseId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
 import { Route as AdminStudentsRouteImport } from './routes/admin/students'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
@@ -144,6 +145,11 @@ const EnrollCourseIdRoute = EnrollCourseIdRouteImport.update({
   path: '/enroll/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DetailsCourseIdRoute = DetailsCourseIdRouteImport.update({
+  id: '/details/$courseId',
+  path: '/details/$courseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
   id: '/courses/$courseId',
   path: '/courses/$courseId',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/details/$courseId': typeof DetailsCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
   '/instructor/announcements': typeof InstructorAnnouncementsRoute
@@ -235,6 +242,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/details/$courseId': typeof DetailsCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
   '/instructor/announcements': typeof InstructorAnnouncementsRoute
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
+  '/details/$courseId': typeof DetailsCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
   '/instructor/announcements': typeof InstructorAnnouncementsRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/students'
     | '/courses/$courseId'
+    | '/details/$courseId'
     | '/enroll/$courseId'
     | '/instructor/analytics'
     | '/instructor/announcements'
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/students'
     | '/courses/$courseId'
+    | '/details/$courseId'
     | '/enroll/$courseId'
     | '/instructor/analytics'
     | '/instructor/announcements'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/students'
     | '/courses/$courseId'
+    | '/details/$courseId'
     | '/enroll/$courseId'
     | '/instructor/analytics'
     | '/instructor/announcements'
@@ -387,6 +399,7 @@ export interface RootRouteChildren {
   ReviewsRoute: typeof ReviewsRoute
   WishlistRoute: typeof WishlistRoute
   CoursesCourseIdRoute: typeof CoursesCourseIdRoute
+  DetailsCourseIdRoute: typeof DetailsCourseIdRoute
   EnrollCourseIdRoute: typeof EnrollCourseIdRoute
   InstructorsInstructorIdRoute: typeof InstructorsInstructorIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
@@ -541,6 +554,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnrollCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/details/$courseId': {
+      id: '/details/$courseId'
+      path: '/details/$courseId'
+      fullPath: '/details/$courseId'
+      preLoaderRoute: typeof DetailsCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/$courseId': {
       id: '/courses/$courseId'
       path: '/courses/$courseId'
@@ -668,6 +688,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewsRoute: ReviewsRoute,
   WishlistRoute: WishlistRoute,
   CoursesCourseIdRoute: CoursesCourseIdRoute,
+  DetailsCourseIdRoute: DetailsCourseIdRoute,
   EnrollCourseIdRoute: EnrollCourseIdRoute,
   InstructorsInstructorIdRoute: InstructorsInstructorIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,
@@ -675,13 +696,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
