@@ -95,8 +95,13 @@
     const { data: courses } = await supabase
       .from("courses")
       .select("*")
+      .eq("status", "published") // Only load published courses
       .order("created_at", { ascending: false });
-    if (!courses) return;
+    if (!courses) {
+        allCourses = [];
+        renderFilteredCourses();
+        return;
+    }
     const { data: contents } = await supabase.from("course_contents").select("id, course_id");
     const counts = {};
     (contents || []).forEach((c) => {
@@ -159,6 +164,23 @@
 
     window.db.courses = filtered;
     grid.innerHTML = "";
+    
+    if (filtered.length === 0) {
+      grid.className = "col-span-full flex flex-col items-center justify-center py-20 text-center";
+      grid.innerHTML = `
+        <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm max-w-md mx-auto">
+          <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fa-solid fa-graduation-cap text-3xl text-rs-green"></i>
+          </div>
+          <h3 class="font-bengali font-bold text-gray-900 text-xl mb-3">কোনো কোর্স পাওয়া যায়নি</h3>
+          <p class="font-bengali text-gray-500 text-sm">দুঃখিত, এই মুহূর্তে কোনো কোর্স এভেইলেবল নেই। দয়া করে পরে আবার চেষ্টা করুন।</p>
+        </div>
+      `;
+      return;
+    } else {
+      grid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6";
+    }
+    
     window.renderDynamicCourses();
 
     // Wire events

@@ -182,7 +182,28 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
                         '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            Aikhane koro prokar demo course diyo na admin panel theke age upload kora hobe tarpor admin panel a upload kora course golo aikhane show korbe abong course a bhorti hon ar porer page tai o Kono demo video ba pdf diyo na admin panel theke upload kora sob kiso dibe
+                                            IMPORTANT REQUIREMENT:
+
+The public Courses / Premium Bundles page must show ONLY courses that are created and published from the Admin Panel.
+
+There must be ZERO demo, sample, mock, placeholder, or hardcoded courses.
+
+Rules:
+1. Admin Panel থেকে যে course create/upload করা হবে, শুধু সেই course public Courses page-এ দেখাবে।
+2. Admin Panel থেকে course publish না করলে public page-এ দেখাবে না।
+3. Admin Panel থেকে course delete/unpublish করলে public page থেকেও automatically disappear করবে।
+4. Remove ALL hardcoded/demo course data from the frontend.
+5. Do not use fallback/mock courses.
+6. Courses must be loaded dynamically from the existing Supabase database.
+7. Keep the existing course card design, search, category filter, pricing and enrollment functionality unchanged.
+8. Make sure the Admin Panel and public Courses page use the same Supabase course data.
+9. Do not create any fake/default course just because the database is empty.
+10. If there are no published courses, show an empty-state message instead.
+
+The ONLY source of truth for public courses is:
+Admin Panel → Supabase database → Published courses → Public Courses page.
+
+Please inspect the existing code and fix the current demo courses accordingly. Do not just hide them with CSS.
                     </button>
                 </div>
                 
