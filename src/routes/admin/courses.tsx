@@ -31,24 +31,27 @@ function CoursesAdmin() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log("Attempting to delete course:", id);
+      
       // Delete all related data in the correct order to handle foreign keys
-      const { error: reviewsError } = await supabase.from("reviews").delete().eq("course_id", id);
-      if (reviewsError) console.warn("Reviews deletion error:", reviewsError);
-
-      const { error: examResultsError } = await supabase.from("exam_results").delete().eq("course_id", id);
-      if (examResultsError) console.warn("Exam results deletion error:", examResultsError);
-
-      const { error: enrollmentReqError } = await supabase.from("enrollment_requests").delete().eq("course_id", id);
-      if (enrollmentReqError) console.warn("Enrollment requests deletion error:", enrollmentReqError);
-
-      const { error: enrollmentsError } = await supabase.from("enrollments").delete().eq("course_id", id);
-      if (enrollmentsError) console.warn("Enrollments deletion error:", enrollmentsError);
-
-      const { error: contentsError } = await supabase.from("course_contents").delete().eq("course_id", id);
-      if (contentsError) console.warn("Contents deletion error:", contentsError);
+      const tables = ["reviews", "exam_results", "enrollment_requests", "enrollments", "course_contents"];
+      
+      for (const table of tables) {
+        const { error } = await supabase.from(table).delete().eq("course_id", id);
+        if (error) {
+          console.error(`Error deleting from ${table}:`, error);
+          // If it's a critical error (not just "row not found"), we might want to know
+          if (error.code !== 'PGRST116') { 
+             throw new Error(`Failed to delete related ${table}: ${error.message}`);
+          }
+        }
+      }
 
       const { error: courseError } = await supabase.from("courses").delete().eq("id", id);
-      if (courseError) throw courseError;
+      if (courseError) {
+        console.error("Course deletion error:", courseError);
+        throw courseError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
@@ -75,16 +78,19 @@ function CoursesAdmin() {
           onClick={async () => {
             const title = window.prompt("Enter Course Title:");
             if (title) {
-               const { error } = await supabase.from("courses").insert({ 
+               console.log("Creating course:", title);
+               const { data, error } = await supabase.from("courses").insert({ 
                  title, 
                  price: 0, 
                  category: 'University Admission',
-                 is_published: false // New courses are draft by default
-               });
+                 is_published: false
+               }).select();
                
                if (error) {
+                 console.error("Creation error:", error);
                  toast.error(`Failed to create: ${error.message}`);
                } else {
+                 console.log("Created course successfully:", data);
                  queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
                  toast.success("Course created as draft");
                }
