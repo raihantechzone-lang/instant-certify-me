@@ -115,16 +115,28 @@
        loadCourseDetails(window.currentCourseId);
     }
     
-    // Global real-time link synchronization
-    if (window.location.pathname.startsWith('/admin')) {
-       // Admin routes handle their own synchronization via React Query/Supabase Realtime
-    } else {
-       // For the static HTML pages, we listen for relevant changes
+    // Global real-time synchronization
+    if (!window.hasSiteSync) {
+       window.hasSiteSync = true;
        supabase.channel('public-site-sync')
-         .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, () => loadCourses())
-         .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, () => loadSettings())
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, () => {
+           console.log('Realtime update: Courses changed');
+           loadCourses();
+         })
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, () => {
+           console.log('Realtime update: Settings changed');
+           loadSettings();
+         })
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'course_contents' }, () => {
+           console.log('Realtime update: Course content changed');
+           if (window.currentCourseId) loadCourseDetails(window.currentCourseId);
+           loadCourses(); // Recount lessons on home
+         })
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => loadReviews())
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, () => showInterstitialAd())
          .subscribe();
     }
+
     // wire the enrol / details buttons of the rendered cards to real routes
     Array.from(grid.children).forEach((card, i) => {
       const course = window.db.courses[i];
@@ -546,13 +558,6 @@
     await Promise.all([loadSettings(), loadCourses(), loadReviews(), showInterstitialAd()]);
 
 
-    // realtime updates from the admin panel
-    supabase
-      .channel("home-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "courses" }, loadCourses)
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, loadSettings)
-      .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, loadReviews)
-      .on("postgres_changes", { event: "*", schema: "public", table: "ads" }, showInterstitialAd)
-      .subscribe();
+    // Redundant listeners removed. The 'public-site-sync' channel in loadCourses handles updates globally.
   })();
 </script>
