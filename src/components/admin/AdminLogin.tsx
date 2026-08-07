@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Lock, Mail, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const ADMIN_USER = "adel111";
 const ADMIN_EMAIL = "adel111@gmail.com";
@@ -10,25 +11,60 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(false);
+    setErrorMessage("");
 
-    const validUser = (username.trim().toLowerCase() === ADMIN_USER || username.trim().toLowerCase() === ADMIN_EMAIL);
-    const validPass = password === ADMIN_PASS;
+    const loginInput = username.trim().toLowerCase();
+    const isHardcodedAdmin = (loginInput === ADMIN_USER || loginInput === ADMIN_EMAIL) && password === ADMIN_PASS;
 
-    setTimeout(() => {
-      if (validUser && validPass) {
+    try {
+      // 1. Authenticate with Supabase
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: loginInput.includes("@") ? loginInput : `${loginInput}@gmail.com`,
+        password: password,
+      });
+
+      if (authError) {
+        setError(true);
+        setErrorMessage(authError.message);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Check if user has admin role
+      const { data: roles, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id)
+        .eq("role", "admin");
+
+      if (roleError || !roles || roles.length === 0) {
+        // If hardcoded admin matches but role is missing, we might need to seed it
+        if (isHardcodedAdmin) {
+          await supabase.from("user_roles").upsert({ user_id: data.user.id, role: "admin" }, { onConflict: "user_id,role" });
+          localStorage.setItem(SESSION_KEY, "1");
+          onSuccess();
+        } else {
+          setError(true);
+          setErrorMessage("Access denied. Admin privileges required.");
+          await supabase.auth.signOut();
+        }
+      } else {
         localStorage.setItem(SESSION_KEY, "1");
         onSuccess();
-      } else {
-        setError(true);
       }
+    } catch (err) {
+      setError(true);
+      setErrorMessage("An unexpected error occurred.");
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -79,7 +115,7 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
 
             {error && (
               <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100 animate-in shake duration-300">
-                <p className="text-sm text-rose-600 font-bold text-center">Invalid admin credentials provided.</p>
+                <p className="text-sm text-rose-600 font-bold text-center">{errorMessage || "Invalid admin credentials provided."}</p>
               </div>
             )}
 
