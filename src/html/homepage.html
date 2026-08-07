@@ -1026,43 +1026,123 @@ After making the change, inspect the rendered mobile header and verify that exac
     </div>
 
     <!-- Auth Modal -->
-    <div id="authModal" class="modal fixed inset-0 z-[100] items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in relative">
-            <button onclick="closeModal('authModal')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:bg-gray-100 rounded-full transition z-10"><i class="fa-solid fa-xmark"></i></button>
-            <div class="flex border-b border-gray-100 flex-wrap">
-                <button id="tab-login" onclick="switchAuthTab('login')" class="w-1/3 py-3 text-center font-bold text-sm text-rs-dark border-b-2 border-rs-green transition-colors">Log In</button>
-                <button id="tab-signup" onclick="switchAuthTab('signup')" class="w-1/3 py-3 text-center font-bold text-sm text-gray-400 border-b-2 border-transparent transition-colors">Sign Up</button>
-                <button id="tab-roll" onclick="switchAuthTab('roll')" class="w-1/3 py-3 text-center font-bold text-sm text-gray-400 border-b-2 border-transparent transition-colors">Roll Login</button>
+    <div id="authModal" class="modal fixed inset-0 z-[100] items-center justify-center bg-black/60 backdrop-blur-md p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white/95 backdrop-blur-xl rounded-[28px] w-full max-w-md shadow-[0_20px_50px_rgba(0,0,0,0.1),0_0_20px_rgba(16,185,129,0.05)] border border-emerald-50/50 overflow-hidden relative transform translate-y-8 transition-all duration-300" id="auth-modal-card">
+            
+            <!-- Close Button -->
+            <button onclick="closeModal('authModal')" class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center bg-white text-gray-400 hover:text-emerald-600 rounded-full shadow-sm border border-gray-100 transition-all hover:scale-110 active:scale-95 z-20">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <!-- Decorative pattern -->
+            <div class="absolute top-0 left-0 right-0 h-32 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px] opacity-[0.03] pointer-events-none"></div>
+
+            <!-- Tabs -->
+            <div class="flex p-2 bg-gray-50/50 border-b border-gray-100 relative z-10">
+                <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-gray-400 hover:text-emerald-600">
+                    <i class="fa-solid fa-right-to-bracket text-xs"></i> Log In
+                </button>
+                <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-gray-400 hover:text-emerald-600">
+                    <i class="fa-solid fa-user-plus text-xs"></i> Sign Up
+                </button>
+                <button id="tab-roll" onclick="switchAuthTab('roll')" class="flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-gray-400 hover:text-emerald-600">
+                    <i class="fa-solid fa-id-card text-xs"></i> Roll Login
+                </button>
+                <!-- Active Indicator -->
+                <div id="tab-indicator" class="absolute bottom-0 h-0.5 bg-emerald-500 transition-all duration-300 rounded-full" style="width: 33.33%; left: 0;"></div>
             </div>
-            <div class="p-6">
-                <form id="loginForm" onsubmit="handleAuthSubmit(event, 'Login')" class="flex flex-col gap-4">
-                    <input type="email" name="email" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Email (e.g. test@gmail.com)">
-                    <input type="password" name="password" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Password">
-                    <button type="submit" class="w-full bg-rs-dark text-white font-bold py-3.5 rounded-xl hover:bg-black transition-colors">Log In</button>
-                </form>
-                <form id="signupForm" onsubmit="handleAuthSubmit(event, 'Signup')" class="hidden flex-col gap-4">
-                    <input type="text" name="name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Full Name">
-                    <input type="email" name="email" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Email">
-                    <input type="tel" name="phone" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Phone Number">
-                    <button type="submit" class="w-full bg-rs-green text-white font-bold py-3.5 rounded-xl hover:bg-emerald-700 transition-colors shadow-md">Create Account</button>
-                </form>
-                <form id="rollForm" onsubmit="handleAuthSubmit(event, 'Roll')" class="hidden flex-col gap-4">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Enter your Roll Number</label>
-                    <input type="text" name="roll" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="e.g. GL-12345">
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors">Login with Roll</button>
+
+            <div class="p-8 sm:p-10 relative z-10">
+                <!-- Sign Up Header Content -->
+                <div id="signup-header" class="hidden flex-col items-center text-center mb-8 animate-fade-in">
+                    <div class="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mb-4 border border-emerald-100/50 shadow-inner">
+                        <i class="fa-solid fa-graduation-cap text-2xl text-emerald-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Create your account</h3>
+                    <p class="text-sm text-gray-500 font-medium">Join thousands of students learning and growing with us.</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" onsubmit="handleAuthSubmit(event, 'Login')" class="flex flex-col gap-5">
+                    <div class="space-y-1.5">
+                        <div class="relative group">
+                            <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                                <i class="fa-solid fa-envelope text-xs"></i>
+                            </div>
+                            <input type="email" name="email" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Email Address">
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="relative group">
+                            <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                                <i class="fa-solid fa-lock text-xs"></i>
+                            </div>
+                            <input type="password" name="password" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Password">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full h-[56px] bg-emerald-600 text-white font-bold rounded-[16px] hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-2 mt-2">
+                        Log In <i class="fa-solid fa-arrow-right-to-bracket text-sm"></i>
+                    </button>
                 </form>
 
-                <div class="mt-6 flex flex-col gap-3 pt-6 border-t border-gray-100">
-                    <p class="text-xs font-bold text-gray-400 text-center uppercase tracking-widest">Or login with</p>
-                    <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" class="w-5 h-5" alt="Google">
+                <!-- Sign Up Form -->
+                <form id="signupForm" onsubmit="handleAuthSubmit(event, 'Signup')" class="hidden flex-col gap-5">
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                            <i class="fa-solid fa-user text-xs"></i>
+                        </div>
+                        <input type="text" name="name" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Full Name">
+                    </div>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                            <i class="fa-solid fa-envelope text-xs"></i>
+                        </div>
+                        <input type="email" name="email" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Email Address">
+                    </div>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                            <i class="fa-solid fa-phone text-xs"></i>
+                        </div>
+                        <input type="tel" name="phone" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Phone Number">
+                    </div>
+                    <button type="submit" class="w-full h-[56px] bg-emerald-600 text-white font-bold rounded-[16px] hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-2 mt-2">
+                        Create Account <i class="fa-solid fa-arrow-right text-sm"></i>
+                    </button>
+                </form>
+
+                <!-- Roll Login Form -->
+                <form id="rollForm" onsubmit="handleAuthSubmit(event, 'Roll')" class="hidden flex-col gap-5">
+                    <div class="text-center mb-2">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Enter your credentials</p>
+                    </div>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                            <i class="fa-solid fa-hashtag text-xs"></i>
+                        </div>
+                        <input type="text" name="roll" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Roll Number (e.g. GL-12345)">
+                    </div>
+                    <button type="submit" class="w-full h-[56px] bg-indigo-600 text-white font-bold rounded-[16px] hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center gap-2">
+                        Login with Roll <i class="fa-solid fa-circle-check text-sm"></i>
+                    </button>
+                </form>
+
+                <!-- Google Auth -->
+                <div id="google-auth-container" class="mt-8 flex flex-col gap-4 pt-8 border-t border-gray-50">
+                    <div class="relative flex justify-center text-xs uppercase tracking-widest font-bold text-gray-400">
+                        <span class="bg-white px-4 relative z-10">Or continue with</span>
+                        <div class="absolute top-1/2 left-0 right-0 h-px bg-gray-100 -z-0"></div>
+                    </div>
+                    <button type="button" onclick="signInWithGoogle()" class="w-full h-[56px] flex items-center justify-center gap-3 bg-white border border-gray-200 rounded-[16px] hover:bg-gray-50 transition-all active:scale-[0.98] shadow-sm group">
+                        <div class="w-6 h-6 flex items-center justify-center">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" class="w-5 h-5 group-hover:scale-110 transition-transform" alt="Google">
+                        </div>
                         <span class="text-sm font-bold text-gray-700">Continue with Google</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="mt-6 text-center">
-                    <button type="button" onclick="switchAuthTab('admin')" class="text-xs text-gray-400 hover:text-rs-dark">Admin Access</button>
-                </div>
                 <form id="adminForm" onsubmit="handleAuthSubmit(event, 'Admin')" class="hidden flex-col gap-4 mt-4 pt-4 border-t">
                     <h4 class="font-bold text-center mb-2">Admin Login</h4>
                     <input type="text" name="adminId" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500" placeholder="Admin ID">
