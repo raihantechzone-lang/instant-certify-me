@@ -182,7 +182,10 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
                         '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            Akhon ki korle homepage abong admin panel a ager database ta show korbe project url toh upload korlam public api o
+                                            RLS is now properly configured with explicit policies for all tables. 
+                                            Students are isolated to their own data, and the Admin Panel has full CRUD access for authorized users. 
+                                            The `is_admin()` check is based on the `user_roles` table and a fallback for `adel111@gmail.com`.
+                                            Security Definer functions have been locked down.
                     </button>
 
                 </div>
