@@ -128,18 +128,25 @@ function CoursesAdmin() {
                         const newCategory = window.prompt("Update Category:", course.category || "");
                         
                         if (newTitle !== null) {
-                          supabase
-                            .from("courses")
-                            .update({ 
-                              title: newTitle, 
-                              price: parseFloat(newPrice || "0"),
-                              category: newCategory
-                            })
-                            .eq("id", course.id)
-                            .then(() => {
+                          const updateCourse = async () => {
+                            const { error } = await supabase
+                              .from("courses")
+                              .update({ 
+                                title: newTitle, 
+                                price: parseFloat(newPrice || "0"),
+                                category: newCategory
+                              })
+                              .eq("id", course.id);
+                            
+                            if (error) {
+                              console.error("Update error:", error);
+                              toast.error(`Error: ${error.message}`);
+                            } else {
                               queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
                               toast.success("Course updated");
-                            });
+                            }
+                          };
+                          updateCourse();
                         }
                       }}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-sm hover:bg-brand hover:text-white transition"
