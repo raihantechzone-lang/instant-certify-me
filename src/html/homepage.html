@@ -182,27 +182,45 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
 '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            On the homepage mobile view, redesign the top-right authentication section.
+                                            Fix the mobile homepage header authentication buttons.
 
 
 
-Place the “Sign up” and “Log in” buttons side-by-side horizontally in the same row, with equal visual height and proper spacing between them.
+There are currently duplicate “Sign up” and “Log in” buttons because the previous buttons were not removed.
 
 
 
-Keep both buttons compact so they fit perfectly on mobile screens without wrapping or overlapping. Make “Sign up” the primary button and “Log in” the secondary button.
+Remove ALL duplicate/old authentication buttons from the mobile header and keep exactly ONE “Sign up” button and ONE “Log in” button.
 
 
 
-Keep the hamburger menu on the far right as it is.
+Final mobile header layout must be:
 
 
 
-Do not change any other homepage design, content, layout, colors, or functionality. Only modify the mobile header authentication button layout.
-                                            1. Remove all demo courses from the admin panel and database.
-                                            2. Fix the course delete function (it's currently failing).
-                                            3. Ensure public courses page shows ONLY published admin courses.
-                                            4. Do not just hide with CSS - fix the data flow properly.
+[ Sign up ] [ Log in ] [ ☰ ]
+
+
+
+Requirements:
+
+- Sign up and Log in must be side-by-side horizontally.
+
+- Keep the hamburger menu on the far right.
+
+- Do not show any additional Sign up or Log in buttons in the header.
+
+- Do not duplicate the buttons at any breakpoint.
+
+- Make the buttons compact and properly aligned for mobile screens.
+
+- Keep the existing colors, fonts, functionality, and click actions.
+
+- Do NOT modify the hero section, images, text, spacing, or any other homepage section.
+
+- This is a functional/layout fix only for the mobile header authentication area.
+
+- Verify the final DOM/rendered UI has exactly one Sign up and one Log in button in the mobile header.
 
                     </button>
                 </div>
@@ -254,10 +272,6 @@ Do not change any other homepage design, content, layout, colors, or functionali
             <a href="#courses" onclick="goHome(); document.getElementById('mobile-menu').classList.add('hidden')" class="text-base font-bold text-rs-dark hover:text-rs-green border-b border-gray-50 pb-3 flex items-center justify-between">Our Courses <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i></a>
             <a href="#" onclick="openModal('contactModal'); document.getElementById('mobile-menu').classList.add('hidden')" class="text-base font-bold text-rs-dark hover:text-rs-green border-b border-gray-50 pb-3 flex items-center justify-between">Contact Us <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i></a>
             
-            <div id="mobile-auth-section" class="flex flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
-                <button onclick="openModal('authModal', 'login')" class="flex-1 py-3.5 rounded-xl border-2 border-rs-dark text-rs-dark font-bold hover:bg-gray-50 transition text-sm">Log in</button>
-                <button onclick="openModal('authModal', 'signup')" class="flex-1 py-3.5 rounded-xl bg-rs-green text-white font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 text-sm">Sign up</button>
-            </div>
             
             <div id="mobile-profile-section" class="hidden flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
                 <button onclick="goToDashboard(); document.getElementById('mobile-menu').classList.add('hidden')" class="w-full py-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-rs-green font-bold transition">My Dashboard</button>
