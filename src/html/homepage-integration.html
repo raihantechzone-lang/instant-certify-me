@@ -136,36 +136,6 @@
     const descEl = document.querySelector('main p.font-bengali');
     if (descEl) descEl.innerText = course.description || "";
 
-    const priceEl = document.querySelector('h2');
-    if (priceEl) priceEl.innerText = "৳" + (course.discount_price || course.price);
-    
-    const oldPriceEl = document.querySelector('.line-through');
-    if (oldPriceEl) oldPriceEl.innerText = "৳" + course.price;
-
-    const posterImg = document.getElementById('vid-poster');
-    if (posterImg) posterImg.src = course.thumbnail_url;
-
-    // Load contents and populate the list
-    const { data: contents } = await supabase.from("course_contents")
-      .select("*")
-      .eq("course_id", id)
-      .order("position", { ascending: true });
-    
-    // ... Logic to populate the content list based on file-9's structure ...
-  }
-
-  /* ---------- database: approved reviews ---------- */
-  async function loadCourseDetails(id) {
-    const { data: course } = await supabase.from("courses").select("*").eq("id", id).maybeSingle();
-    if (!course) return;
-    
-    // Update basic UI info
-    const titleEl = document.querySelector('h1');
-    if (titleEl) titleEl.innerText = course.title;
-    
-    const descEl = document.querySelector('main p.font-bengali');
-    if (descEl) descEl.innerText = course.description || "";
-
     const priceEls = document.querySelectorAll('h2');
     priceEls.forEach(el => {
       if (el.innerText.includes("৳")) el.innerText = "৳" + (course.discount_price || course.price);
