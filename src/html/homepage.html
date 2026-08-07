@@ -1427,14 +1427,28 @@ After making the change, inspect the rendered mobile header and verify that exac
         }
 
         function openModal(modalId, tab = 'login') {
-            document.getElementById(modalId).classList.add('active');
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('flex', 'opacity-100');
+            const card = modal.querySelector('div[id$="-card"]') || modal.querySelector('.bg-white');
+            if(card) {
+                card.classList.remove('translate-y-8');
+                card.classList.add('translate-y-0');
+            }
             if(modalId === 'authModal') {
                 switchAuthTab(tab);
             }
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
+            const modal = document.getElementById(modalId);
+            const card = modal.querySelector('div[id$="-card"]') || modal.querySelector('.bg-white');
+            if(card) {
+                card.classList.add('translate-y-8');
+                card.classList.remove('translate-y-0');
+            }
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.classList.remove('flex', 'opacity-100');
         }
 
         function switchAuthTab(tab) {
@@ -1444,30 +1458,46 @@ After making the change, inspect the rendered mobile header and verify that exac
             const loginForm = document.getElementById('loginForm');
             const signupForm = document.getElementById('signupForm');
             const rollForm = document.getElementById('rollForm');
-            const adminForm = document.getElementById('adminForm');
+            const signupHeader = document.getElementById('signup-header');
+            const googleAuth = document.getElementById('google-auth-container');
+            const indicator = document.getElementById('tab-indicator');
 
-            const activeStyle = "w-1/3 py-3 text-center font-bold text-sm text-rs-dark border-b-2 border-rs-green transition-colors";
-            const inactiveStyle = "w-1/3 py-3 text-center font-bold text-sm text-gray-400 border-b-2 border-transparent transition-colors";
+            const activeBtnStyle = "flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-emerald-600 bg-emerald-50/50 shadow-sm shadow-emerald-600/5";
+            const inactiveBtnStyle = "flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-gray-400 hover:text-emerald-600";
 
-            loginBtn.className = inactiveStyle;
-            signupBtn.className = inactiveStyle;
-            rollBtn.className = inactiveStyle;
-            loginForm.style.display = 'none';
-            signupForm.style.display = 'none';
-            rollForm.style.display = 'none';
-            adminForm.style.display = 'none';
+            loginBtn.className = inactiveBtnStyle;
+            signupBtn.className = inactiveBtnStyle;
+            rollBtn.className = inactiveBtnStyle;
+            
+            loginForm.classList.add('hidden');
+            loginForm.classList.remove('flex');
+            signupForm.classList.add('hidden');
+            signupForm.classList.remove('flex');
+            rollForm.classList.add('hidden');
+            rollForm.classList.remove('flex');
+            
+            if (signupHeader) signupHeader.classList.add('hidden');
+            if (googleAuth) googleAuth.classList.remove('hidden');
 
             if (tab === 'login') {
-                loginBtn.className = activeStyle;
-                loginForm.style.display = 'flex';
+                loginBtn.className = activeBtnStyle;
+                loginForm.classList.remove('hidden');
+                loginForm.classList.add('flex');
+                if (indicator) { indicator.style.left = '0%'; indicator.style.width = '33.33%'; }
             } else if (tab === 'signup') {
-                signupBtn.className = activeStyle;
-                signupForm.style.display = 'flex';
+                signupBtn.className = activeBtnStyle;
+                signupForm.classList.remove('hidden');
+                signupForm.classList.add('flex');
+                if (signupHeader) signupHeader.classList.remove('hidden');
+                if (indicator) { indicator.style.left = '33.33%'; indicator.style.width = '33.33%'; }
             } else if (tab === 'roll') {
-                rollBtn.className = activeStyle;
-                rollForm.style.display = 'flex';
+                rollBtn.className = activeBtnStyle;
+                rollForm.classList.remove('hidden');
+                rollForm.classList.add('flex');
+                if (indicator) { indicator.style.left = '66.66%'; indicator.style.width = '33.33%'; }
             }
         }
+
 
         function showToast(message = 'Your information has been securely saved.', title = 'Success!') {
             const toast = document.getElementById('toast');
