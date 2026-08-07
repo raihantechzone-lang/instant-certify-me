@@ -31,6 +31,8 @@ function CoursesAdmin() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // First delete related contents to avoid foreign key issues if cascade isn't set
+      await supabase.from("course_contents").delete().eq("course_id", id);
       const { error } = await supabase.from("courses").delete().eq("id", id);
       if (error) throw error;
     },
@@ -51,7 +53,19 @@ function CoursesAdmin() {
           <h2 className="text-3xl font-black text-slate-900">Manage Courses</h2>
           <p className="text-slate-500 font-medium">Create, edit, or remove courses from your platform.</p>
         </div>
-        <button className="flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-brand/20 hover:scale-105 transition active:scale-95">
+        <button 
+          onClick={() => {
+            const title = window.prompt("Enter Course Title:");
+            if (title) {
+               supabase.from("courses").insert({ 
+                 title, 
+                 price: 0, 
+                 category: 'University Admission' 
+               }).then(() => queryClient.invalidateQueries({ queryKey: ["admin-courses"] }));
+            }
+          }}
+          className="flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-brand/20 hover:scale-105 transition active:scale-95"
+        >
           <Plus size={20} /> Create New Course
         </button>
       </div>
