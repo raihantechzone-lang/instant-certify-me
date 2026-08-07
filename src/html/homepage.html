@@ -182,27 +182,8 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
                         '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            Our Courses
-
-Premium
-
-Bundles a Kono demo course show korbe na admin panel theke ja upload korbe only ta e show korbe, 
-
-
-
-Feedback a o same admin panel theke approved betito Kono feedback show korbe na demo feedback golo remove koro. 
-
-
-
-Ar oporer log in ar sign up secment ta mobile view te opor niche alomelo lagse oigolo mobile view te pasapasi dew jate sondor lage ar log in a log in with email, roll number ar pasapasi log in with Google a add koro ja supabase ar Sath connected thakbe ar sob realtime data synced hobe 
-
-Demo kiso thakbe na demo course golo remove koro
-
-
-
-Ami ja ja bolechi ta bade barti Kono kiso poriborton korbe na
+                                            Add a search and category filter on the Home page so I can quickly find the courses and bundles I want.
                     </button>
-
                 </div>
                 
                 <div id="auth-buttons" class="hidden lg:flex items-center space-x-3">
@@ -561,22 +542,34 @@ Ami ja ja bolechi ta bade barti Kono kiso poriborton korbe na
         </section>
 
         <section id="courses" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 reveal">
-            <div class="mb-10">
-                <span class="text-acadia-red font-bold text-sm tracking-widest uppercase mb-2 block">Our Courses</span>
-                <h2 class="text-4xl sm:text-5xl font-heading font-extrabold text-gray-900 flex items-center flex-wrap gap-2">
-                    Premium
-                    <span class="relative text-acadia-red inline-block">
-                        Bundles
-                        <svg class="absolute -bottom-2 left-0 w-full" width="124" height="12" viewBox="0 0 124 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 9.5C33 2.5 86 -2.5 122 9.5" stroke="#ffb60a" stroke-width="4" stroke-linecap="round"/>
-                        </svg>
-                    </span>
-                </h2>
-            </div>
-
-            <div class="flex items-center space-x-2 sm:space-x-8 border-b border-gray-200 mb-10 overflow-x-auto hide-scrollbar pb-1">
-                <button onclick="filterCourses('versity')" id="tab-versity" class="tab-btn active font-bengali text-rs-dark font-bold border-b-2 border-rs-dark pb-3 px-2 whitespace-nowrap text-lg transition-colors">বিশ্ববিদ্যালয় ভর্তি প্রস্তুতি</button>
-                <button onclick="filterCourses('ielts')" id="tab-ielts" class="tab-btn font-bengali text-gray-400 hover:text-gray-900 font-semibold border-b-2 border-transparent pb-3 px-2 whitespace-nowrap text-lg transition-colors">IELTS & Skills</button>
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+                <div>
+                    <span class="text-acadia-red font-bold text-sm tracking-widest uppercase mb-2 block">Our Courses</span>
+                    <h2 class="text-4xl sm:text-5xl font-heading font-extrabold text-gray-900 flex items-center flex-wrap gap-2">
+                        Premium
+                        <span class="relative text-acadia-red inline-block">
+                            Bundles
+                            <svg class="absolute -bottom-2 left-0 w-full" width="124" height="12" viewBox="0 0 124 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2 9.5C33 2.5 86 -2.5 122 9.5" stroke="#ffb60a" stroke-width="4" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                    </h2>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                    <!-- Search Input -->
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="course-search" oninput="searchCourses(this.value)" placeholder="Search courses..." class="w-full bg-white border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-rs-green focus:ring-4 focus:ring-emerald-50 transition-all shadow-sm">
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div class="flex items-center space-x-2 bg-gray-100/50 p-1.5 rounded-xl border border-gray-100 overflow-x-auto hide-scrollbar">
+                        <button onclick="filterCourses('all')" id="tab-all" class="tab-btn active px-5 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap bg-white text-rs-dark shadow-sm">All</button>
+                        <button onclick="filterCourses('versity')" id="tab-versity" class="tab-btn px-5 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-rs-dark transition-all whitespace-nowrap">Admission</button>
+                        <button onclick="filterCourses('ielts')" id="tab-ielts" class="tab-btn px-5 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-rs-dark transition-all whitespace-nowrap">IELTS & Skills</button>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="courses-grid">
