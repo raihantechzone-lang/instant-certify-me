@@ -95,7 +95,8 @@
     const { data: courses } = await supabase
       .from("courses")
       .select("*")
-      .eq("status", "published") // Only load published courses
+      .eq("is_published", true) // Use is_published column correctly
+
       .order("created_at", { ascending: false });
     if (!courses) {
         allCourses = [];
