@@ -1027,7 +1027,15 @@ Ami ja ja bolechi ta bade barti Kono kiso poriborton korbe na
                     <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors">Login with Roll</button>
                 </form>
 
-                <div class="mt-4 text-center">
+                <div class="mt-6 flex flex-col gap-3 pt-6 border-t border-gray-100">
+                    <p class="text-xs font-bold text-gray-400 text-center uppercase tracking-widest">Or login with</p>
+                    <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" class="w-5 h-5" alt="Google">
+                        <span class="text-sm font-bold text-gray-700">Continue with Google</span>
+                    </button>
+                </div>
+
+                <div class="mt-6 text-center">
                     <button type="button" onclick="switchAuthTab('admin')" class="text-xs text-gray-400 hover:text-rs-dark">Admin Access</button>
                 </div>
                 <form id="adminForm" onsubmit="handleAuthSubmit(event, 'Admin')" class="hidden flex-col gap-4 mt-4 pt-4 border-t">
