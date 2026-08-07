@@ -463,9 +463,12 @@
 
       }
 
+      const email = String(fd.get("email"));
+      const password = String(fd.get("password"));
+
       const { data: ld, error } = await supabase.auth.signInWithPassword({
-        email: String(fd.get("email")),
-        password: String(fd.get("password")),
+        email,
+        password,
       });
       if (error) return finish(error.message, "Login failed");
       if (!ld?.session) return finish("Could not start a session.", "Login failed");
