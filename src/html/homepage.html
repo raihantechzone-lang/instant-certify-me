@@ -182,7 +182,25 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
                         '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            Animate the certified badge reveal on my student dashboard when the certificate becomes unlocked in real time.
+                                            Our Courses
+
+Premium
+
+Bundles a Kono demo course show korbe na admin panel theke ja upload korbe only ta e show korbe, 
+
+
+
+Feedback a o same admin panel theke approved betito Kono feedback show korbe na demo feedback golo remove koro. 
+
+
+
+Ar oporer log in ar sign up secment ta mobile view te opor niche alomelo lagse oigolo mobile view te pasapasi dew jate sondor lage ar log in a log in with email, roll number ar pasapasi log in with Google a add koro ja supabase ar Sath connected thakbe ar sob realtime data synced hobe 
+
+Demo kiso thakbe na demo course golo remove koro
+
+
+
+Ami ja ja bolechi ta bade barti Kono kiso poriborton korbe na
                     </button>
 
                 </div>
@@ -222,9 +240,9 @@
             <a href="#courses" onclick="goHome(); document.getElementById('mobile-menu').classList.add('hidden')" class="text-base font-bold text-rs-dark hover:text-rs-green border-b border-gray-50 pb-3 flex items-center justify-between">Our Courses <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i></a>
             <a href="#" onclick="openModal('contactModal'); document.getElementById('mobile-menu').classList.add('hidden')" class="text-base font-bold text-rs-dark hover:text-rs-green border-b border-gray-50 pb-3 flex items-center justify-between">Contact Us <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i></a>
             
-            <div id="mobile-auth-section" class="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
-                <button onclick="openModal('authModal', 'login')" class="w-full py-3.5 rounded-xl border-2 border-rs-dark text-rs-dark font-bold hover:bg-gray-50 transition">Log in</button>
-                <button onclick="openModal('authModal', 'signup')" class="w-full py-3.5 rounded-xl bg-rs-green text-white font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-200">Sign up</button>
+            <div id="mobile-auth-section" class="flex flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
+                <button onclick="openModal('authModal', 'login')" class="flex-1 py-3.5 rounded-xl border-2 border-rs-dark text-rs-dark font-bold hover:bg-gray-50 transition text-sm">Log in</button>
+                <button onclick="openModal('authModal', 'signup')" class="flex-1 py-3.5 rounded-xl bg-rs-green text-white font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 text-sm">Sign up</button>
             </div>
             
             <div id="mobile-profile-section" class="hidden flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
@@ -1009,7 +1027,15 @@
                     <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors">Login with Roll</button>
                 </form>
 
-                <div class="mt-4 text-center">
+                <div class="mt-6 flex flex-col gap-3 pt-6 border-t border-gray-100">
+                    <p class="text-xs font-bold text-gray-400 text-center uppercase tracking-widest">Or login with</p>
+                    <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" class="w-5 h-5" alt="Google">
+                        <span class="text-sm font-bold text-gray-700">Continue with Google</span>
+                    </button>
+                </div>
+
+                <div class="mt-6 text-center">
                     <button type="button" onclick="switchAuthTab('admin')" class="text-xs text-gray-400 hover:text-rs-dark">Admin Access</button>
                 </div>
                 <form id="adminForm" onsubmit="handleAuthSubmit(event, 'Admin')" class="hidden flex-col gap-4 mt-4 pt-4 border-t">
@@ -1082,11 +1108,18 @@
         window.addEventListener('scroll', handleScrollAnimations);
 
         function initApp() {
-            document.getElementById('dynamic-site-title').innerHTML = db.siteSettings.title;
-            document.getElementById('dynamic-site-subtitle').innerHTML = db.siteSettings.subtitle;
+            // Set dynamic title and subtitle from database settings or default
+            const titleEl = document.getElementById('dynamic-site-title');
+            const subtitleEl = document.getElementById('dynamic-site-subtitle');
+            if (titleEl) titleEl.innerHTML = db.siteSettings.title;
+            if (subtitleEl) subtitleEl.innerHTML = db.siteSettings.subtitle;
             
+            // Initial render - these will be replaced by real-time data from integration script
             renderDynamicCourses();
             renderTestimonialsList(); 
+            
+            // Check for existing session
+            isLoggedIn = !!localStorage.getItem('gators-learning-auth');
             
             setTimeout(handleScrollAnimations, 100); 
         }
@@ -1107,6 +1140,10 @@
 
         function renderDynamicCourses() {
             const grid = document.getElementById('courses-grid');
+            if (!db.courses || db.courses.length === 0) {
+                grid.innerHTML = '<div class="col-span-full py-20 text-center"><i class="fa-solid fa-graduation-cap text-5xl text-gray-200 mb-4 block"></i><p class="text-gray-400 font-bengali">নতুন কোর্স শীঘ্রই আসছে...</p></div>';
+                return;
+            }
             db.courses.forEach(course => {
                 const origPrice = parseFloat(course.price);
                 const discPrice = parseFloat(course.discountPrice);
@@ -1166,10 +1203,7 @@
         let mergedTestimonials = [];
 
         function renderTestimonialsList() {
-            const staticTests = [
-                { name: "Oisely", role: "Lecturer, Oxford university", text: "I need to get a certification for English proficiency and Acadia is my best choice. Their tutors are smart and professional.", img: "https://i.pravatar.cc/150?img=47" },
-                { name: "Rahim Chowdhury", role: "IELTS Candidate (Band 8.0)", text: "The IELTS expert training here is phenomenal. The premium study materials and one-on-one mentorship helped me achieve an 8.0 band score.", img: "https://i.pravatar.cc/150?img=33" }
-            ];
+            const staticTests = [];
             const dbTests = (db.feedbacks || []).filter(f => f.status === 'approved').map(f => ({
                 name: f.name, role: f.role, text: f.text, img: "https://ui-avatars.com/api/?name=" + encodeURIComponent(f.name) + "&background=0D8ABC&color=fff"
             }));
@@ -1219,7 +1253,11 @@
         }
 
         function nextTestimonial() {
-            if(mergedTestimonials.length === 0) return;
+            const container = document.getElementById('testimonial-content');
+            if(mergedTestimonials.length === 0) {
+                if (container) container.innerHTML = '<div class="py-10 text-center text-gray-400 font-bengali">শিক্ষার্থীদের মতামত শীঘ্রই যুক্ত করা হবে...</div>';
+                return;
+            }
             currentIdx = (currentIdx + 1) % mergedTestimonials.length;
             renderTestimonial();
             resetInterval();
