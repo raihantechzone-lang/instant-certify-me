@@ -118,7 +118,7 @@ function StudentsAdmin() {
                         <div>
                           <p className="font-bold text-slate-900">{req.full_name}</p>
                           <div className="flex items-center gap-2 text-xs text-slate-400">
-                             <Phone size={12} /> {req.mobile_number}
+                             <Phone size={12} /> {req.mobile}
                           </div>
                         </div>
                       </div>

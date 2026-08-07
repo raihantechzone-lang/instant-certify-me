@@ -15,13 +15,20 @@ function SettingsAdmin() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ["site-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("site_settings").select("*").single();
-      if (error && error.code !== 'PGRST116') throw error;
-      return data || { 
-        title: "Gators Learning", 
-        subtitle: "The ultimate platform for admission & skills.",
-        primary_color: "#3B82F6",
-        contact_email: "support@gators.com"
+      const { data, error } = await supabase.from("site_settings").select("*");
+      if (error) throw error;
+      
+      const settingsMap: any = {};
+      data?.forEach(item => {
+        settingsMap[item.key] = item.value;
+      });
+
+      return { 
+        title: settingsMap.hero_title || "Gators Learning", 
+        subtitle: settingsMap.hero_subtitle || "The ultimate platform for admission & skills.",
+        primary_color: settingsMap.primary_color || "#3B82F6",
+        contact_email: settingsMap.contact_email || "support@gators.com",
+        announcement: settingsMap.announcement || ""
       };
     },
   });
@@ -48,12 +55,22 @@ function SettingsAdmin() {
 
   const updateMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const { error } = await supabase.from("site_settings").upsert({ 
-        id: settings?.id || undefined,
-        ...payload,
-        updated_at: new Date().toISOString()
-      });
-      if (error) throw error;
+      const updates = [
+        { key: 'hero_title', value: payload.title },
+        { key: 'hero_subtitle', value: payload.subtitle },
+        { key: 'primary_color', value: payload.primary_color },
+        { key: 'contact_email', value: payload.contact_email },
+        { key: 'announcement', value: payload.announcement }
+      ];
+
+      for (const update of updates) {
+        const { error } = await supabase.from("site_settings").upsert({ 
+          key: update.key,
+          value: update.value,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["site-settings"] });

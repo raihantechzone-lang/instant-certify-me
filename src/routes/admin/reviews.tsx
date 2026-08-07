@@ -38,7 +38,7 @@ function ReviewsAndAdsAdmin() {
 
   const approveReviewMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("reviews").update({ status: "approved" }).eq("id", id);
+      const { error } = await supabase.from("reviews").update({ is_approved: true }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -49,7 +49,7 @@ function ReviewsAndAdsAdmin() {
 
   const toggleAdMutation = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
-      const { error } = await supabase.from("ads").update({ active }).eq("id", id);
+      const { error } = await supabase.from("ads").update({ is_active: active }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -91,14 +91,14 @@ function ReviewsAndAdsAdmin() {
                            <UserIcon size={20} className="text-slate-400" />
                          </div>
                          <div>
-                            <p className="font-bold text-slate-900">{review.student_name}</p>
+                            <p className="font-bold text-slate-900">{review.student_name || "Student"}</p>
                             <div className="flex items-center gap-1 text-amber-400">
                                {[...Array(review.rating || 5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
                             </div>
                          </div>
                       </div>
                       <div className="flex items-center gap-2">
-                         {review.status === 'pending' && (
+                         {!review.is_approved && (
                            <button 
                              onClick={() => approveReviewMutation.mutate(review.id)}
                              className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition"
@@ -107,9 +107,9 @@ function ReviewsAndAdsAdmin() {
                            </button>
                          )}
                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg ${
-                           review.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                           review.is_approved ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
                          }`}>
-                           {review.status}
+                           {review.is_approved ? 'approved' : 'pending'}
                          </span>
                       </div>
                    </div>
@@ -150,24 +150,24 @@ function ReviewsAndAdsAdmin() {
                       )}
                    </div>
                    <div className="flex-1">
-                      <p className="font-bold text-slate-900 mb-1">{ad.title || "Untitled Ad"}</p>
+                       <p className="font-bold text-slate-900 mb-1">{ad.id.split('-')[0] || "Untitled Ad"}</p>
                       <div className="flex items-center gap-2">
                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${
-                           ad.active ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                           ad.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                          }`}>
-                           {ad.active ? 'Active' : 'Paused'}
+                           {ad.is_active ? 'Active' : 'Paused'}
                          </span>
-                         {ad.link && <p className="text-xs text-brand truncate max-w-[150px]">{ad.link}</p>}
+                         {ad.link_url && <p className="text-xs text-brand truncate max-w-[150px]">{ad.link_url}</p>}
                       </div>
                    </div>
                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
                       <button 
-                        onClick={() => toggleAdMutation.mutate({ id: ad.id, active: !ad.active })}
-                        className={`p-2.5 rounded-xl transition ${
-                          ad.active ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'
-                        }`}
+                         onClick={() => toggleAdMutation.mutate({ id: ad.id, active: !ad.is_active })}
+                         className={`p-2.5 rounded-xl transition ${
+                           ad.is_active ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'
+                         }`}
                       >
-                        {ad.active ? <Pause size={18} /> : <Play size={18} />}
+                        {ad.is_active ? <Pause size={18} /> : <Play size={18} />}
                       </button>
                       <button 
                         onClick={() => window.confirm("Delete this ad?") && deleteAdMutation.mutate(ad.id)}

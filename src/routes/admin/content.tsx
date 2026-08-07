@@ -36,7 +36,7 @@ function ContentAdmin() {
         .from("course_contents")
         .select("*")
         .eq("course_id", selectedCourseId)
-        .order("created_at");
+        .order("position", { ascending: true });
       if (error) throw error;
       return data;
     },
@@ -66,9 +66,17 @@ function ContentAdmin() {
 
   const addMutation = useMutation({
     mutationFn: async (payload: any) => {
+      const { data: countData } = await supabase
+        .from("course_contents")
+        .select("id", { count: "exact" })
+        .eq("course_id", selectedCourseId);
+        
+      const position = (countData?.length || 0) + 1;
+
       const { error } = await supabase.from("course_contents").insert({
         ...payload,
         course_id: selectedCourseId,
+        position,
         live_expires_at: payload.live_url ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
       });
       if (error) throw error;
