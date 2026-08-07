@@ -15,14 +15,15 @@ function AdminDashboard() {
   const { data: stats } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const [courses, students, enrollments, reviews] = await Promise.all([
+      const [courses, students, enrollments, reviews, recentRequests] = await Promise.all([
         supabase.from("courses").select("id", { count: "exact" }),
         supabase.from("profiles").select("id", { count: "exact" }),
-        supabase.from("enrollments").select("id, amount"),
+        supabase.from("enrollments").select("id, status"),
         supabase.from("reviews").select("id", { count: "exact" }),
+        supabase.from("enrollment_requests").select("*, courses(title)").order("created_at", { ascending: false }).limit(5)
       ]);
 
-      const totalRevenue = enrollments.data?.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0) || 0;
+      const totalRevenue = 0; // Amount not explicitly stored in enrollments in current schema
 
       return {
         totalCourses: courses.count || 0,
@@ -30,6 +31,7 @@ function AdminDashboard() {
         totalEnrollments: enrollments.data?.length || 0,
         totalReviews: reviews.count || 0,
         totalRevenue,
+        recentRequests: recentRequests.data || []
       };
     },
   });
@@ -88,26 +90,28 @@ function AdminDashboard() {
         </div>
 
         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-6">Recent Enrollments</h3>
+          <h3 className="text-lg font-bold text-slate-900 mb-6">Recent Enrollment Requests</h3>
           <div className="space-y-4">
-             {/* Mock recent enrollments */}
-             {[1,2,3,4,5].map(i => (
-               <div key={i} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition">
+             {stats?.recentRequests?.map((req: any) => (
+               <div key={req.id} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500">
-                      S{i}
+                      {req.full_name?.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-bold text-slate-900">Student Name {i}</p>
-                      <p className="text-xs text-slate-500 font-medium">Enrolled in IELTS Masterclass</p>
+                      <p className="font-bold text-slate-900">{req.full_name}</p>
+                      <p className="text-xs text-slate-500 font-medium">Enrolled in {req.courses?.title}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-brand">৳2500</p>
-                    <p className="text-[10px] text-slate-400">2 mins ago</p>
+                    <p className="font-bold text-brand">{req.transaction_id}</p>
+                    <p className="text-[10px] text-slate-400">{new Date(req.created_at).toLocaleDateString()}</p>
                   </div>
                </div>
              ))}
+             {(!stats?.recentRequests || stats.recentRequests.length === 0) && (
+               <p className="text-center py-10 text-slate-400 text-sm">No recent requests.</p>
+             )}
           </div>
         </div>
       </div>

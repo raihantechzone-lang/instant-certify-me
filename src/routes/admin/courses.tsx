@@ -21,7 +21,7 @@ function CoursesAdmin() {
         .from("courses")
         .select(`
           *,
-          categories (name)
+          categories:category (name)
         `)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -88,7 +88,7 @@ function CoursesAdmin() {
                 )}
                 <div className="absolute top-4 left-4">
                    <span className="px-3 py-1 bg-white/90 backdrop-blur shadow-sm rounded-lg text-xs font-bold text-slate-900">
-                     {course.categories?.name || "Uncategorized"}
+                     {course.categories?.name || course.category || "Uncategorized"}
                    </span>
                 </div>
               </div>
