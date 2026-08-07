@@ -63,6 +63,12 @@
     currentProfile = data ?? null;
   }
 
+  async function checkEnrollment(courseId) {
+    if (!currentUser) return false;
+    const { data } = await supabase.from("enrollments").select("id").eq("profile_id", currentUser.id).eq("course_id", courseId).maybeSingle();
+    return !!data;
+  }
+
   supabase.auth.onAuthStateChange(async (_e, session) => {
     currentUser = session?.user ?? null;
     await loadProfile();
@@ -316,8 +322,9 @@
                 এখনও কোনো কন্টেন্ট আপলোড করা হয়নি।
               </div>`;
           }
+          const isEnrolled = !!(currentUser && await checkEnrollment(id));
           contents.forEach((c, idx) => {
-             const isLocked = !c.is_free;
+             const isLocked = !c.is_free && !isEnrolled;
              const item = document.createElement("div");
              item.className = `group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${isLocked ? 'opacity-80' : 'relative overflow-hidden'}`;
              if (!isLocked) {
@@ -366,7 +373,7 @@
                   materialsContainer.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">কোনো কন্টেন্ট নেই</p>';
               } else {
                   pdfs.forEach(p => {
-                      const isLocked = !p.is_free;
+                      const isLocked = !p.is_free && !isEnrolled;
                       const div = document.createElement("div");
                       div.className = "flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100";
                       div.innerHTML = `
