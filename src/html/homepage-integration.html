@@ -130,15 +130,15 @@
     if (!course) return;
     
     // Update basic UI info
-    const titleEl = document.querySelector('h1');
-    if (titleEl) titleEl.innerText = course.title;
+    const titleEls = document.querySelectorAll('h1, #vid-title-overlay');
+    titleEls.forEach(el => el.innerText = course.title);
     
-    const descEl = document.querySelector('main p.font-bengali');
-    if (descEl) descEl.innerText = course.description || "";
+    const descEls = document.querySelectorAll('main p.font-bengali, #course-description');
+    descEls.forEach(el => el.innerText = course.description || course.details || "");
 
-    const priceEls = document.querySelectorAll('h2');
+    const priceEls = document.querySelectorAll('h2, .course-price');
     priceEls.forEach(el => {
-      if (el.innerText.includes("৳")) el.innerText = "৳" + (course.discount_price || course.price);
+      if (el.innerText.includes("৳") || el.tagName === "H2") el.innerText = "৳" + (course.discount_price || course.price);
     });
     
     const oldPriceEl = document.querySelector('.line-through');
@@ -150,14 +150,73 @@
     // Enrollment logic integration
     const enrollBtn = document.getElementById('enroll-main-btn');
     if (enrollBtn) {
-       enrollBtn.onclick = () => {
-         if (currentUser) {
-            window.location.href = "/enroll/" + id;
-         } else {
-            window.showToast("Please log in to enroll.", "Login Required");
-            window.openModal("authModal", "login");
-         }
-       };
+       // On /enroll/$id page, we might want to change behavior or just update price
+       if (window.location.pathname.startsWith('/details/')) {
+         enrollBtn.onclick = () => {
+           if (currentUser) {
+              window.location.href = "/enroll/" + id;
+           } else {
+              window.showToast("Please log in to enroll.", "Login Required");
+              window.openModal("authModal", "login");
+           }
+         };
+       }
+    }
+
+    // Payment form integration (for /enroll page)
+    const paymentForm = document.querySelector('#paymentModal form');
+    if (paymentForm) {
+      paymentForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('pay-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
+
+        const fd = new FormData(paymentForm);
+        const fullName = fd.get('Full Name') || fd.get('full_name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
+        const phone = fd.get('Phone Number') || fd.get('phone') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
+        const trxId = fd.get('Transaction ID') || trxIdInput?.value || paymentForm.querySelector('input[placeholder*="e.g."]')?.value;
+
+        try {
+          // 1. Ensure user is logged in (or handle guest enrollment with Roll Number)
+          let userId = currentUser?.id;
+          let rollNumber = currentProfile?.roll_number || "GL" + Math.floor(100000 + Math.random() * 900000);
+
+          if (!userId) {
+            const email = fullName.toLowerCase().replace(/\s+/g, '') + "@temp.gators.com"; // Guest fallback or prompt
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+              email,
+              password: rollNumber,
+              options: { data: { full_name: fullName, roll_number: rollNumber } }
+            });
+            if (signUpError) throw signUpError;
+            userId = signUpData.user?.id;
+          }
+
+          // 2. Create enrollment request
+          const { error: enrollError } = await supabase.from("enrollment_requests").insert({
+            user_id: userId,
+            course_id: id,
+            full_name: fullName,
+            mobile: phone,
+            transaction_id: trxId,
+            roll_number: rollNumber,
+            status: "pending"
+          });
+          if (enrollError) throw enrollError;
+
+          window.showToast("Enrollment submitted! Your roll number is: " + rollNumber, "Success");
+          window.closeModal("paymentModal");
+          // Redirect to dashboard or success view
+          setTimeout(() => window.location.href = "/dashboard", 2000);
+        } catch (err) {
+          window.showToast(err.message, "Enrollment Error");
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      };
     }
 
     // Load contents and populate the list
