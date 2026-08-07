@@ -182,41 +182,510 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
 '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            STOP making another visual edit.
+                                            Upgrade the existing Login / Sign Up authentication modal to a highly premium, modern EdTech-style design.
 
 
 
-The mobile homepage header still shows duplicate Sign up and Log in buttons. Fix the actual React component/code that renders the header.
+IMPORTANT:
+
+Do NOT change any authentication functionality, Supabase logic, database logic, routes, form validation, or button actions.
+
+Do NOT modify the homepage behind the modal.
+
+Do NOT create a new authentication modal.
+
+Only redesign the existing authentication modal UI.
 
 
 
-TASK:
+DESIGN GOAL:
 
-1. Find the homepage/header component responsible for the mobile navigation.
-
-2. Search the entire header JSX for every instance of “Sign up”, “Sign Up”, “Log in”, and “Log In”.
-
-3. Remove the old/duplicate authentication button group completely.
-
-4. Keep only ONE Sign up button and ONE Log in button in the mobile header.
-
-5. Render them from a SINGLE authentication button group/component so they cannot appear twice.
-
-6. The final mobile header must render exactly:
-
-   Sign up | Log in | ☰
-
-7. Do NOT simply hide the duplicate with CSS. Remove the duplicate JSX/component from the source code.
-
-8. Preserve the existing authentication actions/routes for both buttons.
-
-9. Keep the hamburger menu.
-
-10. Do not modify the hero section, images, text, colors, or any other homepage section.
+Make the authentication modal look like a high-end, modern EdTech/SaaS platform — clean, elegant, trustworthy, premium, polished and professional.
 
 
 
-After making the change, inspect the rendered mobile header and verify that exactly one Sign up and one Log in button are present.
+1. MODAL CONTAINER
+
+
+
+- Use a premium white/off-white modal card.
+
+- Border radius: approximately 24–28px.
+
+- Add a very subtle green-tinted glass effect.
+
+- Add a thin, elegant border.
+
+- Use a soft multi-layer shadow for depth.
+
+- Use generous and balanced internal spacing.
+
+- Keep the modal visually clean and uncluttered.
+
+- Make it fully responsive on desktop and mobile.
+
+
+
+2. BACKGROUND / OVERLAY
+
+
+
+- Keep the existing homepage visible behind the modal.
+
+- Add a dark translucent backdrop.
+
+- Add a subtle backdrop blur effect.
+
+- The background should look slightly dimmed and blurred.
+
+- Do NOT modify the actual homepage content, layout, images or sections.
+
+
+
+3. TOP AUTHENTICATION TABS
+
+
+
+Create a premium 3-tab navigation:
+
+
+
+[ Log In ]   [ Sign Up ]   [ Roll Login ]
+
+
+
+Requirements:
+
+- Keep all three tabs horizontally aligned.
+
+- Keep the existing functionality of each tab.
+
+- Do not create duplicate tabs.
+
+- Active tab should have a soft light-green background.
+
+- Active tab text should use the existing brand green.
+
+- Add a thin green active indicator underneath the active tab.
+
+- Use subtle, clean icons beside the tab labels.
+
+- Use smooth transition when switching tabs.
+
+- Make the tabs easy to tap on mobile.
+
+
+
+4. CLOSE BUTTON
+
+
+
+- Place the × close button at the top-right corner of the modal.
+
+- Use a small circular white button.
+
+- Add a subtle shadow.
+
+- Give it a clean modern appearance.
+
+- Add a subtle hover/press animation.
+
+- Keep its existing close functionality.
+
+
+
+5. SIGN UP CONTENT
+
+
+
+For the Sign Up tab, create a premium visual hierarchy.
+
+
+
+At the top of the form:
+
+- Add a small elegant circular education/graduation-cap icon.
+
+- Use a subtle light-green background around the icon.
+
+- Keep the decoration minimal and professional.
+
+
+
+Main heading:
+
+
+
+“Create your account”
+
+
+
+Subtitle:
+
+
+
+“Join thousands of students learning and growing with us.”
+
+
+
+If the existing application already has different functional text, preserve the existing functional content where necessary without breaking anything.
+
+
+
+6. FORM INPUTS
+
+
+
+Make the existing Full Name, Email and Phone Number fields look premium.
+
+
+
+For each input:
+
+- Height approximately 54–58px.
+
+- Border radius approximately 14–16px.
+
+- Very subtle light-gray border.
+
+- White/very-light background.
+
+- Add a small icon on the left.
+
+- Put the icon inside a subtle light-green circular/container area.
+
+- Use clean, readable placeholder typography.
+
+- Keep consistent spacing between fields.
+
+- Add a subtle green focus state when the user taps an input.
+
+- Keep all existing input functionality and validation unchanged.
+
+
+
+7. PRIMARY CREATE ACCOUNT BUTTON
+
+
+
+Make the existing “Create Account” button premium.
+
+
+
+Requirements:
+
+- Full width.
+
+- Existing brand green color.
+
+- Height approximately 54–58px.
+
+- Border radius approximately 14–16px.
+
+- Bold white text.
+
+- Add a right-facing arrow icon.
+
+- Subtle shadow.
+
+- Smooth hover/press animation.
+
+- Slight visual feedback when pressed.
+
+- Do NOT change its existing functionality.
+
+
+
+8. GOOGLE AUTHENTICATION BUTTON
+
+
+
+Keep the existing Google authentication functionality.
+
+
+
+Redesign the button as a premium outlined button:
+
+
+
+- Full width.
+
+- White background.
+
+- Thin subtle border.
+
+- Border radius approximately 14–16px.
+
+- Correct Google icon.
+
+- Text:
+
+  “Continue with Google”
+
+- Center the icon and text properly.
+
+- Add a subtle hover/press effect.
+
+- Do not change the Google authentication logic.
+
+
+
+9. ADMIN ACCESS
+
+
+
+IMPORTANT:
+
+Remove “Admin Access” completely from this authentication modal.
+
+
+
+- Do NOT show “Admin Access”.
+
+- Do NOT show an Admin Access icon.
+
+- Do NOT show an Admin Access arrow.
+
+- Remove the entire Admin Access UI section/component from this modal.
+
+- Do NOT replace it with another button or text.
+
+- Do NOT remove or modify the actual admin authentication functionality elsewhere in the application.
+
+- Only remove the Admin Access UI from this Login/Sign Up modal.
+
+
+
+10. VISUAL DETAILS
+
+
+
+Add very subtle premium details:
+
+
+
+- Soft green ambient glow around the modal.
+
+- Very subtle decorative dotted pattern around the upper content area.
+
+- Subtle green highlights.
+
+- Minimal visual decoration.
+
+- Keep everything elegant and clean.
+
+- Do NOT use excessive gradients.
+
+- Do NOT add unnecessary illustrations.
+
+- Do NOT use flashy animations.
+
+
+
+11. TYPOGRAPHY
+
+
+
+Use a modern professional typography hierarchy.
+
+
+
+- Strong/bold main heading.
+
+- Medium-weight subtitle.
+
+- Clear and readable form placeholders.
+
+- Clean tab typography.
+
+- Professional button typography.
+
+- Maintain the website's existing font/brand style where possible.
+
+
+
+12. ANIMATION
+
+
+
+Add subtle professional animations only:
+
+
+
+- Modal opening: fade + slight upward movement.
+
+- Tab switching: smooth transition.
+
+- Button press: subtle scale/feedback.
+
+- Input focus: smooth border transition.
+
+
+
+Animations must be fast and professional.
+
+
+
+Respect reduced-motion preferences if supported.
+
+
+
+13. MOBILE RESPONSIVENESS
+
+
+
+This is extremely important.
+
+
+
+The modal must work perfectly on mobile screens.
+
+
+
+- Do not allow the modal to be cut off.
+
+- Do not allow horizontal overflow.
+
+- Keep the 3 tabs usable.
+
+- Keep buttons and inputs comfortably tappable.
+
+- Maintain proper spacing.
+
+- On small-height screens, allow the modal content to scroll.
+
+- Keep the close button accessible.
+
+- Make sure the modal fits different Android and iPhone screen sizes.
+
+- Do not make the modal unnecessarily wide.
+
+- Do not shrink text to an unreadable size.
+
+
+
+14. DUPLICATE PREVENTION
+
+
+
+There must be ONLY ONE authentication modal.
+
+
+
+There must be:
+
+- Exactly one Log In tab.
+
+- Exactly one Sign Up tab.
+
+- Exactly one Roll Login tab.
+
+- Exactly one close button.
+
+- Exactly one form inside the active tab.
+
+
+
+Do NOT create duplicate authentication components.
+
+
+
+Before finishing, inspect the actual rendered mobile UI and make sure no duplicate Login/Sign Up buttons or duplicate modal elements exist.
+
+
+
+15. FUNCTIONALITY PRESERVATION
+
+
+
+Do NOT break or modify:
+
+
+
+- Supabase authentication.
+
+- Existing Login functionality.
+
+- Existing Sign Up functionality.
+
+- Roll Login functionality.
+
+- Google authentication.
+
+- Existing form validation.
+
+- Existing routes/navigation.
+
+- Existing database operations.
+
+- Existing session handling.
+
+
+
+Only improve the visual design.
+
+
+
+16. DO NOT MODIFY OUTSIDE THE MODAL
+
+
+
+Do NOT change:
+
+- Homepage hero section.
+
+- Homepage text.
+
+- Homepage images.
+
+- Navbar layout.
+
+- Course sections.
+
+- University/logo section.
+
+- Features section.
+
+- WhatsApp button.
+
+- Footer.
+
+- Any other homepage content.
+
+
+
+ONLY redesign the existing Login / Sign Up authentication modal.
+
+
+
+FINAL STYLE:
+
+
+
+Premium modern EdTech platform.
+
+Clean.
+
+Elegant.
+
+Minimal.
+
+Professional.
+
+Trustworthy.
+
+High-end SaaS quality.
+
+Soft white + existing green brand color.
+
+Beautiful spacing.
+
+Smooth subtle interactions.
+
+
+
+The final result should visually resemble a premium modern education platform authentication experience, while keeping all existing functionality completely intact.
+
 
                     </button>
                 </div>
@@ -1026,52 +1495,123 @@ After making the change, inspect the rendered mobile header and verify that exac
     </div>
 
     <!-- Auth Modal -->
-    <div id="authModal" class="modal fixed inset-0 z-[100] items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in relative">
-            <button onclick="closeModal('authModal')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:bg-gray-100 rounded-full transition z-10"><i class="fa-solid fa-xmark"></i></button>
-            <div class="flex border-b border-gray-100 flex-wrap">
-                <button id="tab-login" onclick="switchAuthTab('login')" class="w-1/3 py-3 text-center font-bold text-sm text-rs-dark border-b-2 border-rs-green transition-colors">Log In</button>
-                <button id="tab-signup" onclick="switchAuthTab('signup')" class="w-1/3 py-3 text-center font-bold text-sm text-gray-400 border-b-2 border-transparent transition-colors">Sign Up</button>
-                <button id="tab-roll" onclick="switchAuthTab('roll')" class="w-1/3 py-3 text-center font-bold text-sm text-gray-400 border-b-2 border-transparent transition-colors">Roll Login</button>
+    <div id="authModal" class="modal fixed inset-0 z-[100] items-center justify-center bg-black/60 backdrop-blur-md p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white/95 backdrop-blur-xl rounded-[28px] w-full max-w-md shadow-[0_20px_50px_rgba(0,0,0,0.1),0_0_20px_rgba(16,185,129,0.05)] border border-emerald-50/50 overflow-hidden relative transform translate-y-8 transition-all duration-300" id="auth-modal-card">
+            
+            <!-- Close Button -->
+            <button onclick="closeModal('authModal')" class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center bg-white text-gray-400 hover:text-emerald-600 rounded-full shadow-sm border border-gray-100 transition-all hover:scale-110 active:scale-95 z-20">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <!-- Decorative pattern -->
+            <div class="absolute top-0 left-0 right-0 h-32 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px] opacity-[0.03] pointer-events-none"></div>
+
+            <!-- Tabs -->
+            <div class="flex p-2 bg-gray-50/50 border-b border-gray-100 relative z-10">
+                <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-gray-400 hover:text-emerald-600">
+                    <i class="fa-solid fa-right-to-bracket text-xs"></i> Log In
+                </button>
+                <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-gray-400 hover:text-emerald-600">
+                    <i class="fa-solid fa-user-plus text-xs"></i> Sign Up
+                </button>
+                <button id="tab-roll" onclick="switchAuthTab('roll')" class="flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-gray-400 hover:text-emerald-600">
+                    <i class="fa-solid fa-id-card text-xs"></i> Roll Login
+                </button>
+                <!-- Active Indicator -->
+                <div id="tab-indicator" class="absolute bottom-0 h-0.5 bg-emerald-500 transition-all duration-300 rounded-full" style="width: 33.33%; left: 0;"></div>
             </div>
-            <div class="p-6">
-                <form id="loginForm" onsubmit="handleAuthSubmit(event, 'Login')" class="flex flex-col gap-4">
-                    <input type="email" name="email" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Email (e.g. test@gmail.com)">
-                    <input type="password" name="password" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Password">
-                    <button type="submit" class="w-full bg-rs-dark text-white font-bold py-3.5 rounded-xl hover:bg-black transition-colors">Log In</button>
-                </form>
-                <form id="signupForm" onsubmit="handleAuthSubmit(event, 'Signup')" class="hidden flex-col gap-4">
-                    <input type="text" name="name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Full Name">
-                    <input type="email" name="email" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Email">
-                    <input type="tel" name="phone" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="Phone Number">
-                    <button type="submit" class="w-full bg-rs-green text-white font-bold py-3.5 rounded-xl hover:bg-emerald-700 transition-colors shadow-md">Create Account</button>
-                </form>
-                <form id="rollForm" onsubmit="handleAuthSubmit(event, 'Roll')" class="hidden flex-col gap-4">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Enter your Roll Number</label>
-                    <input type="text" name="roll" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rs-green" placeholder="e.g. GL-12345">
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors">Login with Roll</button>
+
+            <div class="p-8 sm:p-10 relative z-10">
+                <!-- Sign Up Header Content -->
+                <div id="signup-header" class="hidden flex-col items-center text-center mb-8 animate-fade-in">
+                    <div class="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mb-4 border border-emerald-100/50 shadow-inner">
+                        <i class="fa-solid fa-graduation-cap text-2xl text-emerald-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Create your account</h3>
+                    <p class="text-sm text-gray-500 font-medium">Join thousands of students learning and growing with us.</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" onsubmit="handleAuthSubmit(event, 'Login')" class="flex flex-col gap-5">
+                    <div class="space-y-1.5">
+                        <div class="relative group">
+                            <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                                <i class="fa-solid fa-envelope text-xs"></i>
+                            </div>
+                            <input type="email" name="email" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Email Address">
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="relative group">
+                            <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                                <i class="fa-solid fa-lock text-xs"></i>
+                            </div>
+                            <input type="password" name="password" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Password">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full h-[56px] bg-emerald-600 text-white font-bold rounded-[16px] hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-2 mt-2">
+                        Log In <i class="fa-solid fa-arrow-right-to-bracket text-sm"></i>
+                    </button>
                 </form>
 
-                <div class="mt-6 flex flex-col gap-3 pt-6 border-t border-gray-100">
-                    <p class="text-xs font-bold text-gray-400 text-center uppercase tracking-widest">Or login with</p>
-                    <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" class="w-5 h-5" alt="Google">
+                <!-- Sign Up Form -->
+                <form id="signupForm" onsubmit="handleAuthSubmit(event, 'Signup')" class="hidden flex-col gap-5">
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                            <i class="fa-solid fa-user text-xs"></i>
+                        </div>
+                        <input type="text" name="name" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Full Name">
+                    </div>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                            <i class="fa-solid fa-envelope text-xs"></i>
+                        </div>
+                        <input type="email" name="email" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Email Address">
+                    </div>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                            <i class="fa-solid fa-phone text-xs"></i>
+                        </div>
+                        <input type="tel" name="phone" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Phone Number">
+                    </div>
+                    <button type="submit" class="w-full h-[56px] bg-emerald-600 text-white font-bold rounded-[16px] hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-2 mt-2">
+                        Create Account <i class="fa-solid fa-arrow-right text-sm"></i>
+                    </button>
+                </form>
+
+                <!-- Roll Login Form -->
+                <form id="rollForm" onsubmit="handleAuthSubmit(event, 'Roll')" class="hidden flex-col gap-5">
+                    <div class="text-center mb-2">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Enter your credentials</p>
+                    </div>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-focus-within:bg-emerald-100 transition-colors">
+                            <i class="fa-solid fa-hashtag text-xs"></i>
+                        </div>
+                        <input type="text" name="roll" required class="w-full h-[56px] bg-white border border-gray-100 rounded-[16px] pl-16 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm placeholder:text-gray-400" placeholder="Roll Number (e.g. GL-12345)">
+                    </div>
+                    <button type="submit" class="w-full h-[56px] bg-indigo-600 text-white font-bold rounded-[16px] hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center gap-2">
+                        Login with Roll <i class="fa-solid fa-circle-check text-sm"></i>
+                    </button>
+                </form>
+
+                <!-- Google Auth -->
+                <div id="google-auth-container" class="mt-8 flex flex-col gap-4 pt-8 border-t border-gray-50">
+                    <div class="relative flex justify-center text-xs uppercase tracking-widest font-bold text-gray-400">
+                        <span class="bg-white px-4 relative z-10">Or continue with</span>
+                        <div class="absolute top-1/2 left-0 right-0 h-px bg-gray-100 -z-0"></div>
+                    </div>
+                    <button type="button" onclick="signInWithGoogle()" class="w-full h-[56px] flex items-center justify-center gap-3 bg-white border border-gray-200 rounded-[16px] hover:bg-gray-50 transition-all active:scale-[0.98] shadow-sm group">
+                        <div class="w-6 h-6 flex items-center justify-center">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/smartlock/google.svg" class="w-5 h-5 group-hover:scale-110 transition-transform" alt="Google">
+                        </div>
                         <span class="text-sm font-bold text-gray-700">Continue with Google</span>
                     </button>
                 </div>
-
-                <div class="mt-6 text-center">
-                    <button type="button" onclick="switchAuthTab('admin')" class="text-xs text-gray-400 hover:text-rs-dark">Admin Access</button>
-                </div>
-                <form id="adminForm" onsubmit="handleAuthSubmit(event, 'Admin')" class="hidden flex-col gap-4 mt-4 pt-4 border-t">
-                    <h4 class="font-bold text-center mb-2">Admin Login</h4>
-                    <input type="text" name="adminId" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500" placeholder="Admin ID">
-                    <input type="password" name="adminPass" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500" placeholder="Password">
-                    <button type="submit" class="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl hover:bg-red-700 transition-colors">Secure Login</button>
-                </form>
             </div>
         </div>
     </div>
+
 
     <!-- Contact Modal -->
     <div id="contactModal" class="modal fixed inset-0 z-[100] items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -1347,14 +1887,28 @@ After making the change, inspect the rendered mobile header and verify that exac
         }
 
         function openModal(modalId, tab = 'login') {
-            document.getElementById(modalId).classList.add('active');
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('flex', 'opacity-100');
+            const card = modal.querySelector('div[id$="-card"]') || modal.querySelector('.bg-white');
+            if(card) {
+                card.classList.remove('translate-y-8');
+                card.classList.add('translate-y-0');
+            }
             if(modalId === 'authModal') {
                 switchAuthTab(tab);
             }
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
+            const modal = document.getElementById(modalId);
+            const card = modal.querySelector('div[id$="-card"]') || modal.querySelector('.bg-white');
+            if(card) {
+                card.classList.add('translate-y-8');
+                card.classList.remove('translate-y-0');
+            }
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.classList.remove('flex', 'opacity-100');
         }
 
         function switchAuthTab(tab) {
@@ -1364,30 +1918,46 @@ After making the change, inspect the rendered mobile header and verify that exac
             const loginForm = document.getElementById('loginForm');
             const signupForm = document.getElementById('signupForm');
             const rollForm = document.getElementById('rollForm');
-            const adminForm = document.getElementById('adminForm');
+            const signupHeader = document.getElementById('signup-header');
+            const googleAuth = document.getElementById('google-auth-container');
+            const indicator = document.getElementById('tab-indicator');
 
-            const activeStyle = "w-1/3 py-3 text-center font-bold text-sm text-rs-dark border-b-2 border-rs-green transition-colors";
-            const inactiveStyle = "w-1/3 py-3 text-center font-bold text-sm text-gray-400 border-b-2 border-transparent transition-colors";
+            const activeBtnStyle = "flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-emerald-600 bg-emerald-50/50 shadow-sm shadow-emerald-600/5";
+            const inactiveBtnStyle = "flex-1 py-3 px-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[13px] transition-all duration-300 text-gray-400 hover:text-emerald-600";
 
-            loginBtn.className = inactiveStyle;
-            signupBtn.className = inactiveStyle;
-            rollBtn.className = inactiveStyle;
-            loginForm.style.display = 'none';
-            signupForm.style.display = 'none';
-            rollForm.style.display = 'none';
-            adminForm.style.display = 'none';
+            loginBtn.className = inactiveBtnStyle;
+            signupBtn.className = inactiveBtnStyle;
+            rollBtn.className = inactiveBtnStyle;
+            
+            loginForm.classList.add('hidden');
+            loginForm.classList.remove('flex');
+            signupForm.classList.add('hidden');
+            signupForm.classList.remove('flex');
+            rollForm.classList.add('hidden');
+            rollForm.classList.remove('flex');
+            
+            if (signupHeader) signupHeader.classList.add('hidden');
+            if (googleAuth) googleAuth.classList.remove('hidden');
 
             if (tab === 'login') {
-                loginBtn.className = activeStyle;
-                loginForm.style.display = 'flex';
+                loginBtn.className = activeBtnStyle;
+                loginForm.classList.remove('hidden');
+                loginForm.classList.add('flex');
+                if (indicator) { indicator.style.left = '0%'; indicator.style.width = '33.33%'; }
             } else if (tab === 'signup') {
-                signupBtn.className = activeStyle;
-                signupForm.style.display = 'flex';
+                signupBtn.className = activeBtnStyle;
+                signupForm.classList.remove('hidden');
+                signupForm.classList.add('flex');
+                if (signupHeader) signupHeader.classList.remove('hidden');
+                if (indicator) { indicator.style.left = '33.33%'; indicator.style.width = '33.33%'; }
             } else if (tab === 'roll') {
-                rollBtn.className = activeStyle;
-                rollForm.style.display = 'flex';
+                rollBtn.className = activeBtnStyle;
+                rollForm.classList.remove('hidden');
+                rollForm.classList.add('flex');
+                if (indicator) { indicator.style.left = '66.66%'; indicator.style.width = '33.33%'; }
             }
         }
+
 
         function showToast(message = 'Your information has been securely saved.', title = 'Success!') {
             const toast = document.getElementById('toast');
@@ -1481,7 +2051,16 @@ After making the change, inspect the rendered mobile header and verify that exac
             coursesSection.scrollIntoView({ behavior: 'smooth' });
         }
 
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        function goToDashboard() {
+            window.location.href = '/dashboard';
+        }
+
         initApp();
+
     </script>
 </body>
 </html>
