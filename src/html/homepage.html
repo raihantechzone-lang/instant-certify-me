@@ -182,59 +182,55 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
 '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            Fix the mobile homepage header authentication buttons.
+                                            STOP making another visual edit.
 
 
 
-There are currently duplicate “Sign up” and “Log in” buttons because the previous buttons were not removed.
+The mobile homepage header still shows duplicate Sign up and Log in buttons. Fix the actual React component/code that renders the header.
 
 
 
-Remove ALL duplicate/old authentication buttons from the mobile header and keep exactly ONE “Sign up” button and ONE “Log in” button.
+TASK:
+
+1. Find the homepage/header component responsible for the mobile navigation.
+
+2. Search the entire header JSX for every instance of “Sign up”, “Sign Up”, “Log in”, and “Log In”.
+
+3. Remove the old/duplicate authentication button group completely.
+
+4. Keep only ONE Sign up button and ONE Log in button in the mobile header.
+
+5. Render them from a SINGLE authentication button group/component so they cannot appear twice.
+
+6. The final mobile header must render exactly:
+
+   Sign up | Log in | ☰
+
+7. Do NOT simply hide the duplicate with CSS. Remove the duplicate JSX/component from the source code.
+
+8. Preserve the existing authentication actions/routes for both buttons.
+
+9. Keep the hamburger menu.
+
+10. Do not modify the hero section, images, text, colors, or any other homepage section.
 
 
 
-Final mobile header layout must be:
-
-
-
-[ Sign up ] [ Log in ] [ ☰ ]
-
-
-
-Requirements:
-
-- Sign up and Log in must be side-by-side horizontally.
-
-- Keep the hamburger menu on the far right.
-
-- Do not show any additional Sign up or Log in buttons in the header.
-
-- Do not duplicate the buttons at any breakpoint.
-
-- Make the buttons compact and properly aligned for mobile screens.
-
-- Keep the existing colors, fonts, functionality, and click actions.
-
-- Do NOT modify the hero section, images, text, spacing, or any other homepage section.
-
-- This is a functional/layout fix only for the mobile header authentication area.
-
-- Verify the final DOM/rendered UI has exactly one Sign up and one Log in button in the mobile header.
+After making the change, inspect the rendered mobile header and verify that exactly one Sign up and one Log in button are present.
 
                     </button>
                 </div>
                 
-                <div id="auth-buttons" class="hidden lg:flex items-center space-x-3">
-                    <button onclick="openModal('authModal', 'signup')" class="px-5 py-2.5 rounded-xl border-2 border-gray-100 bg-white text-sm font-bold text-rs-dark hover:border-gray-200 transition shadow-sm whitespace-nowrap">Sign up</button>
-                    <button onclick="openModal('authModal', 'login')" class="px-5 py-2.5 rounded-xl bg-rs-dark text-white text-sm font-bold hover:bg-black transition shadow-md shadow-gray-400/20 whitespace-nowrap">Log in</button>
+                <div id="auth-buttons" class="flex items-center space-x-2 lg:space-x-3">
+                    <button onclick="openModal('authModal', 'signup')" class="px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-lg lg:rounded-xl bg-rs-green lg:bg-white text-white lg:text-rs-dark text-[11px] lg:text-sm font-bold border-0 lg:border-2 lg:border-gray-100 hover:bg-emerald-700 lg:hover:border-gray-200 transition shadow-sm whitespace-nowrap">Sign up</button>
+                    <button onclick="openModal('authModal', 'login')" class="px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-lg lg:rounded-xl border border-gray-200 lg:border-0 bg-white lg:bg-rs-dark text-rs-dark lg:text-white text-[11px] lg:text-sm font-bold hover:bg-gray-50 lg:hover:bg-black transition shadow-md shadow-gray-400/20 whitespace-nowrap">Log in</button>
                 </div>
 
-                <div id="profile-button" class="hidden lg:flex items-center space-x-3 relative">
-                    <button onclick="goToDashboard()" class="text-sm font-bold text-rs-green mr-4 hover:underline">Dashboard</button>
-                    <button onclick="toggleProfileMenu()" class="w-10 h-10 rounded-full bg-emerald-100 border-2 border-rs-green flex items-center justify-center text-rs-green overflow-hidden shadow-sm">
+                <div id="profile-button" class="hidden flex items-center space-x-3 relative">
+                    <button onclick="goToDashboard()" class="hidden lg:block text-sm font-bold text-rs-green mr-4 hover:underline">Dashboard</button>
+                    <button onclick="toggleProfileMenu()" class="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-emerald-100 border lg:border-2 border-rs-green flex items-center justify-center text-rs-green overflow-hidden shadow-sm">
                         <img id="header-profile-img" src="" loading="lazy" class="hidden w-full h-full object-cover">
-                        <i id="header-profile-icon" class="fa-solid fa-user"></i>
+                        <i id="header-profile-icon" class="fa-solid fa-user text-xs lg:text-base"></i>
                     </button>
                     <!-- Dropdown -->
                     <div id="profile-menu" class="profile-dropdown absolute top-12 right-0 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2">
@@ -248,17 +244,6 @@ Requirements:
                     </div>
                 </div>
 
-                <div id="auth-buttons-mobile" class="lg:hidden flex items-center space-x-2 mr-1">
-                    <button onclick="openModal('authModal', 'signup')" class="px-3 py-1.5 rounded-lg bg-rs-green text-white text-[11px] font-bold hover:bg-emerald-700 transition shadow-sm whitespace-nowrap">Sign up</button>
-                    <button onclick="openModal('authModal', 'login')" class="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-rs-dark text-[11px] font-bold hover:bg-gray-50 transition whitespace-nowrap">Log in</button>
-                </div>
-
-                <div id="profile-button-mobile" class="hidden lg:hidden items-center mr-2">
-                    <button onclick="toggleProfileMenu()" class="w-8 h-8 rounded-full bg-emerald-100 border border-rs-green flex items-center justify-center text-rs-green overflow-hidden">
-                        <img id="header-profile-img-mobile" src="" loading="lazy" class="hidden w-full h-full object-cover">
-                        <i id="header-profile-icon-mobile" class="fa-solid fa-user text-xs"></i>
-                    </button>
-                </div>
 
                 <button id="mobile-menu-btn" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden w-9 h-9 rounded-lg bg-white border border-gray-100 text-rs-dark hover:text-rs-green flex items-center justify-center shadow-sm transition">
                     <i class="fa-solid fa-bars text-base"></i>
