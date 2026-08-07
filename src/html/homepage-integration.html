@@ -108,6 +108,9 @@
     if (!grid) return;
     grid.innerHTML = "";
     window.renderDynamicCourses();
+    const isDetailsPage = window.location.pathname.includes('/details/');
+    const isEnrollPage = window.location.pathname.includes('/enroll/');
+    
     if (window.currentCourseId) {
        loadCourseDetails(window.currentCourseId);
     }
@@ -136,16 +139,22 @@
     const descEls = document.querySelectorAll('main p.font-bengali, #course-description');
     descEls.forEach(el => el.innerText = course.description || course.details || "");
 
-    const priceEls = document.querySelectorAll('h2, .course-price');
+    const priceEls = document.querySelectorAll('h2, .course-price, [id*="price"]');
     priceEls.forEach(el => {
-      if (el.innerText.includes("৳") || el.tagName === "H2") el.innerText = "৳" + (course.discount_price || course.price);
+      if (el.innerText.includes("৳") || el.tagName === "H2" || el.classList.contains('course-price')) {
+         el.innerText = "৳" + (course.discount_price || course.price);
+      }
     });
     
-    const oldPriceEl = document.querySelector('.line-through');
-    if (oldPriceEl) oldPriceEl.innerText = "৳" + course.price;
+    const oldPriceEls = document.querySelectorAll('.line-through');
+    oldPriceEls.forEach(el => el.innerText = "৳" + course.price);
 
     const posterImg = document.getElementById('vid-poster');
-    if (posterImg) posterImg.src = course.thumbnail_url;
+    if (posterImg && course.thumbnail_url) posterImg.src = course.thumbnail_url;
+    
+    // Update breadcrumbs if they exist
+    const breadcrumbCourse = document.querySelector('nav span.text-surface-900.truncate');
+    if (breadcrumbCourse) breadcrumbCourse.innerText = course.title;
 
     // Enrollment logic integration
     const enrollBtn = document.getElementById('enroll-main-btn');
@@ -225,7 +234,7 @@
     const { data: contents } = await supabase.from("course_contents")
       .select("*")
       .eq("course_id", id)
-      .order("position", { ascending: true });
+      .order("created_at", { ascending: true });
     
     const contentContainer = document.querySelector('section .bg-white.border.border-slate-200\\/60.rounded-3xl');
     if (contentContainer && contents) {
