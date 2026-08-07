@@ -31,15 +31,33 @@ function CoursesAdmin() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // First delete related contents to avoid foreign key issues if cascade isn't set
-      await supabase.from("course_contents").delete().eq("course_id", id);
-      const { error } = await supabase.from("courses").delete().eq("id", id);
-      if (error) throw error;
+      // Delete all related data in the correct order to handle foreign keys
+      const { error: reviewsError } = await supabase.from("reviews").delete().eq("course_id", id);
+      if (reviewsError) console.warn("Reviews deletion error:", reviewsError);
+
+      const { error: examResultsError } = await supabase.from("exam_results").delete().eq("course_id", id);
+      if (examResultsError) console.warn("Exam results deletion error:", examResultsError);
+
+      const { error: enrollmentReqError } = await supabase.from("enrollment_requests").delete().eq("course_id", id);
+      if (enrollmentReqError) console.warn("Enrollment requests deletion error:", enrollmentReqError);
+
+      const { error: enrollmentsError } = await supabase.from("enrollments").delete().eq("course_id", id);
+      if (enrollmentsError) console.warn("Enrollments deletion error:", enrollmentsError);
+
+      const { error: contentsError } = await supabase.from("course_contents").delete().eq("course_id", id);
+      if (contentsError) console.warn("Contents deletion error:", contentsError);
+
+      const { error: courseError } = await supabase.from("courses").delete().eq("id", id);
+      if (courseError) throw courseError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
       toast.success("Course deleted successfully");
     },
+    onError: (error: any) => {
+      console.error("Deletion failed:", error);
+      toast.error(`Delete failed: ${error.message || "Unknown error"}`);
+    }
   });
 
   const filteredCourses = courses?.filter(course => 
@@ -54,14 +72,22 @@ function CoursesAdmin() {
           <p className="text-slate-500 font-medium">Create, edit, or remove courses from your platform.</p>
         </div>
         <button 
-          onClick={() => {
+          onClick={async () => {
             const title = window.prompt("Enter Course Title:");
             if (title) {
-               supabase.from("courses").insert({ 
+               const { error } = await supabase.from("courses").insert({ 
                  title, 
                  price: 0, 
-                 category: 'University Admission' 
-               }).then(() => queryClient.invalidateQueries({ queryKey: ["admin-courses"] }));
+                 category: 'University Admission',
+                 is_published: false // New courses are draft by default
+               });
+               
+               if (error) {
+                 toast.error(`Failed to create: ${error.message}`);
+               } else {
+                 queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+                 toast.success("Course created as draft");
+               }
             }
           }}
           className="flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-brand/20 hover:scale-105 transition active:scale-95"
@@ -124,8 +150,9 @@ function CoursesAdmin() {
                     <button 
                       onClick={() => {
                         const newTitle = window.prompt("Update Course Title:", course.title);
-                        const newPrice = window.prompt("Update Price:", course.price.toString());
+                        const newPrice = window.prompt("Update Price:", course.price?.toString() || "0");
                         const newCategory = window.prompt("Update Category:", course.category || "");
+                        const publish = window.confirm(course.is_published ? "Unpublish this course?" : "Publish this course?");
                         
                         if (newTitle !== null) {
                           const updateCourse = async () => {
@@ -134,7 +161,8 @@ function CoursesAdmin() {
                               .update({ 
                                 title: newTitle, 
                                 price: parseFloat(newPrice || "0"),
-                                category: newCategory
+                                category: newCategory,
+                                is_published: course.is_published ? !publish : publish
                               })
                               .eq("id", course.id);
                             
@@ -149,9 +177,9 @@ function CoursesAdmin() {
                           updateCourse();
                         }
                       }}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-sm hover:bg-brand hover:text-white transition"
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition ${course.is_published ? 'bg-brand/10 text-brand' : 'bg-slate-50 text-slate-600'}`}
                     >
-                      <Edit2 size={16} /> Edit
+                      <Edit2 size={16} /> {course.is_published ? 'Published' : 'Draft'}
                     </button>
                    <button 
                      onClick={() => window.confirm("Are you sure?") && deleteMutation.mutate(course.id)}
