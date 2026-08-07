@@ -182,41 +182,510 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
 '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            STOP making another visual edit.
+                                            Upgrade the existing Login / Sign Up authentication modal to a highly premium, modern EdTech-style design.
 
 
 
-The mobile homepage header still shows duplicate Sign up and Log in buttons. Fix the actual React component/code that renders the header.
+IMPORTANT:
+
+Do NOT change any authentication functionality, Supabase logic, database logic, routes, form validation, or button actions.
+
+Do NOT modify the homepage behind the modal.
+
+Do NOT create a new authentication modal.
+
+Only redesign the existing authentication modal UI.
 
 
 
-TASK:
+DESIGN GOAL:
 
-1. Find the homepage/header component responsible for the mobile navigation.
-
-2. Search the entire header JSX for every instance of “Sign up”, “Sign Up”, “Log in”, and “Log In”.
-
-3. Remove the old/duplicate authentication button group completely.
-
-4. Keep only ONE Sign up button and ONE Log in button in the mobile header.
-
-5. Render them from a SINGLE authentication button group/component so they cannot appear twice.
-
-6. The final mobile header must render exactly:
-
-   Sign up | Log in | ☰
-
-7. Do NOT simply hide the duplicate with CSS. Remove the duplicate JSX/component from the source code.
-
-8. Preserve the existing authentication actions/routes for both buttons.
-
-9. Keep the hamburger menu.
-
-10. Do not modify the hero section, images, text, colors, or any other homepage section.
+Make the authentication modal look like a high-end, modern EdTech/SaaS platform — clean, elegant, trustworthy, premium, polished and professional.
 
 
 
-After making the change, inspect the rendered mobile header and verify that exactly one Sign up and one Log in button are present.
+1. MODAL CONTAINER
+
+
+
+- Use a premium white/off-white modal card.
+
+- Border radius: approximately 24–28px.
+
+- Add a very subtle green-tinted glass effect.
+
+- Add a thin, elegant border.
+
+- Use a soft multi-layer shadow for depth.
+
+- Use generous and balanced internal spacing.
+
+- Keep the modal visually clean and uncluttered.
+
+- Make it fully responsive on desktop and mobile.
+
+
+
+2. BACKGROUND / OVERLAY
+
+
+
+- Keep the existing homepage visible behind the modal.
+
+- Add a dark translucent backdrop.
+
+- Add a subtle backdrop blur effect.
+
+- The background should look slightly dimmed and blurred.
+
+- Do NOT modify the actual homepage content, layout, images or sections.
+
+
+
+3. TOP AUTHENTICATION TABS
+
+
+
+Create a premium 3-tab navigation:
+
+
+
+[ Log In ]   [ Sign Up ]   [ Roll Login ]
+
+
+
+Requirements:
+
+- Keep all three tabs horizontally aligned.
+
+- Keep the existing functionality of each tab.
+
+- Do not create duplicate tabs.
+
+- Active tab should have a soft light-green background.
+
+- Active tab text should use the existing brand green.
+
+- Add a thin green active indicator underneath the active tab.
+
+- Use subtle, clean icons beside the tab labels.
+
+- Use smooth transition when switching tabs.
+
+- Make the tabs easy to tap on mobile.
+
+
+
+4. CLOSE BUTTON
+
+
+
+- Place the × close button at the top-right corner of the modal.
+
+- Use a small circular white button.
+
+- Add a subtle shadow.
+
+- Give it a clean modern appearance.
+
+- Add a subtle hover/press animation.
+
+- Keep its existing close functionality.
+
+
+
+5. SIGN UP CONTENT
+
+
+
+For the Sign Up tab, create a premium visual hierarchy.
+
+
+
+At the top of the form:
+
+- Add a small elegant circular education/graduation-cap icon.
+
+- Use a subtle light-green background around the icon.
+
+- Keep the decoration minimal and professional.
+
+
+
+Main heading:
+
+
+
+“Create your account”
+
+
+
+Subtitle:
+
+
+
+“Join thousands of students learning and growing with us.”
+
+
+
+If the existing application already has different functional text, preserve the existing functional content where necessary without breaking anything.
+
+
+
+6. FORM INPUTS
+
+
+
+Make the existing Full Name, Email and Phone Number fields look premium.
+
+
+
+For each input:
+
+- Height approximately 54–58px.
+
+- Border radius approximately 14–16px.
+
+- Very subtle light-gray border.
+
+- White/very-light background.
+
+- Add a small icon on the left.
+
+- Put the icon inside a subtle light-green circular/container area.
+
+- Use clean, readable placeholder typography.
+
+- Keep consistent spacing between fields.
+
+- Add a subtle green focus state when the user taps an input.
+
+- Keep all existing input functionality and validation unchanged.
+
+
+
+7. PRIMARY CREATE ACCOUNT BUTTON
+
+
+
+Make the existing “Create Account” button premium.
+
+
+
+Requirements:
+
+- Full width.
+
+- Existing brand green color.
+
+- Height approximately 54–58px.
+
+- Border radius approximately 14–16px.
+
+- Bold white text.
+
+- Add a right-facing arrow icon.
+
+- Subtle shadow.
+
+- Smooth hover/press animation.
+
+- Slight visual feedback when pressed.
+
+- Do NOT change its existing functionality.
+
+
+
+8. GOOGLE AUTHENTICATION BUTTON
+
+
+
+Keep the existing Google authentication functionality.
+
+
+
+Redesign the button as a premium outlined button:
+
+
+
+- Full width.
+
+- White background.
+
+- Thin subtle border.
+
+- Border radius approximately 14–16px.
+
+- Correct Google icon.
+
+- Text:
+
+  “Continue with Google”
+
+- Center the icon and text properly.
+
+- Add a subtle hover/press effect.
+
+- Do not change the Google authentication logic.
+
+
+
+9. ADMIN ACCESS
+
+
+
+IMPORTANT:
+
+Remove “Admin Access” completely from this authentication modal.
+
+
+
+- Do NOT show “Admin Access”.
+
+- Do NOT show an Admin Access icon.
+
+- Do NOT show an Admin Access arrow.
+
+- Remove the entire Admin Access UI section/component from this modal.
+
+- Do NOT replace it with another button or text.
+
+- Do NOT remove or modify the actual admin authentication functionality elsewhere in the application.
+
+- Only remove the Admin Access UI from this Login/Sign Up modal.
+
+
+
+10. VISUAL DETAILS
+
+
+
+Add very subtle premium details:
+
+
+
+- Soft green ambient glow around the modal.
+
+- Very subtle decorative dotted pattern around the upper content area.
+
+- Subtle green highlights.
+
+- Minimal visual decoration.
+
+- Keep everything elegant and clean.
+
+- Do NOT use excessive gradients.
+
+- Do NOT add unnecessary illustrations.
+
+- Do NOT use flashy animations.
+
+
+
+11. TYPOGRAPHY
+
+
+
+Use a modern professional typography hierarchy.
+
+
+
+- Strong/bold main heading.
+
+- Medium-weight subtitle.
+
+- Clear and readable form placeholders.
+
+- Clean tab typography.
+
+- Professional button typography.
+
+- Maintain the website's existing font/brand style where possible.
+
+
+
+12. ANIMATION
+
+
+
+Add subtle professional animations only:
+
+
+
+- Modal opening: fade + slight upward movement.
+
+- Tab switching: smooth transition.
+
+- Button press: subtle scale/feedback.
+
+- Input focus: smooth border transition.
+
+
+
+Animations must be fast and professional.
+
+
+
+Respect reduced-motion preferences if supported.
+
+
+
+13. MOBILE RESPONSIVENESS
+
+
+
+This is extremely important.
+
+
+
+The modal must work perfectly on mobile screens.
+
+
+
+- Do not allow the modal to be cut off.
+
+- Do not allow horizontal overflow.
+
+- Keep the 3 tabs usable.
+
+- Keep buttons and inputs comfortably tappable.
+
+- Maintain proper spacing.
+
+- On small-height screens, allow the modal content to scroll.
+
+- Keep the close button accessible.
+
+- Make sure the modal fits different Android and iPhone screen sizes.
+
+- Do not make the modal unnecessarily wide.
+
+- Do not shrink text to an unreadable size.
+
+
+
+14. DUPLICATE PREVENTION
+
+
+
+There must be ONLY ONE authentication modal.
+
+
+
+There must be:
+
+- Exactly one Log In tab.
+
+- Exactly one Sign Up tab.
+
+- Exactly one Roll Login tab.
+
+- Exactly one close button.
+
+- Exactly one form inside the active tab.
+
+
+
+Do NOT create duplicate authentication components.
+
+
+
+Before finishing, inspect the actual rendered mobile UI and make sure no duplicate Login/Sign Up buttons or duplicate modal elements exist.
+
+
+
+15. FUNCTIONALITY PRESERVATION
+
+
+
+Do NOT break or modify:
+
+
+
+- Supabase authentication.
+
+- Existing Login functionality.
+
+- Existing Sign Up functionality.
+
+- Roll Login functionality.
+
+- Google authentication.
+
+- Existing form validation.
+
+- Existing routes/navigation.
+
+- Existing database operations.
+
+- Existing session handling.
+
+
+
+Only improve the visual design.
+
+
+
+16. DO NOT MODIFY OUTSIDE THE MODAL
+
+
+
+Do NOT change:
+
+- Homepage hero section.
+
+- Homepage text.
+
+- Homepage images.
+
+- Navbar layout.
+
+- Course sections.
+
+- University/logo section.
+
+- Features section.
+
+- WhatsApp button.
+
+- Footer.
+
+- Any other homepage content.
+
+
+
+ONLY redesign the existing Login / Sign Up authentication modal.
+
+
+
+FINAL STYLE:
+
+
+
+Premium modern EdTech platform.
+
+Clean.
+
+Elegant.
+
+Minimal.
+
+Professional.
+
+Trustworthy.
+
+High-end SaaS quality.
+
+Soft white + existing green brand color.
+
+Beautiful spacing.
+
+Smooth subtle interactions.
+
+
+
+The final result should visually resemble a premium modern education platform authentication experience, while keeping all existing functionality completely intact.
+
 
                     </button>
                 </div>
