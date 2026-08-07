@@ -54,6 +54,7 @@
       if (nameEl) nameEl.innerText = name;
       const rollEl = document.getElementById("dropdown-roll-number");
       if (rollEl) rollEl.innerText = currentProfile?.roll_number ? "Roll: " + currentProfile.roll_number : "";
+
       
       const photo = currentProfile?.photo_url || currentUser.user_metadata?.avatar_url;
       
