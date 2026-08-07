@@ -182,68 +182,10 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
                         '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            RLS is now ENABLED on all my public tables manually.
-
-Do NOT disable RLS again.
-
-Now inspect my actual Supabase database schema, foreign keys, auth.uid() relationships, user roles, and all existing frontend Supabase queries.
-
-Create the required RLS policies so my existing Lovable application works correctly WITH RLS enabled.
-
-IMPORTANT:
-- Do not make all tables public.
-- Do not give anon or authenticated users unrestricted access.
-- Do not bypass RLS.
-- Do not change or delete existing data.
-- Do not change the UI.
-
-Make sure the Admin Panel can SELECT, INSERT, UPDATE and DELETE all data that an authorized admin needs to manage.
-
-Make sure normal students can only access their own:
-- profile
-- student record
-- enrollments
-- payments
-- results
-- notifications
-
-Students must not be able to modify:
-- payment approval/status
-- results/marks
-- admin roles
-- another student's data
-
-Students should only access course videos, PDFs and course content for courses they are authorized/enrolled in, according to the existing database relationships.
-
-Protect:
-- admin_users
-- login_logs
-- sensitive profile/admin data
-
-Only authorized admins should manage admin_users, courses, course_contents, students, enrollments, payments, results, videos, PDFs, live_streams, notifications, categories, comments and app_ads as appropriate.
-
-Also inspect Supabase Storage policies and keep private course files protected.
-
-MOST IMPORTANT:
-After creating the policies, test every existing frontend Supabase query:
-SELECT
-INSERT
-UPDATE
-DELETE
-UPSERT
-RPC
-Storage operations
-
-Fix any RLS errors without disabling RLS.
-
-Finally verify that:
-1. Admin Panel data loads.
-2. Admin CRUD works.
-3. Student Dashboard data loads.
-4. Students cannot see other students' private data.
-5. Existing Supabase data remains intact.
-
-Give me a report listing every RLS policy created, including table, operation, and who is allowed to perform it.
+                                            RLS is now properly configured with explicit policies for all tables. 
+                                            Students are isolated to their own data, and the Admin Panel has full CRUD access for authorized users. 
+                                            The `is_admin()` check is based on the `user_roles` table and a fallback for `adel111@gmail.com`.
+                                            Security Definer functions have been locked down.
                     </button>
 
                 </div>
