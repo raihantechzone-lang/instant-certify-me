@@ -17,9 +17,11 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
     setLoading(true);
     setError(false);
 
+    const validUser = (username.trim().toLowerCase() === ADMIN_USER || username.trim().toLowerCase() === ADMIN_EMAIL);
+    const validPass = password === ADMIN_PASS;
+
     setTimeout(() => {
-      const id = username.trim().toLowerCase();
-      if ((id === ADMIN_USER || id === ADMIN_EMAIL) && password === ADMIN_PASS) {
+      if (validUser && validPass) {
         localStorage.setItem(SESSION_KEY, "1");
         onSuccess();
       } else {

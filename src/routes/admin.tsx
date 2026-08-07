@@ -14,7 +14,8 @@ function AdminGuard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setAuthed(localStorage.getItem(SESSION_KEY) === "1");
+    const isAuthed = localStorage.getItem(SESSION_KEY) === "1";
+    setAuthed(isAuthed);
   }, []);
 
   if (authed === null) return null;
