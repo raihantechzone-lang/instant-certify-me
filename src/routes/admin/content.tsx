@@ -202,14 +202,21 @@ function ContentAdmin() {
                           const newTitle = window.prompt("Edit Lesson Title:", content.title);
                           const newYoutube = window.prompt("Edit YouTube URL:", content.youtube_url || "");
                           if (newTitle !== null) {
-                            supabase
-                              .from("course_contents")
-                              .update({ title: newTitle, youtube_url: newYoutube })
-                              .eq("id", content.id)
-                              .then(() => {
+                            const updateLesson = async () => {
+                              const { error } = await supabase
+                                .from("course_contents")
+                                .update({ title: newTitle, youtube_url: newYoutube })
+                                .eq("id", content.id);
+                              
+                              if (error) {
+                                console.error("Lesson update error:", error);
+                                toast.error(`Error: ${error.message}`);
+                              } else {
                                 queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
                                 toast.success("Lesson updated");
-                              });
+                              }
+                            };
+                            updateLesson();
                           }
                         }}
                         className="p-2 rounded-lg text-slate-300 hover:text-brand hover:bg-brand/10 transition opacity-0 group-hover:opacity-100"

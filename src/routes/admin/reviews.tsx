@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, Check, X, Image as ImageIcon, Trash2, Power, Pause, Play, Plus } from "lucide-react";
+import { Star, Check, X, Image as ImageIcon, Trash2, Power, Pause, Play, Plus, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -88,7 +88,7 @@ function ReviewsAndAdsAdmin() {
                    <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                           <UserIcon size={20} className="text-slate-400" />
+                           <Users size={20} className="text-slate-400" />
                          </div>
                          <div>
                             <p className="font-bold text-slate-900">{review.student_name || "Student"}</p>
@@ -186,14 +186,3 @@ function ReviewsAndAdsAdmin() {
   );
 }
 
-function UserIcon({ size, className }: { size?: number, className?: string }) {
-  return (
-    <svg 
-      width={size} height={size} viewBox="0 0 24 24" fill="none" 
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
