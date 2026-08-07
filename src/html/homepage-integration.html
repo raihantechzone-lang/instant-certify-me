@@ -176,7 +176,9 @@
         const fd = new FormData(paymentForm);
         const fullName = fd.get('Full Name') || fd.get('full_name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
         const phone = fd.get('Phone Number') || fd.get('phone') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
-        const trxId = fd.get('Transaction ID') || trxIdInput?.value || paymentForm.querySelector('input[placeholder*="e.g."]')?.value;
+        const trxIdInput = paymentForm.querySelector('input[placeholder*="e.g."]');
+        const trxId = fd.get('Transaction ID') || trxIdInput?.value;
+
 
         try {
           // 1. Ensure user is logged in (or handle guest enrollment with Roll Number)
