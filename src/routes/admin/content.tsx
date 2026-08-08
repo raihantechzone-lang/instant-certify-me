@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Video, FileText, Globe, Plus, Trash2, Edit2, Link as LinkIcon, Calendar, CheckSquare } from "lucide-react";
+import { Video, FileText, Globe, Plus, Trash2, Edit2, Link as LinkIcon, Calendar, CheckSquare, Upload, Loader2, Play } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { uploadToImageKit } from "@/lib/imagekit";
 
 export const Route = createFileRoute("/admin/content")({
   component: ContentAdmin,
@@ -12,6 +13,8 @@ export const Route = createFileRoute("/admin/content")({
 function ContentAdmin() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const queryClient = useQueryClient();
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const { data: courses } = useQuery({
     queryKey: ["admin-courses-list"],
@@ -89,6 +92,12 @@ function ContentAdmin() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const getYoutubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -120,9 +129,52 @@ function ContentAdmin() {
                   <input 
                     type="text" placeholder="YouTube URL" 
                      className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 transition font-medium"
-                    value={form.youtube_url} onChange={(e) => setForm({...form, youtube_url: e.target.value})}
+                    value={form.youtube_url} onChange={(e) => {
+                      setForm({...form, youtube_url: e.target.value});
+                      setPreviewUrl(e.target.value);
+                    }}
                   />
                 </div>
+                {previewUrl && getYoutubeId(previewUrl) && (
+                  <div className="aspect-video rounded-xl overflow-hidden bg-black border border-slate-200">
+                    <iframe 
+                      className="w-full h-full"
+                      src={`https://www.youtube.com/embed/${getYoutubeId(previewUrl)}`}
+                      title="Video preview"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                )}
+                <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 cursor-pointer border border-dashed border-slate-300 hover:border-indigo-500 transition">
+                  {isUploading ? <Loader2 size={16} className="animate-spin text-indigo-600" /> : <Upload size={16} className="text-slate-400" />}
+                  <span className="text-sm font-bold text-slate-600">{isUploading ? 'Uploading thumbnail...' : 'Upload Thumbnail Image'}</span>
+                  <input 
+                    type="file" className="hidden" accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        setIsUploading(true);
+                        const url = await uploadToImageKit(file, "/lessons");
+                        setForm({...form, thumbnail_url: url});
+                        toast.success("Thumbnail uploaded");
+                      } catch (err: any) {
+                        toast.error(err.message);
+                      } finally {
+                        setIsUploading(false);
+                      }
+                    }}
+                  />
+                </label>
+                {form.thumbnail_url && (
+                  <div className="relative group rounded-xl overflow-hidden border border-slate-100 aspect-video">
+                    <img src={form.thumbnail_url} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                       <button onClick={() => setForm({...form, thumbnail_url: ""})} className="bg-white p-2 rounded-lg text-rose-500 shadow-sm"><Trash2 size={16} /></button>
+                    </div>
+                  </div>
+                )}
                 <div className="relative">
                   <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 

@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Edit2, Search, Filter, BookOpen } from "lucide-react";
+import { Plus, Trash2, Edit2, Search, Filter, BookOpen, Upload, Loader2 } from "lucide-react";
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { uploadToImageKit } from "@/lib/imagekit";
 
 export const Route = createFileRoute("/admin/courses")({
   component: CoursesAdmin,
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/admin/courses")({
 function CoursesAdmin() {
   const [searchQuery, setSearchQuery] = useState("");
   const queryClient = useQueryClient();
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
 
   const { data: courses, isLoading } = useQuery({
     queryKey: ["admin-courses"],
@@ -75,14 +77,16 @@ function CoursesAdmin() {
           onClick={async () => {
             const title = window.prompt("Enter Course Title:");
             if (title) {
+               // Use a default category from existing categories or a standard string
                const { error } = await supabase.from("courses").insert({ 
                  title, 
                  price: 0, 
-                 category: 'University Admission',
-                 is_published: false // New courses are draft by default
+                 category: 'Web Development', // Defaulting to a safe category string
+                 is_published: false
                });
                
                if (error) {
+                 console.error("Create course error:", error);
                  toast.error(`Failed to create: ${error.message}`);
                } else {
                  queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
@@ -147,40 +151,67 @@ function CoursesAdmin() {
                    )}
                 </div>
                 <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
-                    <button 
-                      onClick={() => {
-                        const newTitle = window.prompt("Update Course Title:", course.title);
-                        const newPrice = window.prompt("Update Price:", course.price?.toString() || "0");
-                        const newCategory = window.prompt("Update Category:", course.category || "");
-                        const publish = window.confirm(course.is_published ? "Unpublish this course?" : "Publish this course?");
-                        
-                        if (newTitle !== null) {
-                          const updateCourse = async () => {
-                            const { error } = await supabase
-                              .from("courses")
-                              .update({ 
-                                title: newTitle, 
-                                price: parseFloat(newPrice || "0"),
-                                category: newCategory,
-                                is_published: course.is_published ? !publish : publish
-                              })
-                              .eq("id", course.id);
-                            
-                            if (error) {
-                              console.error("Update error:", error);
-                              toast.error(`Error: ${error.message}`);
-                            } else {
+                    <div className="flex-1 flex flex-col gap-2">
+                      <button 
+                        onClick={() => {
+                          const newTitle = window.prompt("Update Course Title:", course.title);
+                          const newPrice = window.prompt("Update Price:", course.price?.toString() || "0");
+                          const newCategory = window.prompt("Update Category:", course.category || "");
+                          const publish = window.confirm(course.is_published ? "Unpublish this course?" : "Publish this course?");
+                          
+                          if (newTitle !== null) {
+                            const updateCourse = async () => {
+                              const { error } = await supabase
+                                .from("courses")
+                                .update({ 
+                                  title: newTitle, 
+                                  price: parseFloat(newPrice || "0"),
+                                  category: newCategory,
+                                  is_published: course.is_published ? !publish : publish
+                                })
+                                .eq("id", course.id);
+                              
+                              if (error) {
+                                console.error("Update error:", error);
+                                toast.error(`Error: ${error.message}`);
+                              } else {
+                                queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+                                toast.success("Course updated");
+                              }
+                            };
+                            updateCourse();
+                          }
+                        }}
+                        className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition ${course.is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}
+                      >
+                        <Edit2 size={16} /> {course.is_published ? 'Published' : 'Draft'}
+                      </button>
+                      <label className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm bg-indigo-50 text-indigo-600 cursor-pointer hover:bg-indigo-100 transition">
+                        {uploadingId === course.id ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                        <span>{uploadingId === course.id ? 'Uploading...' : 'Thumbnail'}</span>
+                        <input 
+                          type="file" 
+                          className="hidden" 
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              setUploadingId(course.id);
+                              const url = await uploadToImageKit(file, "/courses");
+                              const { error } = await supabase.from("courses").update({ thumbnail_url: url }).eq("id", course.id);
+                              if (error) throw error;
                               queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-                              toast.success("Course updated");
+                              toast.success("Thumbnail updated");
+                            } catch (err: any) {
+                              toast.error(err.message);
+                            } finally {
+                              setUploadingId(null);
                             }
-                          };
-                          updateCourse();
-                        }
-                      }}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition ${course.is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}
-                    >
-                      <Edit2 size={16} /> {course.is_published ? 'Published' : 'Draft'}
-                    </button>
+                          }}
+                        />
+                      </label>
+                    </div>
                    <button 
                      onClick={() => window.confirm("Are you sure?") && deleteMutation.mutate(course.id)}
                      className="p-2.5 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition"
