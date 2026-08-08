@@ -50,7 +50,12 @@ function CoursesAdmin() {
       if (contentsError) console.warn("Contents deletion error:", contentsError);
 
       const { error: courseError } = await supabase.from("courses").delete().eq("id", id);
-      if (courseError) throw courseError;
+      if (courseError) {
+        if (courseError.code === '42501') {
+          throw new Error("Permission Denied: Admin access required.");
+        }
+        throw courseError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
@@ -90,9 +95,10 @@ function CoursesAdmin() {
                  is_published: false
                });
                
-               if (error) {
-                 toast.error(`Failed to create: ${error.message}`);
-               } else {
+                if (error) {
+                  const msg = error.code === '42501' ? "Permission Denied: Admin role not detected." : error.message;
+                  toast.error(`Failed to create: ${msg}`);
+                } else {
                  queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
                  toast.success("Course created as draft");
                }
