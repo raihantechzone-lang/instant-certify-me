@@ -156,10 +156,11 @@ function CoursesAdmin() {
                   
                   if (!session) {
                     console.error("[CourseSubmit] No active session found");
-                    throw new Error("You must be logged in as an admin to perform this action.");
+                    throw new Error("You must be logged in as an admin to perform this action. Your session may have expired.");
                   }
                   
                   console.log("[CourseSubmit] Auth verified for user:", session.user.id);
+                  console.log("[CourseSubmit] User email:", session.user.email);
 
                   // 1. Validation
                   if (!formData.title?.trim()) {
