@@ -89,29 +89,48 @@ function AdminGuard() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex">
-      <aside className="w-64 bg-white border-r border-slate-100 p-6 flex flex-col sticky top-0 h-screen">
-        <h1 className="text-xl font-black text-brand mb-10 px-2 tracking-tight">MaxSkills Admin</h1>
-        <nav className="flex-1 space-y-2">
+      <aside className="w-64 bg-white border-r border-slate-200 p-6 flex flex-col sticky top-0 h-screen shrink-0">
+        <div className="h-16 flex items-center px-2 mb-8 border-b border-slate-100 shrink-0">
+          <div className="flex items-center gap-2.5 font-bold text-xl text-slate-800 tracking-tight">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+              <Award className="text-white text-lg" />
+            </div>
+            EduAdmin<span className="text-indigo-600">.</span>
+          </div>
+        </div>
+        <nav className="flex-1 space-y-1 overflow-y-auto pr-2 custom-scrollbar">
           {navItems.map((item) => (
             <Link
               key={item.name}
               to={item.href}
               activeOptions={{ exact: item.href === "/admin" }}
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-brand/5 hover:text-brand transition"
-              activeProps={{ className: "bg-brand text-white shadow-lg shadow-brand/20 hover:text-white" }}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition border-l-4 border-transparent"
+              activeProps={{ className: "bg-indigo-50 text-indigo-600 border-indigo-600 hover:text-indigo-600 font-semibold shadow-none" }}
             >
               <item.icon size={20} />
               {item.name}
             </Link>
           ))}
         </nav>
-        <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-50 rounded-2xl transition">
+        <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-rose-500 hover:bg-rose-50 rounded-lg transition mt-4 shrink-0">
            <LogOut size={20} /> Log Out
         </button>
       </aside>
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
-          <Outlet />
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 z-20 shrink-0 sticky top-0">
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-bold text-slate-800 tracking-tight">Control Panel</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full flex items-center gap-2 border border-emerald-100">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
+            </div>
+          </div>
+        </header>
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>
