@@ -624,11 +624,29 @@
     }
   };
 
-  window.signInWithGoogle = () =>
-    supabase.auth.signInWithOAuth({
+  window.signInWithGoogle = async () => {
+    const btn = document.querySelector('#google-auth-container button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting...';
+    btn.disabled = true;
+
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin + "/dashboard" },
+      options: { 
+        redirectTo: window.location.origin + "/dashboard",
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
+      },
     });
+
+    if (error) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      window.showToast(error.message, "Google Login Error");
+    }
+  };
 
   window.goToDashboard = function () {
     window.location.href = currentUser ? "/dashboard" : "/auth?mode=login";
