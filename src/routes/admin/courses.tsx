@@ -17,6 +17,8 @@ function CoursesAdmin() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     details: "",
@@ -24,7 +26,7 @@ function CoursesAdmin() {
     discount_price: "0",
     category: "",
     thumbnail_url: "",
-    is_published: false
+    is_published: true
   });
 
   const { data: categories } = useQuery({
@@ -111,8 +113,9 @@ function CoursesAdmin() {
               discount_price: "0",
               category: categories && categories.length > 0 ? categories[0].name : "",
               thumbnail_url: "",
-              is_published: false
+              is_published: true
             });
+            setSelectedFile(null);
             setIsModalOpen(true);
           }}
           className="flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-brand/20 hover:scale-105 transition active:scale-95"
@@ -136,42 +139,75 @@ function CoursesAdmin() {
             <form 
               onSubmit={async (e) => {
                 e.preventDefault();
+                if (isSubmitting) return;
+
                 const loadingToast = toast.loading(editingCourse ? "Updating course..." : "Creating course...");
+                setIsSubmitting(true);
+
                 try {
                   if (!formData.title?.trim()) {
                     toast.error("Course title is required", { id: loadingToast });
+                    setIsSubmitting(false);
                     return;
                   }
+
+                  let currentThumbnailUrl = formData.thumbnail_url;
+
+                  // 1. Upload thumbnail if a new one was selected
+                  if (selectedFile) {
+                    try {
+                      setUploadingId('new');
+                      currentThumbnailUrl = await uploadToImageKit(selectedFile, "/courses");
+                      setFormData(prev => ({ ...prev, thumbnail_url: currentThumbnailUrl }));
+                    } catch (uploadErr: any) {
+                      console.error("Thumbnail upload failed:", uploadErr);
+                      toast.error(`Thumbnail upload failed: ${uploadErr.message}`, { id: loadingToast });
+                      setIsSubmitting(false);
+                      setUploadingId(null);
+                      return;
+                    } finally {
+                      setUploadingId(null);
+                    }
+                  }
                   
+                  // 2. Prepare database payload
                   const data: any = {
                     title: formData.title.trim(),
                     details: formData.details?.trim() || null,
                     price: isNaN(parseFloat(formData.price)) ? 0 : parseFloat(formData.price),
-                    discount_price: (formData.discount_price === "" || isNaN(parseFloat(formData.discount_price))) ? null : parseFloat(formData.discount_price),
+                    discount_price: (formData.discount_price === "" || isNaN(parseFloat(formData.discount_price)) || parseFloat(formData.discount_price) === 0) ? null : parseFloat(formData.discount_price),
                     category: formData.category || null,
-                    thumbnail_url: formData.thumbnail_url || null,
+                    thumbnail_url: currentThumbnailUrl || null,
                     is_published: !!formData.is_published
                   };
 
                   console.log("Submitting course data:", data);
 
+                  // 3. Database operation
                   const { data: result, error } = editingCourse 
                     ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
                     : await supabase.from("courses").insert([data]).select();
 
                   if (error) {
-                    console.error("Supabase error:", error);
-                    toast.error(error.message, { id: loadingToast });
-                    return;
+                    console.error("Supabase database error:", error);
+                    throw new Error(error.message);
                   }
 
                   console.log("Submission success:", result);
-                  queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-                  toast.success(editingCourse ? "Course updated" : "Course created", { id: loadingToast });
+                  
+                  // 4. Cleanup and Refresh
+                  await queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+                  // Also invalidate public courses if applicable
+                  await queryClient.invalidateQueries({ queryKey: ["courses"] });
+                  
+                  toast.success(editingCourse ? "Course updated successfully" : "Course created successfully", { id: loadingToast });
                   setIsModalOpen(false);
+                  setSelectedFile(null);
                 } catch (err: any) {
-                  console.error("Form submission error:", err);
+                  console.error("Final form submission error:", err);
                   toast.error(err.message || "An unexpected error occurred", { id: loadingToast });
+                } finally {
+                  setIsSubmitting(false);
                 }
               }}
               className="p-8 space-y-4"
@@ -208,9 +244,13 @@ function CoursesAdmin() {
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Thumbnail Cover</label>
                 <div className="flex items-center gap-4">
-                  {formData.thumbnail_url && (
+                  {(formData.thumbnail_url || selectedFile) && (
                     <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-100 shrink-0">
-                      <img src={formData.thumbnail_url} alt="Preview" className="w-full h-full object-cover" />
+                      <img 
+                        src={selectedFile ? URL.createObjectURL(selectedFile) : formData.thumbnail_url} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover" 
+                      />
                     </div>
                   )}
                   <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 hover:border-brand/40 hover:bg-brand/5 cursor-pointer transition group">
@@ -220,24 +260,16 @@ function CoursesAdmin() {
                       <Upload size={20} className="text-slate-400 group-hover:text-brand" />
                     )}
                     <span className="text-sm font-bold text-slate-500 group-hover:text-brand">
-                      {uploadingId === 'new' ? 'Uploading...' : formData.thumbnail_url ? 'Change Thumbnail' : 'Upload Thumbnail'}
+                      {uploadingId === 'new' ? 'Uploading...' : (formData.thumbnail_url || selectedFile) ? 'Change Thumbnail' : 'Upload Thumbnail'}
                     </span>
                     <input 
                       type="file" 
                       className="hidden" 
                       accept="image/*"
-                      onChange={async (e) => {
+                      onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          setUploadingId('new');
-                          const url = await uploadToImageKit(file, "/courses");
-                          setFormData({...formData, thumbnail_url: url});
-                          toast.success("Thumbnail uploaded");
-                        } catch (err: any) {
-                          toast.error(err.message);
-                        } finally {
-                          setUploadingId(null);
+                        if (file) {
+                          setSelectedFile(file);
                         }
                       }}
                     />
@@ -289,8 +321,10 @@ function CoursesAdmin() {
 
               <button 
                 type="submit"
-                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4"
+                disabled={isSubmitting}
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
+                {isSubmitting && <Loader2 className="animate-spin" size={20} />}
                 {editingCourse ? "Save Changes" : "Create Course"}
               </button>
             </form>
@@ -362,6 +396,7 @@ function CoursesAdmin() {
                             thumbnail_url: course.thumbnail_url || "",
                             is_published: course.is_published
                           });
+                          setSelectedFile(null);
                           setIsModalOpen(true);
                         }}
                         className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition ${course.is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}
