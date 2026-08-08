@@ -28,8 +28,12 @@ function CategoriesAdmin() {
   const addMutation = useMutation({
     mutationFn: async (name: string) => {
       console.log("Adding category:", name);
+      console.log("Attempting insert with name:", name);
       const { data, error } = await supabase.from("categories").insert({ name }).select();
-      if (error) throw error;
+      if (error) {
+        console.error("Insert error details:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -45,8 +49,12 @@ function CategoriesAdmin() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log("Attempting delete with id:", id);
       const { error } = await supabase.from("categories").delete().eq("id", id);
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error details:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
