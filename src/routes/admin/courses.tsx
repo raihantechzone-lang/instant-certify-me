@@ -109,7 +109,7 @@ function CoursesAdmin() {
               details: "",
               price: "0",
               discount_price: "0",
-              category: categories?.[0]?.name || "",
+              category: categories && categories.length > 0 ? categories[0].name : "",
               thumbnail_url: "",
               is_published: false
             });
@@ -136,12 +136,18 @@ function CoursesAdmin() {
             <form 
               onSubmit={async (e) => {
                 e.preventDefault();
+                const loadingToast = toast.loading(editingCourse ? "Updating course..." : "Creating course...");
                 try {
-                  const data = {
-                    title: formData.title,
-                    details: formData.details || null,
-                    price: formData.price ? parseFloat(formData.price) : 0,
-                    discount_price: formData.discount_price ? parseFloat(formData.discount_price) : null,
+                  if (!formData.title?.trim()) {
+                    toast.error("Course title is required", { id: loadingToast });
+                    return;
+                  }
+                  
+                  const data: any = {
+                    title: formData.title.trim(),
+                    details: formData.details?.trim() || null,
+                    price: isNaN(parseFloat(formData.price)) ? 0 : parseFloat(formData.price),
+                    discount_price: (formData.discount_price === "" || isNaN(parseFloat(formData.discount_price))) ? null : parseFloat(formData.discount_price),
                     category: formData.category || null,
                     thumbnail_url: formData.thumbnail_url || null,
                     is_published: !!formData.is_published
@@ -155,17 +161,17 @@ function CoursesAdmin() {
 
                   if (error) {
                     console.error("Supabase error:", error);
-                    toast.error(error.message);
+                    toast.error(error.message, { id: loadingToast });
                     return;
                   }
 
                   console.log("Submission success:", result);
                   queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-                  toast.success(editingCourse ? "Course updated" : "Course created");
+                  toast.success(editingCourse ? "Course updated" : "Course created", { id: loadingToast });
                   setIsModalOpen(false);
                 } catch (err: any) {
                   console.error("Form submission error:", err);
-                  toast.error(err.message || "An unexpected error occurred");
+                  toast.error(err.message || "An unexpected error occurred", { id: loadingToast });
                 }
               }}
               className="p-8 space-y-4"
