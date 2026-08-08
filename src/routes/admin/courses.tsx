@@ -151,7 +151,7 @@ function CoursesAdmin() {
 
                   const { data: result, error } = editingCourse 
                     ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
-                    : await supabase.from("courses").insert([data]).select();
+                    : await supabase.from("courses").insert(data).select();
 
                   if (error) {
                     console.error("Supabase error:", error);
