@@ -184,13 +184,18 @@ function CoursesAdmin() {
                   console.log("Submitting course data:", data);
 
                   // 3. Database operation
-                  const { data: result, error } = editingCourse 
-                    ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
-                    : await supabase.from("courses").insert([data]).select();
+                  console.log("Starting Supabase request...");
+                  const query = editingCourse 
+                    ? supabase.from("courses").update(data).eq("id", editingCourse.id).select()
+                    : supabase.from("courses").insert([data]).select();
+                  
+                  const { data: result, error } = await query;
 
                   if (error) {
-                    console.error("Supabase database error:", error);
-                    throw new Error(error.message);
+                    console.error("Supabase database error detail:", error);
+                    toast.error(`Error: ${error.message}`, { id: loadingToast });
+                    setIsSubmitting(false);
+                    return;
                   }
 
                   console.log("Submission success:", result);
