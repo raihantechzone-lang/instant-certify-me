@@ -214,11 +214,20 @@ function CoursesAdmin() {
 
                   if (dbError) {
                     console.error("[CourseSubmit] Supabase database error:", dbError);
-                    // Handle specific RLS errors
+                    
+                    // Detailed error message mapping
+                    let userFriendlyError = dbError.message;
                     if (dbError.code === '42501') {
-                      throw new Error("Permission Denied: Your account doesn't have permission to save courses. Please ensure you are an admin.");
+                      userFriendlyError = "Permission Denied: Your account doesn't have administrator permissions in the database. (Error 42501)";
+                    } else if (dbError.code === '23505') {
+                      userFriendlyError = "A course with this title already exists.";
+                    } else if (dbError.code === '23503') {
+                      userFriendlyError = "Invalid category selected. Please refresh and try again.";
                     }
-                    throw new Error(`Database Error (${dbError.code}): ${dbError.message}`);
+                    
+                    toast.error(userFriendlyError, { id: loadingToast });
+                    setIsSubmitting(false);
+                    return;
                   }
 
                   if (!result || result.length === 0) {
