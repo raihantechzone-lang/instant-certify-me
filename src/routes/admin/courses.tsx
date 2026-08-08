@@ -136,9 +136,10 @@ function CoursesAdmin() {
             <form 
               onSubmit={async (e) => {
                 e.preventDefault();
+                const loadingToast = toast.loading(editingCourse ? "Updating course..." : "Creating course...");
                 try {
-                  if (!formData.title) {
-                    toast.error("Course title is required");
+                  if (!formData.title?.trim()) {
+                    toast.error("Course title is required", { id: loadingToast });
                     return;
                   }
                   
@@ -154,24 +155,23 @@ function CoursesAdmin() {
 
                   console.log("Submitting course data:", data);
 
-                  console.log("Submitting to Supabase:", data);
                   const { data: result, error } = editingCourse 
                     ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
                     : await supabase.from("courses").insert([data]).select();
 
                   if (error) {
                     console.error("Supabase error:", error);
-                    toast.error(error.message);
+                    toast.error(error.message, { id: loadingToast });
                     return;
                   }
 
                   console.log("Submission success:", result);
                   queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-                  toast.success(editingCourse ? "Course updated" : "Course created");
+                  toast.success(editingCourse ? "Course updated" : "Course created", { id: loadingToast });
                   setIsModalOpen(false);
                 } catch (err: any) {
                   console.error("Form submission error:", err);
-                  toast.error(err.message || "An unexpected error occurred");
+                  toast.error(err.message || "An unexpected error occurred", { id: loadingToast });
                 }
               }}
               className="p-8 space-y-4"
