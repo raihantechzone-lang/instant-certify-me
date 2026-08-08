@@ -136,26 +136,36 @@ function CoursesAdmin() {
             <form 
               onSubmit={async (e) => {
                 e.preventDefault();
-                const data = {
-                  title: formData.title,
-                  details: formData.details,
-                  price: parseFloat(formData.price || "0"),
-                  discount_price: parseFloat(formData.discount_price || "0"),
-                  category: formData.category,
-                  thumbnail_url: formData.thumbnail_url,
-                  is_published: formData.is_published
-                };
+                try {
+                  const data = {
+                    title: formData.title,
+                    details: formData.details || null,
+                    price: formData.price ? parseFloat(formData.price) : 0,
+                    discount_price: formData.discount_price ? parseFloat(formData.discount_price) : null,
+                    category: formData.category || null,
+                    thumbnail_url: formData.thumbnail_url || null,
+                    is_published: !!formData.is_published
+                  };
 
-                const res = editingCourse 
-                  ? await supabase.from("courses").update(data).eq("id", editingCourse.id)
-                  : await supabase.from("courses").insert(data);
+                  console.log("Submitting course data:", data);
 
-                if (res.error) {
-                  toast.error(res.error.message);
-                } else {
+                  const { data: result, error } = editingCourse 
+                    ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
+                    : await supabase.from("courses").insert([data]).select();
+
+                  if (error) {
+                    console.error("Supabase error:", error);
+                    toast.error(error.message);
+                    return;
+                  }
+
+                  console.log("Submission success:", result);
                   queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
                   toast.success(editingCourse ? "Course updated" : "Course created");
                   setIsModalOpen(false);
+                } catch (err: any) {
+                  console.error("Form submission error:", err);
+                  toast.error(err.message || "An unexpected error occurred");
                 }
               }}
               className="p-8 space-y-4"
@@ -248,6 +258,16 @@ function CoursesAdmin() {
                     onChange={e => setFormData({...formData, discount_price: e.target.value})}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Course Details</label>
+                <textarea 
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium min-h-[100px]"
+                  placeholder="Enter course description..."
+                  value={formData.details}
+                  onChange={e => setFormData({...formData, details: e.target.value})}
+                />
               </div>
 
               <div className="flex items-center gap-3 py-2">
