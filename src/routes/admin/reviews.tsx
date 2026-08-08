@@ -79,16 +79,16 @@ function ReviewsAndAdsAdmin() {
             <p className="text-slate-500 font-medium text-sm">Approve student reviews before they show on the website.</p>
           </div>
 
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
             {reviews?.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 font-medium">No reviews yet.</div>
+              <div className="p-8 text-center text-slate-400 font-medium italic">No reviews yet.</div>
             ) : (
               reviews?.map((review) => (
                 <div key={review.id} className="p-6 hover:bg-slate-50 transition group">
                    <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                           <Users size={20} className="text-slate-400" />
+                         <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
+                           <Users size={18} className="text-slate-400" />
                          </div>
                          <div>
                             <p className="font-bold text-slate-900">{review.student_name || "Student"}</p>
@@ -134,12 +134,12 @@ function ReviewsAndAdsAdmin() {
 
           <div className="grid grid-cols-1 gap-4">
             {ads?.length === 0 ? (
-              <div className="bg-white p-12 rounded-[2rem] border border-dashed border-slate-200 text-center text-slate-400">
+              <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-200 text-center text-slate-400 italic">
                 No ads configured.
               </div>
             ) : (
               ads?.map((ad) => (
-                <div key={ad.id} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 group">
+                <div key={ad.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 group hover:shadow-md transition">
                    <div className="w-24 aspect-[4/5] bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0">
                       {ad.image_url ? (
                         <img src={ad.image_url} alt="" className="w-full h-full object-cover" />
