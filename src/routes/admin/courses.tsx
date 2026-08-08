@@ -189,21 +189,38 @@ function CoursesAdmin() {
                   console.log("[CourseSubmit] INSERT Payload:", JSON.stringify(payload, null, 2));
 
                   // 5. Database Operation
-                  const query = editingCourse 
-                    ? supabase.from("courses").update(payload).eq("id", editingCourse.id).select()
-                    : supabase.from("courses").insert([payload]).select();
+                  console.log("[CourseSubmit] Payload keys:", Object.keys(payload));
                   
-                  const { data: result, error: dbError } = await query;
+                  // Use upsert or explicitly separate based on editingCourse
+                  let dbResult;
+                  if (editingCourse) {
+                    console.log("[CourseSubmit] Updating course:", editingCourse.id);
+                    dbResult = await supabase
+                      .from("courses")
+                      .update(payload)
+                      .eq("id", editingCourse.id)
+                      .select();
+                  } else {
+                    console.log("[CourseSubmit] Inserting new course...");
+                    dbResult = await supabase
+                      .from("courses")
+                      .insert(payload)
+                      .select();
+                  }
+
+                  const { data: result, error: dbError } = dbResult;
 
                   if (dbError) {
                     console.error("[CourseSubmit] Supabase DB Error:", dbError);
                     throw new Error(`DATABASE ERROR: [${dbError.code}] ${dbError.message}${dbError.hint ? ` | Hint: ${dbError.hint}` : ""}`);
                   }
 
+                  console.log("[CourseSubmit] Database operation successful. Result:", result);
+                  
                   if (!result || result.length === 0) {
-                    console.warn("[CourseSubmit] Success but no data returned (RLS?)");
-                  } else {
-                    console.log("[CourseSubmit] Success:", result[0]);
+                    console.warn("[CourseSubmit] Success but no data returned (RLS or policy mismatch?)");
+                    // We treat this as a failure if we expect data back
+                    throw new Error("COURSE NOT SAVED: The database accepted the request but returned no data. This usually means a security policy (RLS) blocked your specific account from seeing/creating this row despite being an admin.");
                   }
                   
                   // 6. Finalize on SUCCESS ONLY
@@ -243,6 +260,7 @@ function CoursesAdmin() {
                   <input 
                     type="text" 
                     required
+                    name="title"
                     className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
                     value={formData.title}
                     onChange={e => setFormData({...formData, title: e.target.value})}
@@ -347,7 +365,8 @@ function CoursesAdmin() {
               <button 
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                onClick={() => console.log("[CourseSubmit] Form button clicked direct handler")}
               >
                 {isSubmitting && <Loader2 className="animate-spin" size={20} />}
                 {editingCourse ? "Save Changes" : "Create Course"}
