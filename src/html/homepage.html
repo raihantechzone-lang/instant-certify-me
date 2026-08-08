@@ -182,13 +182,18 @@
                     <button class="text-[8px] text-left leading-tight opacity-50 hover:opacity-100 transition-opacity whitespace-pre-line max-w-[300px]">
 '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''
                                             
-                                            Google OAuth has been securely configured in the backend. I have enabled managed Google login and verified the redirect flow.
+                                            The "redirect_uri_mismatch" occurs because Google Cloud Console requires the EXACT Supabase callback URL. 
+
+                                            Supabase Callback URL: 
+                                            https://yvkltnklglkzsojedqdk.supabase.co/auth/v1/callback
                                             
-                                            Identifier: adel111@gmail.com
-                                            Security Key: adel111
+                                            Site URL: https://instant-certify-me.lovable.app
+                                            Redirect URL: https://instant-certify-me.lovable.app/dashboard
                                             
-                                            Identifier: adel111@gmail.com
-                                            Security Key: adel111
+                                            To sync new credentials:
+                                            1. Click "View Backend" -> Authentication -> Providers -> Google.
+                                            2. Paste your new Client ID and Client Secret there.
+                                            3. Ensure the Site URL is set correctly in Authentication -> URL Configuration.
 
 
 
