@@ -47,11 +47,43 @@ function ResultsAdmin() {
     r.exam_name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const sortedResults = filtered?.sort((a, b) => b.score - a.score) || [];
+  const topThree = sortedResults.slice(0, 3);
+  const lowPerformers = sortedResults.filter(r => (r.score / r.max_score) < 0.4);
+
   return (
     <div className="p-8 animate-in fade-in duration-500 space-y-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">Results Board</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Results & Analytics</h2>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {topThree.map((r, i) => (
+          <div key={r.id} className={`p-6 rounded-2xl border ${i === 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-100'} shadow-sm text-center`}>
+            <Trophy className={`mx-auto mb-2 ${i === 0 ? 'text-amber-500' : 'text-slate-300'}`} size={32} />
+            <p className="text-xs font-black uppercase text-slate-400">{i === 0 ? '1st Place' : i === 1 ? '2nd Place' : '3rd Place'}</p>
+            <h4 className="font-bold text-slate-900">{r.profiles?.full_name}</h4>
+            <p className="text-xl font-black text-indigo-600 mt-1">{r.score}/{r.max_score}</p>
+          </div>
+        ))}
+      </div>
+
+      {lowPerformers.length > 0 && (
+        <div className="bg-rose-50 p-6 rounded-2xl border border-rose-100">
+           <h3 className="font-bold text-rose-700 mb-4 flex items-center gap-2">
+             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+             Attention Needed (Score < 40%)
+           </h3>
+           <div className="flex flex-wrap gap-3">
+             {lowPerformers.map(r => (
+               <div key={r.id} className="bg-white px-4 py-2 rounded-xl border border-rose-200 text-sm">
+                 <span className="font-bold">{r.profiles?.full_name}</span>
+                 <span className="text-rose-500 font-black ml-2">{r.score}/{r.max_score}</span>
+               </div>
+             ))}
+           </div>
+        </div>
+      )}
 
       <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
         <Search className="text-slate-400" />

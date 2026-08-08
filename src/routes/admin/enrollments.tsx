@@ -50,7 +50,37 @@ function EnrollmentsAdmin() {
   return (
     <div className="p-8 animate-in fade-in duration-500 space-y-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">Enrollment Management</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Enrollment Tracking</h2>
+          <p className="text-sm text-slate-500 mt-1">Verified students and active learning paths.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+           <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Enrolled Students</h3>
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                 <Users size={24} />
+              </div>
+              <div>
+                 <h4 className="text-2xl font-black text-slate-900">{enrollments?.filter(e => e.status === 'active').length || 0}</h4>
+                 <p className="text-xs text-slate-500 font-medium">Access granted students</p>
+              </div>
+           </div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+           <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Recent Growth</h3>
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                 <UserPlus size={24} />
+              </div>
+              <div>
+                 <h4 className="text-2xl font-black text-slate-900">{enrollments?.filter(e => new Date(e.enrolled_at || "").getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000).length || 0}</h4>
+                 <p className="text-xs text-slate-500 font-medium">New enrollments this week</p>
+              </div>
+           </div>
+        </div>
       </div>
 
       <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
