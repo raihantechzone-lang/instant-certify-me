@@ -15,6 +15,28 @@ function CoursesAdmin() {
   const [searchQuery, setSearchQuery] = useState("");
   const queryClient = useQueryClient();
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    details: "",
+    price: "0",
+    discount_price: "0",
+    category: "",
+    is_published: false
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ["admin-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: courses, isLoading } = useQuery({
     queryKey: ["admin-courses"],
