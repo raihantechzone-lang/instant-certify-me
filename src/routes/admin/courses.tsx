@@ -189,8 +189,13 @@ function CoursesAdmin() {
                     : await supabase.from("courses").insert([data]).select();
 
                   if (error) {
-                    console.error("Supabase database error:", error);
-                    throw new Error(error.message);
+                    console.error("Supabase database error detail:", {
+                      message: error.message,
+                      code: error.code,
+                      details: error.details,
+                      hint: error.hint
+                    });
+                    throw new Error(`Database Error (${error.code}): ${error.message}`);
                   }
 
                   console.log("Submission success:", result);
