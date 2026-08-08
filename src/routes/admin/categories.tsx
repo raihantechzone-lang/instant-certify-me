@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Folders } from "lucide-react";
+import { Plus, Trash2, Folders, Edit2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -105,12 +105,28 @@ function CategoriesAdmin() {
                         </div>
                         <span className="font-semibold text-slate-700">{cat.name}</span>
                       </div>
-                      <button 
-                        onClick={() => window.confirm("Delete this category?") && deleteMutation.mutate(cat.id)}
-                        className="p-2 text-slate-400 hover:text-rose-600 transition"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => {
+                            const newName = window.prompt("Edit category name:", cat.name);
+                            if (newName && newName !== cat.name) {
+                              supabase.from("categories").update({ name: newName }).eq("id", cat.id).then(() => {
+                                queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+                                toast.success("Category updated");
+                              });
+                            }
+                          }}
+                          className="p-2 text-slate-400 hover:text-brand transition"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button 
+                          onClick={() => window.confirm("Delete this category?") && deleteMutation.mutate(cat.id)}
+                          className="p-2 text-slate-400 hover:text-rose-600 transition"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </li>
                   ))
                 )}
