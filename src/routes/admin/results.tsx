@@ -72,7 +72,7 @@ function ResultsAdmin() {
         <div className="bg-rose-50 p-6 rounded-2xl border border-rose-100">
            <h3 className="font-bold text-rose-700 mb-4 flex items-center gap-2">
              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-             Attention Needed (Score < 40%)
+             Attention Needed (Score {"<"} 40%)
            </h3>
            <div className="flex flex-wrap gap-3">
              {lowPerformers.map(r => (
