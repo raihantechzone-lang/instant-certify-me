@@ -23,6 +23,7 @@ function CoursesAdmin() {
     price: "0",
     discount_price: "0",
     category: "",
+    thumbnail_url: "",
     is_published: false
   });
 
@@ -109,6 +110,7 @@ function CoursesAdmin() {
               price: "0",
               discount_price: "0",
               category: categories?.[0]?.name || "",
+              thumbnail_url: "",
               is_published: false
             });
             setIsModalOpen(true);
@@ -140,6 +142,7 @@ function CoursesAdmin() {
                   price: parseFloat(formData.price || "0"),
                   discount_price: parseFloat(formData.discount_price || "0"),
                   category: formData.category,
+                  thumbnail_url: formData.thumbnail_url,
                   is_published: formData.is_published
                 };
 
@@ -157,31 +160,73 @@ function CoursesAdmin() {
               }}
               className="p-8 space-y-4"
             >
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Course Title</label>
-                <input 
-                  type="text" 
-                  required
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
-                  value={formData.title}
-                  onChange={e => setFormData({...formData, title: e.target.value})}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Course Title</label>
+                  <input 
+                    type="text" 
+                    required
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                    value={formData.title}
+                    onChange={e => setFormData({...formData, title: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Category</label>
+                  <select 
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium appearance-none"
+                    value={formData.category}
+                    onChange={e => setFormData({...formData, category: e.target.value})}
+                  >
+                    {categories?.map(cat => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))}
+                    {(!categories || categories.length === 0) && (
+                      <option value="">No categories available</option>
+                    )}
+                  </select>
+                </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Category</label>
-                <select 
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium appearance-none"
-                  value={formData.category}
-                  onChange={e => setFormData({...formData, category: e.target.value})}
-                >
-                  {categories?.map(cat => (
-                    <option key={cat.id} value={cat.name}>{cat.name}</option>
-                  ))}
-                  {(!categories || categories.length === 0) && (
-                    <option value="">No categories available</option>
+                <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Thumbnail Cover</label>
+                <div className="flex items-center gap-4">
+                  {formData.thumbnail_url && (
+                    <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-100 shrink-0">
+                      <img src={formData.thumbnail_url} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
                   )}
-                </select>
+                  <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 hover:border-brand/40 hover:bg-brand/5 cursor-pointer transition group">
+                    {uploadingId === 'new' ? (
+                      <Loader2 size={20} className="animate-spin text-brand" />
+                    ) : (
+                      <Upload size={20} className="text-slate-400 group-hover:text-brand" />
+                    )}
+                    <span className="text-sm font-bold text-slate-500 group-hover:text-brand">
+                      {uploadingId === 'new' ? 'Uploading...' : formData.thumbnail_url ? 'Change Thumbnail' : 'Upload Thumbnail'}
+                    </span>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          setUploadingId('new');
+                          const url = await uploadToImageKit(file, "/courses");
+                          setFormData({...formData, thumbnail_url: url});
+                          toast.success("Thumbnail uploaded");
+                        } catch (err: any) {
+                          toast.error(err.message);
+                        } finally {
+                          setUploadingId(null);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -288,6 +333,7 @@ function CoursesAdmin() {
                             price: course.price?.toString() || "0",
                             discount_price: course.discount_price?.toString() || "0",
                             category: course.category || "",
+                            thumbnail_url: course.thumbnail_url || "",
                             is_published: course.is_published
                           });
                           setIsModalOpen(true);
