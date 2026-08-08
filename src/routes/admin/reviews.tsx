@@ -127,7 +127,19 @@ function ReviewsAndAdsAdmin() {
               <h2 className="text-2xl font-black text-slate-900">Interstitial Ads</h2>
               <p className="text-slate-500 font-medium text-sm">Manage full-screen overlays shown on entry.</p>
             </div>
-            <button className="p-3 bg-brand text-white rounded-xl shadow-lg shadow-brand/20 hover:scale-105 transition active:scale-95">
+            <button 
+              onClick={() => {
+                const img = window.prompt("Image URL:");
+                const link = window.prompt("Link URL (optional):");
+                if (img) {
+                   supabase.from("ads").insert({ image_url: img, link_url: link, is_active: true }).then(() => {
+                     queryClient.invalidateQueries({ queryKey: ["admin-ads"] });
+                     toast.success("Ad created");
+                   });
+                }
+              }}
+              className="p-3 bg-brand text-white rounded-xl shadow-lg shadow-brand/20 hover:scale-105 transition active:scale-95"
+            >
                <Plus size={20} />
             </button>
           </div>

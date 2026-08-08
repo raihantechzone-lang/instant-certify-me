@@ -17,11 +17,12 @@ function EarningsAdmin() {
           id,
           created_at,
           payment_status,
+          status,
           courses (
             price
           )
         `)
-        .eq("payment_status", "verified");
+        .eq("status", "active");
       
       if (error) throw error;
 
@@ -108,7 +109,7 @@ function EarningsAdmin() {
                   </td>
                   <td className="px-6 py-4">
                     <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
-                      Verified
+                      Active
                     </span>
                   </td>
                 </tr>
