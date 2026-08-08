@@ -48,33 +48,78 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-3xl font-black text-slate-900">Dashboard Overview</h2>
-        <p className="text-slate-500 font-medium">Welcome back, Adel. Here's what's happening today.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Overview</h1>
+          <p className="text-sm text-slate-500 mt-1">Here's what's happening with your platform today.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Students" value={stats?.totalStudents || 0} icon={Users} color="blue" />
-        <StatCard title="Active Courses" value={stats?.totalCourses || 0} icon={BookOpen} color="brand" />
-        <StatCard title="Total Revenue" value={`৳${stats?.totalRevenue || 0}`} icon={DollarSign} color="green" />
-        <StatCard title="Total Reviews" value={stats?.totalReviews || 0} icon={Star} color="amber" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-900">Revenue Analytics</h3>
-            <div className="flex items-center gap-2 text-green-500 text-sm font-bold">
-              <TrendingUp size={16} /> +12.5%
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition relative overflow-hidden group">
+          <div className="flex justify-between items-start mb-2 relative z-10">
+            <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
+              <div className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <DollarSign size={14} />
+              </div>
+              Total Revenue
             </div>
           </div>
-          <div className="h-[300px]">
+          <div className="relative z-10">
+            <h3 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">৳{stats?.totalRevenue || 0}</h3>
+            <div className="flex items-center gap-2 text-xs font-medium">
+              <span className="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded flex items-center gap-1">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition relative overflow-hidden group">
+          <div className="flex justify-between items-start mb-2 relative z-10">
+            <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
+              <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
+                <Users size={14} />
+              </div>
+              Total Enrollments
+            </div>
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">{stats?.totalEnrollments || 0}</h3>
+            <div className="flex items-center gap-2 text-xs font-medium">
+              <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1">Growing</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition relative overflow-hidden group">
+          <div className="flex justify-between items-start mb-2 relative z-10">
+            <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
+              <div className="w-6 h-6 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <Users size={14} />
+              </div>
+              Registered Students
+            </div>
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">{stats?.totalStudents || 0}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:col-span-2 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="font-bold text-slate-900 text-lg">Revenue Trend</h3>
+              <p className="text-xs text-slate-500 mt-1">Metrics across all courses</p>
+            </div>
+          </div>
+          <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
@@ -83,13 +128,13 @@ function AdminDashboard() {
                 <Tooltip 
                   contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                 />
-                <Area type="monotone" dataKey="sales" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" />
+                <Area type="monotone" dataKey="sales" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col">
           <h3 className="text-lg font-bold text-slate-900 mb-6">Recent Enrollment Requests</h3>
           <div className="space-y-4">
              {stats?.recentRequests?.map((req: any) => (
@@ -104,7 +149,7 @@ function AdminDashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-brand">{req.transaction_id}</p>
+                    <p className="font-bold text-indigo-600">৳{req.amount || 0}</p>
                     <p className="text-[10px] text-slate-400">{new Date(req.created_at).toLocaleDateString()}</p>
                   </div>
                </div>

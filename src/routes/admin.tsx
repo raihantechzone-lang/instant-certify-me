@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminLogin } from "@/components/admin/AdminLogin";
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Star, FileText, Award } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Star, FileText, Award, CalendarCheck, UserPlus, Medal, DollarSign, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({
@@ -71,11 +71,18 @@ function AdminGuard() {
 
   const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Categories", href: "/admin/categories", icon: LayoutDashboard },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
-    { name: "Students & Payments", href: "/admin/students", icon: Users },
-    { name: "Certificates", href: "/admin/certificates", icon: Award },
-    { name: "Content & Exams", href: "/admin/content", icon: FileText },
-
+    { name: "Course Content", href: "/admin/content", icon: FileText },
+    { name: "Exams & Links", href: "/admin/exams", icon: FileText },
+    { name: "Results Board", href: "/admin/results", icon: Medal },
+    { name: "Active Students", href: "/admin/students", icon: Users },
+    { name: "Attendance", href: "/admin/attendance", icon: CalendarCheck },
+    { name: "Enrollments", href: "/admin/enrollments", icon: UserPlus },
+    { name: "Certified Students", href: "/admin/certified", icon: Medal },
+    { name: "Send Certificates", href: "/admin/certificates", icon: Award },
+    { name: "Course Earnings", href: "/admin/earnings", icon: DollarSign },
+    { name: "Verification", href: "/admin/transactions", icon: ShieldCheck },
     { name: "Reviews & Ads", href: "/admin/reviews", icon: Star },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
