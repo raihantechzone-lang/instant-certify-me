@@ -260,6 +260,7 @@ function CoursesAdmin() {
                   <input 
                     type="text" 
                     required
+                    name="title"
                     className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
                     value={formData.title}
                     onChange={e => setFormData({...formData, title: e.target.value})}
@@ -364,7 +365,8 @@ function CoursesAdmin() {
               <button 
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                onClick={() => console.log("[CourseSubmit] Form button clicked direct handler")}
               >
                 {isSubmitting && <Loader2 className="animate-spin" size={20} />}
                 {editingCourse ? "Save Changes" : "Create Course"}
