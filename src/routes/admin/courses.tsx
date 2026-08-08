@@ -148,41 +148,38 @@ function CoursesAdmin() {
                   console.log("[CourseSubmit] Starting submission flow...");
                   
                   // 0. Check Auth Session
+                  console.log("[CourseSubmit] Checking auth session...");
                   const { data: { session }, error: authError } = await supabase.auth.getSession();
+                  
                   if (authError) {
-                    console.error("[CourseSubmit] Auth session error:", authError);
-                    throw new Error(`Authentication error: ${authError.message}`);
+                    console.error("[CourseSubmit] Auth session lookup error:", authError);
+                    throw new Error(`Authentication Lookup Failed: ${authError.message}`);
                   }
                   
                   if (!session) {
                     console.error("[CourseSubmit] No active session found");
-                    throw new Error("You must be logged in as an admin to perform this action. Your session may have expired.");
+                    throw new Error("CRITICAL: No active authentication session found. Please log in again. (Check if cookies/localStorage are blocked)");
                   }
                   
-                  console.log("[CourseSubmit] Auth verified for user:", session.user.id);
-                  console.log("[CourseSubmit] User email:", session.user.email);
+                  console.log("[CourseSubmit] Auth session active for:", session.user.email);
+                  console.log("[CourseSubmit] User ID:", session.user.id);
 
                   // 1. Validation
-                  if (!formData.title?.trim()) {
-                    throw new Error("Course title is required");
-                  }
-                  if (!formData.category) {
-                    throw new Error("Please select a category");
-                  }
+                  if (!formData.title?.trim()) throw new Error("Course title is required");
+                  if (!formData.category) throw new Error("Please select a category");
 
                   let currentThumbnailUrl = formData.thumbnail_url;
 
-                  // 2. Upload thumbnail if a new one was selected
+                  // 2. Upload thumbnail
                   if (selectedFile) {
-                    console.log("[CourseSubmit] Starting thumbnail upload...");
+                    console.log("[CourseSubmit] Starting thumbnail upload for file:", selectedFile.name);
                     try {
                       setUploadingId('new');
                       currentThumbnailUrl = await uploadToImageKit(selectedFile, "/courses");
-                      console.log("[CourseSubmit] Thumbnail uploaded:", currentThumbnailUrl);
-                      setFormData(prev => ({ ...prev, thumbnail_url: currentThumbnailUrl }));
+                      console.log("[CourseSubmit] Thumbnail uploaded successfully:", currentThumbnailUrl);
                     } catch (uploadErr: any) {
-                      console.error("[CourseSubmit] Thumbnail upload failed:", uploadErr);
-                      throw new Error(`Thumbnail upload failed: ${uploadErr.message}`);
+                      console.error("[CourseSubmit] Thumbnail upload failure:", uploadErr);
+                      throw new Error(`THUMBNAIL UPLOAD FAILED: ${uploadErr.message}. The course record was not created.`);
                     } finally {
                       setUploadingId(null);
                     }
@@ -204,10 +201,9 @@ function CoursesAdmin() {
                     payload.created_at = new Date().toISOString();
                   }
 
-                  console.log("[CourseSubmit] Submitting to Supabase:", payload);
+                  console.log("[CourseSubmit] Attempting Supabase INSERT/UPDATE with payload:", JSON.stringify(payload, null, 2));
 
                   // 4. Database operation
-                  console.log("[CourseSubmit] Sending payload to Supabase...");
                   const query = editingCourse 
                     ? supabase.from("courses").update(payload).eq("id", editingCourse.id).select()
                     : supabase.from("courses").insert([payload]).select();
@@ -215,29 +211,22 @@ function CoursesAdmin() {
                   const { data: result, error: dbError } = await query;
 
                   if (dbError) {
-                    console.error("[CourseSubmit] Supabase database error full object:", dbError);
+                    console.error("[CourseSubmit] SUPABASE DATABASE ERROR:", dbError);
                     
-                    // Detailed error message mapping
-                    let userFriendlyError = `Database Error (${dbError.code}): ${dbError.message}`;
-                    if (dbError.code === '42501') {
-                      userFriendlyError = "Permission Denied: Your account (adel111@gmail.com) doesn't have permissions to write to the 'courses' table. I've updated the RLS policies, please try again.";
-                    } else if (dbError.code === '23505') {
-                      userFriendlyError = "A course with this title already exists.";
-                    } else if (dbError.code === '23503') {
-                      userFriendlyError = "Invalid category selected. Please refresh and try again.";
-                    }
+                    // Expose the EXACT error to the user
+                    let specificError = `DATABASE ERROR: [${dbError.code}] ${dbError.message}`;
+                    if (dbError.details) specificError += ` | Details: ${dbError.details}`;
+                    if (dbError.hint) specificError += ` | Hint: ${dbError.hint}`;
                     
-                    toast.error(userFriendlyError, { id: loadingToast, duration: 6000 });
-                    setIsSubmitting(false);
-                    return;
+                    throw new Error(specificError);
                   }
 
                   if (!result || result.length === 0) {
-                    console.warn("[CourseSubmit] Success code but no data returned. This might happen if RLS 'select' policy fails even if 'insert' works.");
-                    // We don't throw here, just log it.
+                    console.warn("[CourseSubmit] Query returned no data. Check if RLS SELECT policy is blocking the return.");
+                    // If insert worked but select failed, we still count as success but warn
+                  } else {
+                    console.log("[CourseSubmit] Database operation successful. Returned record:", result[0]);
                   }
-
-                  console.log("[CourseSubmit] Submission successful:", result);
                   
                   // 5. Cleanup and Refresh
                   await Promise.all([
