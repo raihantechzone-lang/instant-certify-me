@@ -27,9 +27,6 @@ function createSupabaseClient() {
   const SUPABASE_URL = 'https://jouwcthdcjoegcqgwlpl.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Y1rY5LYRuDF9iqJNWS1blQ_9EqPBOp9';
 
-  if (SUPABASE_URL === 'https://placeholder.supabase.co' || SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_placeholder') {
-    console.warn('[Supabase] Missing environment variables. Using placeholder to prevent crash.');
-  }
 
   return createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     global: {
