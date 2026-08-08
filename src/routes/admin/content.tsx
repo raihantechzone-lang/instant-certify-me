@@ -64,7 +64,8 @@ function ContentAdmin() {
     live_url: "",
     exam_link: "",
     exam_enabled: false,
-    thumbnail_url: ""
+    thumbnail_url: "",
+    is_free: false
   });
 
   const addMutation = useMutation({
@@ -87,7 +88,7 @@ function ContentAdmin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
       toast.success("Lesson added successfully");
-      setForm({ title: "", youtube_url: "", pdf_url: "", live_url: "", exam_link: "", exam_enabled: false, thumbnail_url: "" });
+      setForm({ title: "", youtube_url: "", pdf_url: "", live_url: "", exam_link: "", exam_enabled: false, thumbnail_url: "", is_free: false });
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -186,7 +187,7 @@ function ContentAdmin() {
                 <div className="relative">
                   <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
-                    type="text" placeholder="Live Class Link" 
+                    type="text" placeholder="Live Class Link (Meet/Zoom)" 
                      className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 transition font-medium"
                     value={form.live_url} onChange={(e) => setForm({...form, live_url: e.target.value})}
                   />
@@ -199,15 +200,26 @@ function ContentAdmin() {
                     value={form.exam_link} onChange={(e) => setForm({...form, exam_link: e.target.value})}
                   />
                 </div>
-                <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    className="w-5 h-5 rounded-lg text-indigo-600 focus:ring-indigo-500/20 border-slate-200"
-                    checked={form.exam_enabled} 
-                    onChange={(e) => setForm({...form, exam_enabled: e.target.checked})}
-                  />
-                  <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition">Enable Exam Link</span>
-                </label>
+                <div className="flex gap-4">
+                  <label className="flex-1 flex items-center gap-2 p-3 rounded-xl bg-slate-50 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 rounded-lg text-indigo-600 focus:ring-indigo-500/20 border-slate-200"
+                      checked={form.exam_enabled} 
+                      onChange={(e) => setForm({...form, exam_enabled: e.target.checked})}
+                    />
+                    <span className="text-xs font-bold text-slate-600">Exam ON</span>
+                  </label>
+                  <label className="flex-1 flex items-center gap-2 p-3 rounded-xl bg-slate-50 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500/20 border-slate-200"
+                      checked={form.is_free} 
+                      onChange={(e) => setForm({...form, is_free: e.target.checked})}
+                    />
+                    <span className="text-xs font-bold text-slate-600">Is Free</span>
+                  </label>
+                </div>
                 <button 
                   onClick={() => addMutation.mutate(form)}
                   disabled={!form.title || addMutation.isPending}

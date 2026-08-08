@@ -11,14 +11,15 @@ function EarningsAdmin() {
   const { data: stats } = useQuery({
     queryKey: ["admin-earnings"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: enrollments, error } = await supabase
         .from("enrollments")
         .select(`
           id,
           created_at,
-          payment_status,
-          status,
+          course_id,
           courses (
+            id,
+            title,
             price
           )
         `)
@@ -26,13 +27,29 @@ function EarningsAdmin() {
       
       if (error) throw error;
 
-      const totalRevenue = data?.reduce((sum, item) => {
-        const price = Array.isArray(item.courses) ? item.courses[0]?.price : (item.courses as any)?.price;
-        return sum + (Number(price) || 0);
-      }, 0) || 0;
-      const count = data?.length || 0;
-      
-      return { totalRevenue, count, transactions: data };
+      const courseStats: Record<string, { title: string, count: number, revenue: number }> = {};
+      let totalRevenue = 0;
+
+      enrollments?.forEach(item => {
+        const course = Array.isArray(item.courses) ? item.courses[0] : (item.courses as any);
+        if (!course) return;
+
+        const price = Number(course.price) || 0;
+        totalRevenue += price;
+
+        if (!courseStats[course.id]) {
+          courseStats[course.id] = { title: course.title, count: 0, revenue: 0 };
+        }
+        courseStats[course.id].count++;
+        courseStats[course.id].revenue += price;
+      });
+
+      return { 
+        totalRevenue, 
+        count: enrollments?.length || 0, 
+        courseStats: Object.values(courseStats).sort((a, b) => b.revenue - a.revenue),
+        transactions: enrollments 
+      };
     },
   });
 
@@ -78,6 +95,32 @@ function EarningsAdmin() {
            <p className="text-sm font-bold text-slate-400 mb-1 uppercase tracking-wider">Monthly Avg</p>
            <h3 className="text-2xl font-black text-slate-900">৳{(stats?.totalRevenue && stats?.totalRevenue > 0 ? Math.round(stats.totalRevenue / 1) : 0).toLocaleString()}</h3>
            <p className="text-xs text-slate-500 font-medium mt-2">Projection based on current data</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-50 flex justify-between items-center">
+           <h3 className="font-bold text-slate-900">Course-wise Performance</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50/50">
+              <tr>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-wider">Course Title</th>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-wider">Students</th>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-wider">Revenue</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {stats?.courseStats?.map((c: any) => (
+                <tr key={c.title} className="hover:bg-slate-50/50 transition">
+                  <td className="px-6 py-4 text-sm font-bold text-slate-900">{c.title}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-slate-600">{c.count}</td>
+                  <td className="px-6 py-4 text-sm font-black text-emerald-600">৳{c.revenue.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

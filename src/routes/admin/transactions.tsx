@@ -26,27 +26,41 @@ function TransactionsAdmin() {
   });
 
   const verifyMutation = useMutation({
-    mutationFn: async (req: any) => {
-      // 1. Mark request as verified
+    mutationFn: async ({ req, status, message }: { req: any; status: 'verified' | 'failed'; message?: string }) => {
+      // 1. Mark request status
       const { error: reqError } = await supabase
         .from("enrollment_requests")
-        .update({ status: 'verified' })
+        .update({ status })
         .eq("id", req.id);
       if (reqError) throw reqError;
 
-      // 2. Create enrollment record
-      const { error: enrError } = await supabase
-        .from("enrollments")
-        .insert({
-          profile_id: req.user_id, // assuming req.user_id exists
-          course_id: req.course_id,
-          status: 'active'
-        });
-      if (enrError) throw enrError;
+      if (status === 'verified') {
+        // 2. Create enrollment record
+        const { error: enrError } = await supabase
+          .from("enrollments")
+          .insert({
+            profile_id: req.user_id,
+            course_id: req.course_id,
+            status: 'active'
+          });
+        if (enrError) throw enrError;
+        
+        toast.success("Payment verified and enrollment unlocked!");
+        
+        const text = encodeURIComponent(message || `Hello ${req.full_name}, your payment for ${req.courses?.title} has been verified successfully. You can now access your course.`);
+        if (req.whatsapp || req.mobile) {
+          window.open(`https://wa.me/${req.whatsapp || req.mobile}?text=${text}`, '_blank');
+        }
+      } else {
+        toast.error("Transaction marked as failed");
+        const text = encodeURIComponent(message || `Hello ${req.full_name}, your payment for ${req.courses?.title} could not be verified. Please contact support with your Transaction ID: ${req.transaction_id}`);
+        if (req.whatsapp || req.mobile) {
+          window.open(`https://wa.me/${req.whatsapp || req.mobile}?text=${text}`, '_blank');
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-enrollment-requests"] });
-      toast.success("Payment verified and enrollment unlocked!");
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -91,10 +105,27 @@ function TransactionsAdmin() {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  {r.status !== 'verified' && (
-                    <button onClick={() => verifyMutation.mutate(r)} className="px-3 py-1.5 bg-brand text-white rounded-lg text-xs font-bold hover:scale-105 transition">
-                      Verify
-                    </button>
+                  {r.status === 'pending' && (
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          const msg = window.prompt("Success Message (WhatsApp):", `Hello ${r.full_name}, your payment for ${r.courses?.title} has been verified.`);
+                          verifyMutation.mutate({ req: r, status: 'verified', message: msg || undefined });
+                        }} 
+                        className="px-3 py-1.5 bg-brand text-white rounded-lg text-xs font-bold hover:bg-brand/90 transition"
+                      >
+                        Verify
+                      </button>
+                      <button 
+                        onClick={() => {
+                          const msg = window.prompt("Rejection Message (WhatsApp):", `Hello ${r.full_name}, we couldn't verify your transaction.`);
+                          verifyMutation.mutate({ req: r, status: 'failed', message: msg || undefined });
+                        }} 
+                        className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition"
+                      >
+                        Reject
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
