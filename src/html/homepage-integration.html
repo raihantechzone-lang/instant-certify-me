@@ -134,14 +134,15 @@
     const { data: courses } = await supabase
       .from("courses")
       .select("*")
-      .eq("is_published", true) // Use is_published column correctly
-
+      .eq("is_published", true)
       .order("created_at", { ascending: false });
+      
     if (!courses) {
         allCourses = [];
         renderFilteredCourses();
         return;
     }
+    
     const { data: contents } = await supabase.from("course_contents").select("id, course_id");
     const counts = {};
     (contents || []).forEach((c) => {
@@ -153,9 +154,10 @@
       name: c.category || "Course",
       title: c.title,
       category: (c.category || "versity").toLowerCase(),
-      price: c.price ?? c.discount_price ?? 0,
-      discountPrice: c.discount_price ?? c.price ?? 0,
+      price: c.discount_price ?? c.price ?? 0,
+      discountPrice: c.price ?? 0, // Invert if price is original
       thumbnail: c.thumbnail_url || "https://ik.imagekit.io/n7rgjyaxh/default-course.jpg",
+      videosCount: counts[c.id] || 0,
       videos: new Array(counts[c.id] || 0),
     }));
 

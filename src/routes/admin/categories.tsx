@@ -27,15 +27,20 @@ function CategoriesAdmin() {
 
   const addMutation = useMutation({
     mutationFn: async (name: string) => {
-      const { error } = await supabase.from("categories").insert({ name });
+      console.log("Adding category:", name);
+      const { data, error } = await supabase.from("categories").insert({ name }).select();
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
       toast.success("Category added successfully");
       setCatName("");
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: any) => {
+      console.error("Add category error:", err);
+      toast.error(err.message);
+    },
   });
 
   const deleteMutation = useMutation({
