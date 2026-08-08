@@ -101,36 +101,131 @@ function CoursesAdmin() {
           <p className="text-slate-500 font-medium">Create, edit, or remove courses from your platform.</p>
         </div>
         <button 
-          onClick={async () => {
-            const { data: categories } = await supabase.from("categories").select("name").order("name", { ascending: true });
-            const catList = categories?.map(c => c.name).join(", ") || "";
-            
-            const cat = window.prompt(`Select Category to create course in (${catList}):`);
-            if (!cat) return;
-            
-            const title = window.prompt("Enter Course Title:");
-            if (title) {
-               const { error } = await supabase.from("courses").insert({ 
-                 title, 
-                 price: 0, 
-                 category: cat,
-                 is_published: false
-               });
-               
-                if (error) {
-                  const msg = error.code === '42501' ? "Permission Denied: Admin role not detected." : error.message;
-                  toast.error(`Failed to create: ${msg}`);
-                } else {
-                 queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-                 toast.success("Course created as draft");
-               }
-            }
+          onClick={() => {
+            setEditingCourse(null);
+            setFormData({
+              title: "",
+              details: "",
+              price: "0",
+              discount_price: "0",
+              category: categories?.[0]?.name || "",
+              is_published: false
+            });
+            setIsModalOpen(true);
           }}
           className="flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-brand/20 hover:scale-105 transition active:scale-95"
         >
           <Plus size={20} /> Create New Course
         </button>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
+              <h3 className="text-xl font-black text-slate-900">
+                {editingCourse ? "Edit Course" : "Create New Course"}
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form 
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const data = {
+                  title: formData.title,
+                  details: formData.details,
+                  price: parseFloat(formData.price || "0"),
+                  discount_price: parseFloat(formData.discount_price || "0"),
+                  category: formData.category,
+                  is_published: formData.is_published
+                };
+
+                const res = editingCourse 
+                  ? await supabase.from("courses").update(data).eq("id", editingCourse.id)
+                  : await supabase.from("courses").insert(data);
+
+                if (res.error) {
+                  toast.error(res.error.message);
+                } else {
+                  queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+                  toast.success(editingCourse ? "Course updated" : "Course created");
+                  setIsModalOpen(false);
+                }
+              }}
+              className="p-8 space-y-4"
+            >
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Course Title</label>
+                <input 
+                  type="text" 
+                  required
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                  value={formData.title}
+                  onChange={e => setFormData({...formData, title: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Category</label>
+                <select 
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium appearance-none"
+                  value={formData.category}
+                  onChange={e => setFormData({...formData, category: e.target.value})}
+                >
+                  {categories?.map(cat => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
+                  {(!categories || categories.length === 0) && (
+                    <option value="">No categories available</option>
+                  )}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Original Price</label>
+                  <input 
+                    type="number" 
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                    value={formData.price}
+                    onChange={e => setFormData({...formData, price: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Discount Price</label>
+                  <input 
+                    type="number" 
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                    value={formData.discount_price}
+                    onChange={e => setFormData({...formData, discount_price: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 py-2">
+                <input 
+                  type="checkbox" 
+                  id="published"
+                  className="w-5 h-5 rounded border-slate-200 text-brand focus:ring-brand"
+                  checked={formData.is_published}
+                  onChange={e => setFormData({...formData, is_published: e.target.checked})}
+                />
+                <label htmlFor="published" className="text-sm font-bold text-slate-700">Publish immediately</label>
+              </div>
+
+              <button 
+                type="submit"
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4"
+              >
+                {editingCourse ? "Save Changes" : "Create Course"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
         <div className="flex-1 relative">
