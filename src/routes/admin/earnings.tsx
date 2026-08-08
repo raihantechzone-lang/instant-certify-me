@@ -25,7 +25,10 @@ function EarningsAdmin() {
       
       if (error) throw error;
 
-      const totalRevenue = data?.reduce((sum, item) => sum + (Number(item.courses?.price) || 0), 0) || 0;
+      const totalRevenue = data?.reduce((sum, item) => {
+        const price = Array.isArray(item.courses) ? item.courses[0]?.price : (item.courses as any)?.price;
+        return sum + (Number(price) || 0);
+      }, 0) || 0;
       const count = data?.length || 0;
       
       return { totalRevenue, count, transactions: data };
@@ -101,7 +104,7 @@ function EarningsAdmin() {
                     {tx.id.slice(0, 8)}...
                   </td>
                   <td className="px-6 py-4 text-sm font-black text-slate-900">
-                    ৳{tx.courses?.price || 0}
+                    ৳{(Array.isArray(tx.courses) ? tx.courses[0]?.price : tx.courses?.price) || 0}
                   </td>
                   <td className="px-6 py-4">
                     <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
