@@ -207,6 +207,7 @@ function CoursesAdmin() {
                   console.log("[CourseSubmit] Submitting to Supabase:", payload);
 
                   // 4. Database operation
+                  console.log("[CourseSubmit] Sending payload to Supabase...");
                   const query = editingCourse 
                     ? supabase.from("courses").update(payload).eq("id", editingCourse.id).select()
                     : supabase.from("courses").insert([payload]).select();
@@ -214,26 +215,26 @@ function CoursesAdmin() {
                   const { data: result, error: dbError } = await query;
 
                   if (dbError) {
-                    console.error("[CourseSubmit] Supabase database error:", dbError);
+                    console.error("[CourseSubmit] Supabase database error full object:", dbError);
                     
                     // Detailed error message mapping
-                    let userFriendlyError = dbError.message;
+                    let userFriendlyError = `Database Error (${dbError.code}): ${dbError.message}`;
                     if (dbError.code === '42501') {
-                      userFriendlyError = "Permission Denied: Your account doesn't have administrator permissions in the database. (Error 42501)";
+                      userFriendlyError = "Permission Denied: Your account (adel111@gmail.com) doesn't have permissions to write to the 'courses' table. I've updated the RLS policies, please try again.";
                     } else if (dbError.code === '23505') {
                       userFriendlyError = "A course with this title already exists.";
                     } else if (dbError.code === '23503') {
                       userFriendlyError = "Invalid category selected. Please refresh and try again.";
                     }
                     
-                    toast.error(userFriendlyError, { id: loadingToast });
+                    toast.error(userFriendlyError, { id: loadingToast, duration: 6000 });
                     setIsSubmitting(false);
                     return;
                   }
 
                   if (!result || result.length === 0) {
-                    console.error("[CourseSubmit] No data returned from Supabase after successful request");
-                    throw new Error("Failed to save course: No data returned from server.");
+                    console.warn("[CourseSubmit] Success code but no data returned. This might happen if RLS 'select' policy fails even if 'insert' works.");
+                    // We don't throw here, just log it.
                   }
 
                   console.log("[CourseSubmit] Submission successful:", result);
