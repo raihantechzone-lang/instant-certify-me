@@ -106,8 +106,8 @@
     await loadProfile();
     renderAuthState();
 
-    if (event === "SIGNED_IN" && window.location.pathname === "/") {
-       // Optional: small delay to let profile load/create
+    // Redirect to dashboard on successful login if on home page
+    if (event === "SIGNED_IN" && (window.location.pathname === "/" || window.location.pathname === "/index.html")) {
        setTimeout(() => {
          window.location.href = "/dashboard";
        }, 500);
