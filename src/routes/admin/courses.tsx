@@ -109,7 +109,7 @@ function CoursesAdmin() {
               details: "",
               price: "0",
               discount_price: "0",
-              category: categories?.[0]?.name || "",
+              category: categories && categories.length > 0 ? categories[0].name : "",
               thumbnail_url: "",
               is_published: false
             });
@@ -137,7 +137,7 @@ function CoursesAdmin() {
               onSubmit={async (e) => {
                 e.preventDefault();
                 try {
-                  const data = {
+                  const data: any = {
                     title: formData.title,
                     details: formData.details || null,
                     price: formData.price ? parseFloat(formData.price) : 0,
@@ -151,7 +151,7 @@ function CoursesAdmin() {
 
                   const { data: result, error } = editingCourse 
                     ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
-                    : await supabase.from("courses").insert(data).select();
+                    : await supabase.from("courses").insert([data]).select();
 
                   if (error) {
                     console.error("Supabase error:", error);
