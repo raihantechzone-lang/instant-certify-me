@@ -75,18 +75,22 @@ function CoursesAdmin() {
         </div>
         <button 
           onClick={async () => {
+            const { data: categories } = await supabase.from("categories").select("name");
+            const catList = categories?.map(c => c.name).join(", ") || "";
+            
+            const cat = window.prompt(`Select Category to create course in (${catList}):`);
+            if (!cat) return;
+            
             const title = window.prompt("Enter Course Title:");
             if (title) {
-               // Use a default category from existing categories or a standard string
                const { error } = await supabase.from("courses").insert({ 
                  title, 
                  price: 0, 
-                 category: 'Web Development', // Defaulting to a safe category string
+                 category: cat,
                  is_published: false
                });
                
                if (error) {
-                 console.error("Create course error:", error);
                  toast.error(`Failed to create: ${error.message}`);
                } else {
                  queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
@@ -153,33 +157,36 @@ function CoursesAdmin() {
                 <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
                     <div className="flex-1 flex flex-col gap-2">
                       <button 
-                        onClick={() => {
+                        onClick={async () => {
+                          const { data: categories } = await supabase.from("categories").select("name");
+                          const catList = categories?.map(c => c.name).join(", ") || "";
+                          
                           const newTitle = window.prompt("Update Course Title:", course.title);
+                          const newDetails = window.prompt("Update Course Details:", course.details || "");
                           const newPrice = window.prompt("Update Price:", course.price?.toString() || "0");
-                          const newCategory = window.prompt("Update Category:", course.category || "");
+                          const newDiscount = window.prompt("Update Discount Price:", course.discount_price?.toString() || "0");
+                          const newCategory = window.prompt(`Select Category (${catList}):`, course.category || "");
                           const publish = window.confirm(course.is_published ? "Unpublish this course?" : "Publish this course?");
                           
                           if (newTitle !== null) {
-                            const updateCourse = async () => {
-                              const { error } = await supabase
-                                .from("courses")
-                                .update({ 
-                                  title: newTitle, 
-                                  price: parseFloat(newPrice || "0"),
-                                  category: newCategory,
-                                  is_published: course.is_published ? !publish : publish
-                                })
-                                .eq("id", course.id);
-                              
-                              if (error) {
-                                console.error("Update error:", error);
-                                toast.error(`Error: ${error.message}`);
-                              } else {
-                                queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-                                toast.success("Course updated");
-                              }
-                            };
-                            updateCourse();
+                            const { error } = await supabase
+                              .from("courses")
+                              .update({ 
+                                title: newTitle, 
+                                details: newDetails,
+                                price: parseFloat(newPrice || "0"),
+                                discount_price: parseFloat(newDiscount || "0"),
+                                category: newCategory,
+                                is_published: course.is_published ? !publish : publish
+                              })
+                              .eq("id", course.id);
+                            
+                            if (error) {
+                              toast.error(`Error: ${error.message}`);
+                            } else {
+                              queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+                              toast.success("Course updated");
+                            }
                           }
                         }}
                         className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition ${course.is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}

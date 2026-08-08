@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminLogin } from "@/components/admin/AdminLogin";
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Star, FileText, Award, CalendarCheck, UserPlus, Medal, DollarSign, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Star, FileText, Award, CalendarCheck, UserPlus, Medal, DollarSign, ShieldCheck, Folders } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({
@@ -71,7 +71,7 @@ function AdminGuard() {
 
   const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Categories", href: "/admin/categories", icon: LayoutDashboard },
+    { name: "Categories", href: "/admin/categories", icon: Folders },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Course Content", href: "/admin/content", icon: FileText },
     { name: "Exams & Links", href: "/admin/exams", icon: FileText },
