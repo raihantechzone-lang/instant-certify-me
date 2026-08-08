@@ -131,6 +131,15 @@
   let searchQuery = '';
 
   async function loadCourses() {
+    // 1. Load Categories for the tabs
+    const { data: categoriesData } = await supabase
+      .from("categories")
+      .select("name")
+      .order("name", { ascending: true });
+    
+    renderCategoryTabs(categoriesData || []);
+
+    // 2. Load Courses
     const { data: courses } = await supabase
       .from("courses")
       .select("*")
@@ -190,6 +199,26 @@
           .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, () => showInterstitialAd())
           .subscribe();
     }
+  }
+
+  function renderCategoryTabs(categories) {
+    const tabsContainer = document.querySelector('.flex.flex-wrap.gap-3.mb-10.justify-center');
+    if (!tabsContainer) return;
+
+    // Preserve the "All" tab
+    const allTabHtml = `
+      <button id="tab-all" onclick="filterCourses('all')" class="tab-btn active px-6 py-2.5 rounded-full text-sm font-bold bg-white text-rs-dark shadow-sm hover:shadow-md transition duration-300 font-bengali">
+        সব কোর্স
+      </button>
+    `;
+
+    const categoryTabsHtml = categories.map(cat => `
+      <button id="tab-${cat.name.toLowerCase()}" onclick="filterCourses('${cat.name.toLowerCase()}')" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:bg-white hover:text-rs-dark hover:shadow-sm transition duration-300 font-bengali">
+        ${cat.name}
+      </button>
+    `).join('');
+
+    tabsContainer.innerHTML = allTabHtml + categoryTabsHtml;
   }
 
   function renderFilteredCourses() {
