@@ -202,18 +202,16 @@
   }
 
   function renderCategoryTabs(categories) {
-    const tabsContainer = document.querySelector('.flex.flex-wrap.gap-3.mb-10.justify-center');
+    const tabsContainer = document.querySelector('.flex.items-center.space-x-2.bg-gray-100\\/50.p-1\\.5.rounded-xl.border.border-gray-100.overflow-x-auto.hide-scrollbar');
     if (!tabsContainer) return;
 
     // Preserve the "All" tab
     const allTabHtml = `
-      <button id="tab-all" onclick="filterCourses('all')" class="tab-btn active px-6 py-2.5 rounded-full text-sm font-bold bg-white text-rs-dark shadow-sm hover:shadow-md transition duration-300 font-bengali">
-        সব কোর্স
-      </button>
+      <button id="tab-all" onclick="filterCourses('all')" class="tab-btn active px-5 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap bg-white text-rs-dark shadow-sm">All</button>
     `;
 
     const categoryTabsHtml = categories.map(cat => `
-      <button id="tab-${cat.name.toLowerCase()}" onclick="filterCourses('${cat.name.toLowerCase()}')" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:bg-white hover:text-rs-dark hover:shadow-sm transition duration-300 font-bengali">
+      <button id="tab-${cat.name.toLowerCase().replace(/\s+/g, '-')}" onclick="filterCourses('${cat.name.toLowerCase()}')" class="tab-btn px-5 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-rs-dark transition-all whitespace-nowrap">
         ${cat.name}
       </button>
     `).join('');
