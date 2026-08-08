@@ -24,8 +24,8 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseClient() {
-  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || process.env['SUPABASE_URL'] || 'https://placeholder.supabase.co';
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || process.env['SUPABASE_PUBLISHABLE_KEY'] || 'sb_publishable_placeholder';
+  const SUPABASE_URL = 'https://jouwcthdcjoegcqgwlpl.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Y1rY5LYRuDF9iqJNWS1blQ_9EqPBOp9';
 
   if (SUPABASE_URL === 'https://placeholder.supabase.co' || SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_placeholder') {
     console.warn('[Supabase] Missing environment variables. Using placeholder to prevent crash.');
