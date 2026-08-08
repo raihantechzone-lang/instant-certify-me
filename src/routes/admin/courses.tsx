@@ -145,8 +145,8 @@ function CoursesAdmin() {
                   const data: any = {
                     title: formData.title,
                     details: formData.details || null,
-                    price: formData.price ? parseFloat(formData.price) : 0,
-                    discount_price: formData.discount_price ? parseFloat(formData.discount_price) : null,
+                    price: isNaN(parseFloat(formData.price)) ? 0 : parseFloat(formData.price),
+                    discount_price: (formData.discount_price === "" || isNaN(parseFloat(formData.discount_price))) ? null : parseFloat(formData.discount_price),
                     category: formData.category || null,
                     thumbnail_url: formData.thumbnail_url || null,
                     is_published: !!formData.is_published
