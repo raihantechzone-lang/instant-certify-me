@@ -145,72 +145,103 @@ function CoursesAdmin() {
                 setIsSubmitting(true);
 
                 try {
+                  console.log("[CourseSubmit] Starting submission flow...");
+                  
+                  // 0. Check Auth Session
+                  const { data: { session }, error: authError } = await supabase.auth.getSession();
+                  if (authError) {
+                    console.error("[CourseSubmit] Auth session error:", authError);
+                    throw new Error(`Authentication error: ${authError.message}`);
+                  }
+                  
+                  if (!session) {
+                    console.error("[CourseSubmit] No active session found");
+                    throw new Error("You must be logged in as an admin to perform this action.");
+                  }
+                  
+                  console.log("[CourseSubmit] Auth verified for user:", session.user.id);
+
+                  // 1. Validation
                   if (!formData.title?.trim()) {
-                    toast.error("Course title is required", { id: loadingToast });
-                    setIsSubmitting(false);
-                    return;
+                    throw new Error("Course title is required");
+                  }
+                  if (!formData.category) {
+                    throw new Error("Please select a category");
                   }
 
                   let currentThumbnailUrl = formData.thumbnail_url;
 
-                  // 1. Upload thumbnail if a new one was selected
+                  // 2. Upload thumbnail if a new one was selected
                   if (selectedFile) {
+                    console.log("[CourseSubmit] Starting thumbnail upload...");
                     try {
                       setUploadingId('new');
                       currentThumbnailUrl = await uploadToImageKit(selectedFile, "/courses");
+                      console.log("[CourseSubmit] Thumbnail uploaded:", currentThumbnailUrl);
                       setFormData(prev => ({ ...prev, thumbnail_url: currentThumbnailUrl }));
                     } catch (uploadErr: any) {
-                      console.error("Thumbnail upload failed:", uploadErr);
-                      toast.error(`Thumbnail upload failed: ${uploadErr.message}`, { id: loadingToast });
-                      setIsSubmitting(false);
-                      setUploadingId(null);
-                      return;
+                      console.error("[CourseSubmit] Thumbnail upload failed:", uploadErr);
+                      throw new Error(`Thumbnail upload failed: ${uploadErr.message}`);
                     } finally {
                       setUploadingId(null);
                     }
                   }
                   
-                  // 2. Prepare database payload
-                  const data: any = {
+                  // 3. Prepare database payload
+                  const payload: any = {
                     title: formData.title.trim(),
                     details: formData.details?.trim() || null,
                     price: isNaN(parseFloat(formData.price)) ? 0 : parseFloat(formData.price),
                     discount_price: (formData.discount_price === "" || isNaN(parseFloat(formData.discount_price)) || parseFloat(formData.discount_price) === 0) ? null : parseFloat(formData.discount_price),
-                    category: formData.category || null,
+                    category: formData.category,
                     thumbnail_url: currentThumbnailUrl || null,
-                    is_published: !!formData.is_published
+                    is_published: !!formData.is_published,
+                    updated_at: new Date().toISOString()
                   };
 
-                  console.log("Submitting course data:", data);
-
-                  // 3. Database operation
-                  console.log("Starting Supabase request...");
-                  const query = editingCourse 
-                    ? supabase.from("courses").update(data).eq("id", editingCourse.id).select()
-                    : supabase.from("courses").insert([data]).select();
-                  
-                  const { data: result, error } = await query;
-
-                  if (error) {
-                    console.error("Supabase database error detail:", error);
-                    toast.error(`Error: ${error.message}`, { id: loadingToast });
-                    setIsSubmitting(false);
-                    return;
+                  if (!editingCourse) {
+                    payload.created_at = new Date().toISOString();
                   }
 
-                  console.log("Submission success:", result);
+                  console.log("[CourseSubmit] Submitting to Supabase:", payload);
+
+                  // 4. Database operation
+                  const query = editingCourse 
+                    ? supabase.from("courses").update(payload).eq("id", editingCourse.id).select()
+                    : supabase.from("courses").insert([payload]).select();
                   
-                  // 4. Cleanup and Refresh
-                  await queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-                  // Also invalidate public courses if applicable
-                  await queryClient.invalidateQueries({ queryKey: ["courses"] });
+                  const { data: result, error: dbError } = await query;
+
+                  if (dbError) {
+                    console.error("[CourseSubmit] Supabase database error:", dbError);
+                    // Handle specific RLS errors
+                    if (dbError.code === '42501') {
+                      throw new Error("Permission Denied: Your account doesn't have permission to save courses. Please ensure you are an admin.");
+                    }
+                    throw new Error(`Database Error (${dbError.code}): ${dbError.message}`);
+                  }
+
+                  if (!result || result.length === 0) {
+                    console.error("[CourseSubmit] No data returned from Supabase after successful request");
+                    throw new Error("Failed to save course: No data returned from server.");
+                  }
+
+                  console.log("[CourseSubmit] Submission successful:", result);
+                  
+                  // 5. Cleanup and Refresh
+                  await Promise.all([
+                    queryClient.invalidateQueries({ queryKey: ["admin-courses"] }),
+                    queryClient.invalidateQueries({ queryKey: ["courses"] })
+                  ]);
                   
                   toast.success(editingCourse ? "Course updated successfully" : "Course created successfully", { id: loadingToast });
                   setIsModalOpen(false);
                   setSelectedFile(null);
+                  setEditingCourse(null);
                 } catch (err: any) {
-                  console.error("Final form submission error:", err);
+                  console.error("[CourseSubmit] Fatal Error:", err);
                   toast.error(err.message || "An unexpected error occurred", { id: loadingToast });
+                  // We explicitly DO NOT reset isModalOpen or formData here so the user can fix and retry
                 } finally {
                   setIsSubmitting(false);
                 }
