@@ -80,7 +80,7 @@ function CoursesAdmin() {
         </div>
         <button 
           onClick={async () => {
-            const { data: categories } = await supabase.from("categories").select("name");
+            const { data: categories } = await supabase.from("categories").select("name").order("name", { ascending: true });
             const catList = categories?.map(c => c.name).join(", ") || "";
             
             const cat = window.prompt(`Select Category to create course in (${catList}):`);
@@ -164,7 +164,7 @@ function CoursesAdmin() {
                     <div className="flex-1 flex flex-col gap-2">
                       <button 
                         onClick={async () => {
-                          const { data: categories } = await supabase.from("categories").select("name");
+                          const { data: categories } = await supabase.from("categories").select("name").order("name", { ascending: true });
                           const catList = categories?.map(c => c.name).join(", ") || "";
                           
                           const newTitle = window.prompt("Update Course Title:", course.title);
