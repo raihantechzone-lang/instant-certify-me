@@ -32,6 +32,9 @@ function CategoriesAdmin() {
       const { data, error } = await supabase.from("categories").insert({ name }).select();
       if (error) {
         console.error("Insert error details:", error);
+        if (error.code === '42501') {
+          throw new Error("Permission Denied: You are not recognized as an admin by the database. Please contact support or re-login.");
+        }
         throw error;
       }
       return data;
@@ -53,6 +56,9 @@ function CategoriesAdmin() {
       const { error } = await supabase.from("categories").delete().eq("id", id);
       if (error) {
         console.error("Delete error details:", error);
+        if (error.code === '42501') {
+          throw new Error("Permission Denied: You cannot delete this category. Make sure you are logged in as an admin.");
+        }
         throw error;
       }
     },
