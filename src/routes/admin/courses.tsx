@@ -139,19 +139,19 @@ function CoursesAdmin() {
                 try {
                   const data = {
                     title: formData.title,
-                    details: formData.details,
-                    price: parseFloat(formData.price || "0"),
-                    discount_price: parseFloat(formData.discount_price || "0"),
-                    category: formData.category,
-                    thumbnail_url: formData.thumbnail_url,
-                    is_published: formData.is_published
+                    details: formData.details || null,
+                    price: formData.price ? parseFloat(formData.price) : 0,
+                    discount_price: formData.discount_price ? parseFloat(formData.discount_price) : null,
+                    category: formData.category || null,
+                    thumbnail_url: formData.thumbnail_url || null,
+                    is_published: !!formData.is_published
                   };
 
                   console.log("Submitting course data:", data);
 
                   const { data: result, error } = editingCourse 
                     ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
-                    : await supabase.from("courses").insert(data).select();
+                    : await supabase.from("courses").insert([data]).select();
 
                   if (error) {
                     console.error("Supabase error:", error);
