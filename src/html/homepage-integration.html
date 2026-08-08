@@ -84,10 +84,34 @@
     return !!data;
   }
 
-  supabase.auth.onAuthStateChange(async (_e, session) => {
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    const isFirstTime = !currentUser && session?.user;
     currentUser = session?.user ?? null;
+    
+    if (isFirstTime) {
+      // Check if profile exists, if not create one (for Google OAuth/Signup)
+      const { data: profile } = await supabase.from("profiles").select("id").eq("id", currentUser.id).maybeSingle();
+      if (!profile) {
+        const fullName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || "Student";
+        const rollNumber = "GL" + Math.floor(100000 + Math.random() * 899999);
+        await supabase.from("profiles").insert({
+          id: currentUser.id,
+          full_name: fullName,
+          roll_number: rollNumber,
+          avatar_url: currentUser.user_metadata?.avatar_url
+        });
+      }
+    }
+
     await loadProfile();
     renderAuthState();
+
+    // Redirect to dashboard on successful login if on home page
+    if (event === "SIGNED_IN" && (window.location.pathname === "/" || window.location.pathname === "/index.html")) {
+       setTimeout(() => {
+         window.location.href = "/dashboard";
+       }, 500);
+    }
   });
 
   /* ---------- database: site settings ---------- */
@@ -600,11 +624,29 @@
     }
   };
 
-  window.signInWithGoogle = () =>
-    supabase.auth.signInWithOAuth({
+  window.signInWithGoogle = async () => {
+    const btn = document.querySelector('#google-auth-container button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting...';
+    btn.disabled = true;
+
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin + "/dashboard" },
+      options: { 
+        redirectTo: window.location.origin + "/dashboard",
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
+      },
     });
+
+    if (error) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      window.showToast(error.message, "Google Login Error");
+    }
+  };
 
   window.goToDashboard = function () {
     window.location.href = currentUser ? "/dashboard" : "/auth?mode=login";
