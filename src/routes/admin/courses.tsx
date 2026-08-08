@@ -147,45 +147,35 @@ function CoursesAdmin() {
                 try {
                   console.log("[CourseSubmit] Starting submission flow...");
                   
-                  // 0. Check Auth Session
-                  console.log("[CourseSubmit] Checking auth session...");
+                  // 1. Check Auth Session
                   const { data: { session }, error: authError } = await supabase.auth.getSession();
+                  if (authError) throw new Error(`Authentication Lookup Failed: ${authError.message}`);
+                  if (!session) throw new Error("Authentication session missing. Please log in again.");
                   
-                  if (authError) {
-                    console.error("[CourseSubmit] Auth session lookup error:", authError);
-                    throw new Error(`Authentication Lookup Failed: ${authError.message}`);
-                  }
-                  
-                  if (!session) {
-                    console.error("[CourseSubmit] No active session found");
-                    throw new Error("CRITICAL: No active authentication session found. Please log in again. (Check if cookies/localStorage are blocked)");
-                  }
-                  
-                  console.log("[CourseSubmit] Auth session active for:", session.user.email);
-                  console.log("[CourseSubmit] User ID:", session.user.id);
+                  console.log("[CourseSubmit] User:", session.user.email);
 
-                  // 1. Validation
+                  // 2. Validation
                   if (!formData.title?.trim()) throw new Error("Course title is required");
                   if (!formData.category) throw new Error("Please select a category");
 
                   let currentThumbnailUrl = formData.thumbnail_url;
 
-                  // 2. Upload thumbnail
+                  // 3. Upload thumbnail (Independent Step)
                   if (selectedFile) {
-                    console.log("[CourseSubmit] Starting thumbnail upload for file:", selectedFile.name);
+                    console.log("[CourseSubmit] Uploading thumbnail to ImageKit...");
                     try {
                       setUploadingId('new');
                       currentThumbnailUrl = await uploadToImageKit(selectedFile, "/courses");
-                      console.log("[CourseSubmit] Thumbnail uploaded successfully:", currentThumbnailUrl);
+                      console.log("[CourseSubmit] ImageKit success:", currentThumbnailUrl);
                     } catch (uploadErr: any) {
-                      console.error("[CourseSubmit] Thumbnail upload failure:", uploadErr);
-                      throw new Error(`THUMBNAIL UPLOAD FAILED: ${uploadErr.message}. The course record was not created.`);
+                      console.error("[CourseSubmit] ImageKit failure:", uploadErr);
+                      throw new Error(`THUMBNAIL UPLOAD FAILED: ${uploadErr.message}`);
                     } finally {
                       setUploadingId(null);
                     }
                   }
                   
-                  // 3. Prepare database payload
+                  // 4. Prepare Payload
                   const payload: any = {
                     title: formData.title.trim(),
                     details: formData.details?.trim() || null,
@@ -194,16 +184,11 @@ function CoursesAdmin() {
                     category: formData.category,
                     thumbnail_url: currentThumbnailUrl || null,
                     is_published: !!formData.is_published,
-                    updated_at: new Date().toISOString()
                   };
 
-                  if (!editingCourse) {
-                    payload.created_at = new Date().toISOString();
-                  }
+                  console.log("[CourseSubmit] INSERT Payload:", JSON.stringify(payload, null, 2));
 
-                  console.log("[CourseSubmit] Attempting Supabase INSERT/UPDATE with payload:", JSON.stringify(payload, null, 2));
-
-                  // 4. Database operation
+                  // 5. Database Operation
                   const query = editingCourse 
                     ? supabase.from("courses").update(payload).eq("id", editingCourse.id).select()
                     : supabase.from("courses").insert([payload]).select();
@@ -211,37 +196,41 @@ function CoursesAdmin() {
                   const { data: result, error: dbError } = await query;
 
                   if (dbError) {
-                    console.error("[CourseSubmit] SUPABASE DATABASE ERROR:", dbError);
-                    
-                    // Expose the EXACT error to the user
-                    let specificError = `DATABASE ERROR: [${dbError.code}] ${dbError.message}`;
-                    if (dbError.details) specificError += ` | Details: ${dbError.details}`;
-                    if (dbError.hint) specificError += ` | Hint: ${dbError.hint}`;
-                    
-                    throw new Error(specificError);
+                    console.error("[CourseSubmit] Supabase DB Error:", dbError);
+                    throw new Error(`DATABASE ERROR: [${dbError.code}] ${dbError.message}${dbError.hint ? ` | Hint: ${dbError.hint}` : ""}`);
                   }
 
                   if (!result || result.length === 0) {
-                    console.warn("[CourseSubmit] Query returned no data. Check if RLS SELECT policy is blocking the return.");
-                    // If insert worked but select failed, we still count as success but warn
+                    console.warn("[CourseSubmit] Success but no data returned (RLS?)");
                   } else {
-                    console.log("[CourseSubmit] Database operation successful. Returned record:", result[0]);
+                    console.log("[CourseSubmit] Success:", result[0]);
                   }
                   
-                  // 5. Cleanup and Refresh
+                  // 6. Finalize on SUCCESS ONLY
                   await Promise.all([
                     queryClient.invalidateQueries({ queryKey: ["admin-courses"] }),
                     queryClient.invalidateQueries({ queryKey: ["courses"] })
                   ]);
                   
                   toast.success(editingCourse ? "Course updated successfully" : "Course created successfully", { id: loadingToast });
+                  
+                  // Reset state ONLY on success
                   setIsModalOpen(false);
                   setSelectedFile(null);
                   setEditingCourse(null);
+                  setFormData({
+                    title: "",
+                    details: "",
+                    price: "0",
+                    discount_price: "0",
+                    category: categories && categories.length > 0 ? categories[0].name : "",
+                    thumbnail_url: "",
+                    is_published: true
+                  });
                 } catch (err: any) {
-                  console.error("[CourseSubmit] Fatal Error:", err);
-                  toast.error(err.message || "An unexpected error occurred", { id: loadingToast });
-                  // We explicitly DO NOT reset isModalOpen or formData here so the user can fix and retry
+                  console.error("[CourseSubmit] Error:", err);
+                  // Keep modal open and values intact on failure
+                  toast.error(err.message || "An unexpected error occurred", { id: loadingToast, duration: 6000 });
                 } finally {
                   setIsSubmitting(false);
                 }
