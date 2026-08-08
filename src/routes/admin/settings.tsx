@@ -88,7 +88,7 @@ function SettingsAdmin() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+          <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Globe size={20} className="text-brand" /> General Configuration
             </h3>
@@ -129,7 +129,7 @@ function SettingsAdmin() {
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+          <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Palette size={20} className="text-brand" /> Branding & Visuals
             </h3>
@@ -155,7 +155,7 @@ function SettingsAdmin() {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm sticky top-8 space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm sticky top-8 space-y-6">
              <div className="p-4 rounded-2xl bg-brand/5 border border-brand/10">
                 <h4 className="text-sm font-black text-brand uppercase tracking-widest mb-2 flex items-center gap-2">
                    <Shield size={14} /> Security Status

@@ -117,27 +117,27 @@ function CoursesAdmin() {
           [1,2,3].map(i => <div key={i} className="h-64 rounded-[2rem] bg-slate-100 animate-pulse" />)
         ) : (
           filteredCourses?.map((course) => (
-            <div key={course.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden group">
-              <div className="aspect-video relative overflow-hidden bg-slate-100">
+            <div key={course.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-md transition duration-300">
+              <div className="aspect-video relative overflow-hidden bg-slate-50">
                 {course.thumbnail_url ? (
-                  <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
+                  <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-105" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-300">
+                  <div className="w-full h-full flex items-center justify-center text-slate-200">
                     <BookOpen size={48} />
                   </div>
                 )}
                 <div className="absolute top-4 left-4">
-                   <span className="px-3 py-1 bg-white/90 backdrop-blur shadow-sm rounded-lg text-xs font-bold text-slate-900">
+                   <span className="px-3 py-1 bg-white/90 backdrop-blur shadow-sm rounded-lg text-xs font-bold text-slate-900 border border-slate-100">
                      {course.categories?.name || course.category || "Uncategorized"}
                    </span>
                 </div>
               </div>
               <div className="p-6">
-                <h3 className="font-bold text-slate-900 line-clamp-2 mb-2 group-hover:text-brand transition">{course.title}</h3>
+                <h3 className="font-bold text-slate-900 line-clamp-1 mb-2 group-hover:text-indigo-600 transition">{course.title}</h3>
                 <div className="flex items-center justify-between mb-4">
                    <div className="flex flex-col">
                      <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Price</span>
-                     <span className="font-black text-brand text-lg">৳{course.price}</span>
+                     <span className="font-black text-slate-900 text-lg">৳{course.price}</span>
                    </div>
                    {course.discount_price && (
                      <div className="flex flex-col text-right">
@@ -177,7 +177,7 @@ function CoursesAdmin() {
                           updateCourse();
                         }
                       }}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition ${course.is_published ? 'bg-brand/10 text-brand' : 'bg-slate-50 text-slate-600'}`}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition ${course.is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}
                     >
                       <Edit2 size={16} /> {course.is_published ? 'Published' : 'Draft'}
                     </button>

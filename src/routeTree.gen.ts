@@ -32,12 +32,20 @@ import { Route as InstructorAnalyticsRouteImport } from './routes/instructor.ana
 import { Route as EnrollCourseIdRouteImport } from './routes/enroll.$courseId'
 import { Route as DetailsCourseIdRouteImport } from './routes/details.$courseId'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
+import { Route as AdminTransactionsRouteImport } from './routes/admin/transactions'
 import { Route as AdminStudentsRouteImport } from './routes/admin/students'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
+import { Route as AdminResultsRouteImport } from './routes/admin/results'
+import { Route as AdminExamsRouteImport } from './routes/admin/exams'
+import { Route as AdminEnrollmentsRouteImport } from './routes/admin/enrollments'
+import { Route as AdminEarningsRouteImport } from './routes/admin/earnings'
 import { Route as AdminCoursesRouteImport } from './routes/admin/courses'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
+import { Route as AdminCertifiedRouteImport } from './routes/admin/certified'
 import { Route as AdminCertificatesRouteImport } from './routes/admin/certificates'
+import { Route as AdminCategoriesRouteImport } from './routes/admin/categories'
+import { Route as AdminAttendanceRouteImport } from './routes/admin/attendance'
 import { Route as InstructorCoursesCourseIdRouteImport } from './routes/instructor.courses.$courseId'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -155,6 +163,11 @@ const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
   path: '/courses/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTransactionsRoute = AdminTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminStudentsRoute = AdminStudentsRouteImport.update({
   id: '/students',
   path: '/students',
@@ -170,6 +183,26 @@ const AdminReviewsRoute = AdminReviewsRouteImport.update({
   path: '/reviews',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminResultsRoute = AdminResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminExamsRoute = AdminExamsRouteImport.update({
+  id: '/exams',
+  path: '/exams',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEnrollmentsRoute = AdminEnrollmentsRouteImport.update({
+  id: '/enrollments',
+  path: '/enrollments',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEarningsRoute = AdminEarningsRouteImport.update({
+  id: '/earnings',
+  path: '/earnings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCoursesRoute = AdminCoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -180,9 +213,24 @@ const AdminContentRoute = AdminContentRouteImport.update({
   path: '/content',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCertifiedRoute = AdminCertifiedRouteImport.update({
+  id: '/certified',
+  path: '/certified',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCertificatesRoute = AdminCertificatesRouteImport.update({
   id: '/certificates',
   path: '/certificates',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAttendanceRoute = AdminAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
   getParentRoute: () => AdminRoute,
 } as any)
 const InstructorCoursesCourseIdRoute =
@@ -204,12 +252,20 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/categories': typeof AdminCategoriesRoute
   '/admin/certificates': typeof AdminCertificatesRoute
+  '/admin/certified': typeof AdminCertifiedRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/earnings': typeof AdminEarningsRoute
+  '/admin/enrollments': typeof AdminEnrollmentsRoute
+  '/admin/exams': typeof AdminExamsRoute
+  '/admin/results': typeof AdminResultsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
+  '/admin/transactions': typeof AdminTransactionsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/details/$courseId': typeof DetailsCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
@@ -235,12 +291,20 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/categories': typeof AdminCategoriesRoute
   '/admin/certificates': typeof AdminCertificatesRoute
+  '/admin/certified': typeof AdminCertifiedRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/earnings': typeof AdminEarningsRoute
+  '/admin/enrollments': typeof AdminEnrollmentsRoute
+  '/admin/exams': typeof AdminExamsRoute
+  '/admin/results': typeof AdminResultsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
+  '/admin/transactions': typeof AdminTransactionsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/details/$courseId': typeof DetailsCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
@@ -268,12 +332,20 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/categories': typeof AdminCategoriesRoute
   '/admin/certificates': typeof AdminCertificatesRoute
+  '/admin/certified': typeof AdminCertifiedRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/courses': typeof AdminCoursesRoute
+  '/admin/earnings': typeof AdminEarningsRoute
+  '/admin/enrollments': typeof AdminEnrollmentsRoute
+  '/admin/exams': typeof AdminExamsRoute
+  '/admin/results': typeof AdminResultsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
+  '/admin/transactions': typeof AdminTransactionsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/details/$courseId': typeof DetailsCourseIdRoute
   '/enroll/$courseId': typeof EnrollCourseIdRoute
@@ -302,12 +374,20 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/attendance'
+    | '/admin/categories'
     | '/admin/certificates'
+    | '/admin/certified'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/earnings'
+    | '/admin/enrollments'
+    | '/admin/exams'
+    | '/admin/results'
     | '/admin/reviews'
     | '/admin/settings'
     | '/admin/students'
+    | '/admin/transactions'
     | '/courses/$courseId'
     | '/details/$courseId'
     | '/enroll/$courseId'
@@ -333,12 +413,20 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/attendance'
+    | '/admin/categories'
     | '/admin/certificates'
+    | '/admin/certified'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/earnings'
+    | '/admin/enrollments'
+    | '/admin/exams'
+    | '/admin/results'
     | '/admin/reviews'
     | '/admin/settings'
     | '/admin/students'
+    | '/admin/transactions'
     | '/courses/$courseId'
     | '/details/$courseId'
     | '/enroll/$courseId'
@@ -365,12 +453,20 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reviews'
     | '/wishlist'
+    | '/admin/attendance'
+    | '/admin/categories'
     | '/admin/certificates'
+    | '/admin/certified'
     | '/admin/content'
     | '/admin/courses'
+    | '/admin/earnings'
+    | '/admin/enrollments'
+    | '/admin/exams'
+    | '/admin/results'
     | '/admin/reviews'
     | '/admin/settings'
     | '/admin/students'
+    | '/admin/transactions'
     | '/courses/$courseId'
     | '/details/$courseId'
     | '/enroll/$courseId'
@@ -568,6 +664,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/transactions': {
+      id: '/admin/transactions'
+      path: '/transactions'
+      fullPath: '/admin/transactions'
+      preLoaderRoute: typeof AdminTransactionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/students': {
       id: '/admin/students'
       path: '/students'
@@ -589,6 +692,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReviewsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/results': {
+      id: '/admin/results'
+      path: '/results'
+      fullPath: '/admin/results'
+      preLoaderRoute: typeof AdminResultsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/exams': {
+      id: '/admin/exams'
+      path: '/exams'
+      fullPath: '/admin/exams'
+      preLoaderRoute: typeof AdminExamsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/enrollments': {
+      id: '/admin/enrollments'
+      path: '/enrollments'
+      fullPath: '/admin/enrollments'
+      preLoaderRoute: typeof AdminEnrollmentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/earnings': {
+      id: '/admin/earnings'
+      path: '/earnings'
+      fullPath: '/admin/earnings'
+      preLoaderRoute: typeof AdminEarningsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/courses': {
       id: '/admin/courses'
       path: '/courses'
@@ -603,11 +734,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/certified': {
+      id: '/admin/certified'
+      path: '/certified'
+      fullPath: '/admin/certified'
+      preLoaderRoute: typeof AdminCertifiedRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/certificates': {
       id: '/admin/certificates'
       path: '/certificates'
       fullPath: '/admin/certificates'
       preLoaderRoute: typeof AdminCertificatesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/attendance': {
+      id: '/admin/attendance'
+      path: '/attendance'
+      fullPath: '/admin/attendance'
+      preLoaderRoute: typeof AdminAttendanceRouteImport
       parentRoute: typeof AdminRoute
     }
     '/instructor/courses/$courseId': {
@@ -621,22 +773,38 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAttendanceRoute: typeof AdminAttendanceRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCertificatesRoute: typeof AdminCertificatesRoute
+  AdminCertifiedRoute: typeof AdminCertifiedRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminCoursesRoute: typeof AdminCoursesRoute
+  AdminEarningsRoute: typeof AdminEarningsRoute
+  AdminEnrollmentsRoute: typeof AdminEnrollmentsRoute
+  AdminExamsRoute: typeof AdminExamsRoute
+  AdminResultsRoute: typeof AdminResultsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
+  AdminTransactionsRoute: typeof AdminTransactionsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAttendanceRoute: AdminAttendanceRoute,
+  AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCertificatesRoute: AdminCertificatesRoute,
+  AdminCertifiedRoute: AdminCertifiedRoute,
   AdminContentRoute: AdminContentRoute,
   AdminCoursesRoute: AdminCoursesRoute,
+  AdminEarningsRoute: AdminEarningsRoute,
+  AdminEnrollmentsRoute: AdminEnrollmentsRoute,
+  AdminExamsRoute: AdminExamsRoute,
+  AdminResultsRoute: AdminResultsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStudentsRoute: AdminStudentsRoute,
+  AdminTransactionsRoute: AdminTransactionsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -696,13 +864,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

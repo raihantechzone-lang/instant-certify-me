@@ -91,15 +91,13 @@ function ContentAdmin() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-3xl font-black text-slate-900">Content & Exams</h2>
-        <p className="text-slate-500 font-medium">Manage lessons, videos, PDFs, and live classes.</p>
-      </div>
-
-      <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-        <label className="block text-sm font-bold text-slate-500 mb-2">Select Course to Manage</label>
+      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight mb-2">Curriculum Builder</h2>
+          <p className="text-sm text-slate-500">ভিডিও যোগ করার জন্য একটি কোর্স নির্বাচন করুন।</p>
+        </div>
         <select 
-          className="w-full p-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-bold"
+          className="w-full md:w-64 p-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 transition font-bold text-sm"
           value={selectedCourseId}
           onChange={(e) => setSelectedCourseId(e.target.value)}
         >
@@ -109,21 +107,19 @@ function ContentAdmin() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm sticky top-8">
-             <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-               <Plus size={20} className="text-brand" /> Add New Lesson
-             </h3>
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm sticky top-8">
+             <h3 className="font-bold text-slate-900 mb-4">Add New Video</h3>
              <div className="space-y-4">
                 <input 
                   type="text" placeholder="Lesson Title" 
-                  className="w-full p-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 transition font-medium"
                   value={form.title} onChange={(e) => setForm({...form, title: e.target.value})}
                 />
                 <div className="relative">
                   <Video size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
                     type="text" placeholder="YouTube URL" 
-                    className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                     className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 transition font-medium"
                     value={form.youtube_url} onChange={(e) => setForm({...form, youtube_url: e.target.value})}
                   />
                 </div>
@@ -131,7 +127,7 @@ function ContentAdmin() {
                   <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
                     type="text" placeholder="PDF Note URL (Cloudinary)" 
-                    className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                     className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 transition font-medium"
                     value={form.pdf_url} onChange={(e) => setForm({...form, pdf_url: e.target.value})}
                   />
                 </div>
@@ -139,7 +135,7 @@ function ContentAdmin() {
                   <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
                     type="text" placeholder="Live Class Link" 
-                    className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                     className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 transition font-medium"
                     value={form.live_url} onChange={(e) => setForm({...form, live_url: e.target.value})}
                   />
                 </div>
@@ -147,14 +143,14 @@ function ContentAdmin() {
                   <CheckSquare size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
                     type="text" placeholder="Exam Link" 
-                    className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium"
+                    className="w-full pl-10 pr-3 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 transition font-medium"
                     value={form.exam_link} onChange={(e) => setForm({...form, exam_link: e.target.value})}
                   />
                 </div>
                 <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 cursor-pointer group">
                   <input 
                     type="checkbox" 
-                    className="w-5 h-5 rounded-lg text-brand focus:ring-brand/20 border-none"
+                    className="w-5 h-5 rounded-lg text-indigo-600 focus:ring-indigo-500/20 border-slate-200"
                     checked={form.exam_enabled} 
                     onChange={(e) => setForm({...form, exam_enabled: e.target.checked})}
                   />
@@ -163,7 +159,7 @@ function ContentAdmin() {
                 <button 
                   onClick={() => addMutation.mutate(form)}
                   disabled={!form.title || addMutation.isPending}
-                  className="w-full py-4 bg-brand text-white rounded-2xl font-black shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition disabled:opacity-50 disabled:scale-100"
+                  className="w-full py-3.5 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-500/20 hover:bg-red-700 active:scale-95 transition disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
                 >
                   {addMutation.isPending ? "Adding..." : "Add Content"}
                 </button>
@@ -172,7 +168,7 @@ function ContentAdmin() {
         </div>
 
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
              <h3 className="text-lg font-bold text-slate-900 mb-6">Curriculum Structure</h3>
              {isLoading ? (
                <div className="space-y-3">
