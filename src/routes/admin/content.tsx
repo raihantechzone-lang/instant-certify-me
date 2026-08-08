@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Video, FileText, Globe, Plus, Trash2, Edit2, Link as LinkIcon, Calendar, CheckSquare, Upload, Loader2, Play } from "lucide-react";
+import { Video, FileText, Globe, Plus, Trash2, Edit2, Link as LinkIcon, Calendar, CheckSquare, Upload, Loader2, Play, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { uploadToImageKit } from "@/lib/imagekit";
@@ -229,58 +229,87 @@ function ContentAdmin() {
              ) : contents?.length === 0 ? (
                <p className="text-center py-10 text-slate-400 font-medium">No lessons added yet for this course.</p>
              ) : (
-               <div className="space-y-3">
-                 {contents?.map((content, idx) => (
-                   <div key={content.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-transparent hover:border-brand/20 transition group">
-                      <div className="flex items-center gap-4">
-                         <span className="text-sm font-black text-slate-300">#{idx + 1}</span>
-                         <div>
-                            <p className="font-bold text-slate-900">{content.title}</p>
-                            <div className="flex items-center gap-3 mt-1">
-                               {content.youtube_url && <Video size={14} className="text-blue-500" />}
-                               {content.pdf_url && <FileText size={14} className="text-orange-500" />}
-                               {content.live_url && <Globe size={14} className="text-emerald-500" />}
-                               {content.exam_link && <CheckSquare size={14} className="text-indigo-500" />}
-                            </div>
-                         </div>
-                   </div>
-                   <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => {
-                          const newTitle = window.prompt("Edit Lesson Title:", content.title);
-                          const newYoutube = window.prompt("Edit YouTube URL:", content.youtube_url || "");
-                          if (newTitle !== null) {
-                            const updateLesson = async () => {
-                              const { error } = await supabase
-                                .from("course_contents")
-                                .update({ title: newTitle, youtube_url: newYoutube })
-                                .eq("id", content.id);
-                              
-                              if (error) {
-                                console.error("Lesson update error:", error);
-                                toast.error(`Error: ${error.message}`);
-                              } else {
-                                queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
-                                toast.success("Lesson updated");
-                              }
-                            };
-                            updateLesson();
-                          }
-                        }}
-                        className="p-2 rounded-lg text-slate-300 hover:text-brand hover:bg-brand/10 transition opacity-0 group-hover:opacity-100"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button 
-                        onClick={() => window.confirm("Delete this lesson?") && deleteMutation.mutate(content.id)}
-                        className="p-2 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                   </div>
-                   </div>
-                 ))}
-               </div>
+                <div className="space-y-3">
+                  {contents?.map((content, idx) => (
+                    <div key={content.id} className="flex flex-col p-4 rounded-2xl bg-slate-50 border border-transparent hover:border-brand/20 transition group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                           <span className="text-sm font-black text-slate-300">#{idx + 1}</span>
+                           <div>
+                              <p className="font-bold text-slate-900">{content.title}</p>
+                              <div className="flex items-center gap-3 mt-1">
+                                 {content.youtube_url && <Video size={14} className="text-blue-500" />}
+                                 {content.pdf_url && <FileText size={14} className="text-orange-500" />}
+                                 {content.live_url && <Globe size={14} className="text-emerald-500" />}
+                                 {content.exam_link && <CheckSquare size={14} className="text-indigo-500" />}
+                              </div>
+                           </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           {content.youtube_url && (
+                             <button 
+                               onClick={() => setPreviewUrl(content.youtube_url || "")}
+                               className="p-2 rounded-lg text-brand hover:bg-brand/10 transition"
+                               title="Preview video"
+                             >
+                               <Play size={18} />
+                             </button>
+                           )}
+                           <button 
+                             onClick={() => {
+                               const newTitle = window.prompt("Edit Lesson Title:", content.title);
+                               const newYoutube = window.prompt("Edit YouTube URL:", content.youtube_url || "");
+                               if (newTitle !== null) {
+                                 const updateLesson = async () => {
+                                   const { error } = await supabase
+                                     .from("course_contents")
+                                     .update({ title: newTitle, youtube_url: newYoutube })
+                                     .eq("id", content.id);
+                                   
+                                   if (error) {
+                                     console.error("Lesson update error:", error);
+                                     toast.error(`Error: ${error.message}`);
+                                   } else {
+                                     queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
+                                     toast.success("Lesson updated");
+                                   }
+                                 };
+                                 updateLesson();
+                               }
+                             }}
+                             className="p-2 rounded-lg text-slate-300 hover:text-brand hover:bg-brand/10 transition opacity-0 group-hover:opacity-100"
+                           >
+                             <Edit2 size={18} />
+                           </button>
+                           <button 
+                             onClick={() => window.confirm("Delete this lesson?") && deleteMutation.mutate(content.id)}
+                             className="p-2 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition opacity-0 group-hover:opacity-100"
+                           >
+                             <Trash2 size={18} />
+                           </button>
+                        </div>
+                      </div>
+                      
+                      {previewUrl === content.youtube_url && content.youtube_url && getYoutubeId(content.youtube_url) && (
+                        <div className="mt-4 aspect-video rounded-xl overflow-hidden bg-black border border-slate-200 animate-in zoom-in-95 duration-200">
+                          <iframe 
+                            className="w-full h-full"
+                            src={`https://www.youtube.com/embed/${getYoutubeId(content.youtube_url)}?autoplay=1`}
+                            title="Video preview"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                          <button 
+                            onClick={() => setPreviewUrl("")}
+                            className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black transition"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
              )}
           </div>
         </div>
