@@ -136,26 +136,36 @@ function CoursesAdmin() {
             <form 
               onSubmit={async (e) => {
                 e.preventDefault();
-                const data = {
-                  title: formData.title,
-                  details: formData.details,
-                  price: parseFloat(formData.price || "0"),
-                  discount_price: parseFloat(formData.discount_price || "0"),
-                  category: formData.category,
-                  thumbnail_url: formData.thumbnail_url,
-                  is_published: formData.is_published
-                };
+                try {
+                  const data = {
+                    title: formData.title,
+                    details: formData.details,
+                    price: parseFloat(formData.price || "0"),
+                    discount_price: parseFloat(formData.discount_price || "0"),
+                    category: formData.category,
+                    thumbnail_url: formData.thumbnail_url,
+                    is_published: formData.is_published
+                  };
 
-                const res = editingCourse 
-                  ? await supabase.from("courses").update(data).eq("id", editingCourse.id)
-                  : await supabase.from("courses").insert(data);
+                  console.log("Submitting course data:", data);
 
-                if (res.error) {
-                  toast.error(res.error.message);
-                } else {
+                  const { data: result, error } = editingCourse 
+                    ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
+                    : await supabase.from("courses").insert(data).select();
+
+                  if (error) {
+                    console.error("Supabase error:", error);
+                    toast.error(error.message);
+                    return;
+                  }
+
+                  console.log("Submission success:", result);
                   queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
                   toast.success(editingCourse ? "Course updated" : "Course created");
                   setIsModalOpen(false);
+                } catch (err: any) {
+                  console.error("Form submission error:", err);
+                  toast.error(err.message || "An unexpected error occurred");
                 }
               }}
               className="p-8 space-y-4"
