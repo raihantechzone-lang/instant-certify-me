@@ -15,15 +15,19 @@ function AdminDashboard() {
   const { data: stats } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const [courses, students, enrollments, reviews, recentRequests] = await Promise.all([
+      const [courses, students, enrollments, reviews, recentRequests, earnings] = await Promise.all([
         supabase.from("courses").select("id", { count: "exact" }),
         supabase.from("profiles").select("id", { count: "exact" }),
         supabase.from("enrollments").select("id, status"),
         supabase.from("reviews").select("id", { count: "exact" }),
-        supabase.from("enrollment_requests").select("*, courses(title)").order("created_at", { ascending: false }).limit(5)
+        supabase.from("enrollment_requests").select("*, courses(title)").order("created_at", { ascending: false }).limit(5),
+        supabase.from("enrollments").select("id, courses(price)").eq("status", "active")
       ]);
 
-      const totalRevenue = 0; // Amount not explicitly stored in enrollments in current schema
+      const totalRevenue = (earnings.data || []).reduce((sum, item) => {
+        const price = (item.courses as any)?.price || 0;
+        return sum + Number(price);
+      }, 0);
 
       return {
         totalCourses: courses.count || 0,
