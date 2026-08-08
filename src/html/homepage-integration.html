@@ -84,10 +84,34 @@
     return !!data;
   }
 
-  supabase.auth.onAuthStateChange(async (_e, session) => {
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    const isFirstTime = !currentUser && session?.user;
     currentUser = session?.user ?? null;
+    
+    if (isFirstTime) {
+      // Check if profile exists, if not create one (for Google OAuth/Signup)
+      const { data: profile } = await supabase.from("profiles").select("id").eq("id", currentUser.id).maybeSingle();
+      if (!profile) {
+        const fullName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || "Student";
+        const rollNumber = "GL" + Math.floor(100000 + Math.random() * 899999);
+        await supabase.from("profiles").insert({
+          id: currentUser.id,
+          full_name: fullName,
+          roll_number: rollNumber,
+          avatar_url: currentUser.user_metadata?.avatar_url
+        });
+      }
+    }
+
     await loadProfile();
     renderAuthState();
+
+    if (event === "SIGNED_IN" && window.location.pathname === "/") {
+       // Optional: small delay to let profile load/create
+       setTimeout(() => {
+         window.location.href = "/dashboard";
+       }, 500);
+    }
   });
 
   /* ---------- database: site settings ---------- */
