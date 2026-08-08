@@ -137,6 +137,11 @@ function CoursesAdmin() {
               onSubmit={async (e) => {
                 e.preventDefault();
                 try {
+                  if (!formData.title) {
+                    toast.error("Course title is required");
+                    return;
+                  }
+                  
                   const data: any = {
                     title: formData.title,
                     details: formData.details || null,
@@ -149,9 +154,11 @@ function CoursesAdmin() {
 
                   console.log("Submitting course data:", data);
 
-                  const { data: result, error } = editingCourse 
-                    ? await supabase.from("courses").update(data).eq("id", editingCourse.id).select()
-                    : await supabase.from("courses").insert([data]).select();
+                  const query = editingCourse 
+                    ? supabase.from("courses").update(data).eq("id", editingCourse.id)
+                    : supabase.from("courses").insert([data]);
+
+                  const { data: result, error } = await query.select();
 
                   if (error) {
                     console.error("Supabase error:", error);
