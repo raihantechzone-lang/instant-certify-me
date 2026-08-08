@@ -260,6 +260,16 @@ function CoursesAdmin() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Course Details</label>
+                <textarea 
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand/20 transition font-medium min-h-[100px]"
+                  placeholder="Enter course description..."
+                  value={formData.details}
+                  onChange={e => setFormData({...formData, details: e.target.value})}
+                />
+              </div>
+
               <div className="flex items-center gap-3 py-2">
                 <input 
                   type="checkbox" 
