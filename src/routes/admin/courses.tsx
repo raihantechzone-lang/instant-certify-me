@@ -280,37 +280,17 @@ function CoursesAdmin() {
                 <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
                     <div className="flex-1 flex flex-col gap-2">
                       <button 
-                        onClick={async () => {
-                          const { data: categories } = await supabase.from("categories").select("name").order("name", { ascending: true });
-                          const catList = categories?.map(c => c.name).join(", ") || "";
-                          
-                          const newTitle = window.prompt("Update Course Title:", course.title);
-                          const newDetails = window.prompt("Update Course Details:", course.details || "");
-                          const newPrice = window.prompt("Update Price:", course.price?.toString() || "0");
-                          const newDiscount = window.prompt("Update Discount Price:", course.discount_price?.toString() || "0");
-                          const newCategory = window.prompt(`Select Category (${catList}):`, course.category || "");
-                          const publish = window.confirm(course.is_published ? "Unpublish this course?" : "Publish this course?");
-                          
-                          if (newTitle !== null) {
-                            const { error } = await supabase
-                              .from("courses")
-                              .update({ 
-                                title: newTitle, 
-                                details: newDetails,
-                                price: parseFloat(newPrice || "0"),
-                                discount_price: parseFloat(newDiscount || "0"),
-                                category: newCategory,
-                                is_published: course.is_published ? !publish : publish
-                              })
-                              .eq("id", course.id);
-                            
-                            if (error) {
-                              toast.error(`Error: ${error.message}`);
-                            } else {
-                              queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-                              toast.success("Course updated");
-                            }
-                          }
+                        onClick={() => {
+                          setEditingCourse(course);
+                          setFormData({
+                            title: course.title,
+                            details: course.details || "",
+                            price: course.price?.toString() || "0",
+                            discount_price: course.discount_price?.toString() || "0",
+                            category: course.category || "",
+                            is_published: course.is_published
+                          });
+                          setIsModalOpen(true);
                         }}
                         className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition ${course.is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}
                       >
