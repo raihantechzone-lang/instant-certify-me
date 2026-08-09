@@ -299,6 +299,9 @@ function CoursesAdmin() {
                       <option value="">No categories available</option>
                     )}
                   </select>
+                  {!formData.category && (
+                    <p className="text-[10px] text-red-500 font-bold ml-1">Please select a category</p>
+                  )}
                 </div>
               </div>
 
