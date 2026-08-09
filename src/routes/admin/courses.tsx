@@ -390,14 +390,15 @@ function CoursesAdmin() {
               </div>
 
               <button 
-                type="submit"
+                type="button"
+                onClick={handleCourseSubmit}
                 disabled={isSubmitting}
                 className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting && <Loader2 className="animate-spin" size={20} />}
                 {editingCourse ? "Save Changes" : "Create Course"}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
