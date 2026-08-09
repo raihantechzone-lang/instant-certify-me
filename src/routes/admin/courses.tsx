@@ -139,7 +139,13 @@ function CoursesAdmin() {
             <form 
               onSubmit={async (e) => {
                 e.preventDefault();
-                if (isSubmitting) return;
+                console.log("[CourseSubmit] Form onSubmit triggered");
+                toast.info("Processing...", { duration: 2000 });
+                
+                if (isSubmitting) {
+                  console.warn("[CourseSubmit] Submission already in progress, skipping.");
+                  return;
+                }
 
                 const loadingToast = toast.loading(editingCourse ? "Updating course..." : "Creating course...");
                 setIsSubmitting(true);
@@ -155,8 +161,23 @@ function CoursesAdmin() {
                   console.log("[CourseSubmit] User:", session.user.email);
 
                   // 2. Validation
-                  if (!formData.title?.trim()) throw new Error("Course title is required");
-                  if (!formData.category) throw new Error("Please select a category");
+                  if (!formData.title?.trim()) {
+                    throw new Error("Course title is required");
+                  }
+                  if (!formData.category) {
+                    throw new Error("Please select a category");
+                  }
+                  
+                  // Validate prices as numbers
+                  const price = parseFloat(formData.price);
+                  const discountPrice = formData.discount_price ? parseFloat(formData.discount_price) : null;
+                  
+                  if (isNaN(price)) {
+                    throw new Error("Original Price must be a valid number");
+                  }
+                  if (formData.discount_price && isNaN(discountPrice as number)) {
+                    throw new Error("Discount Price must be a valid number or empty");
+                  }
 
                   let currentThumbnailUrl = formData.thumbnail_url;
 
@@ -179,19 +200,16 @@ function CoursesAdmin() {
                   const payload: any = {
                     title: formData.title.trim(),
                     details: formData.details?.trim() || null,
-                    price: isNaN(parseFloat(formData.price)) ? 0 : parseFloat(formData.price),
-                    discount_price: (formData.discount_price === "" || isNaN(parseFloat(formData.discount_price)) || parseFloat(formData.discount_price) === 0) ? null : parseFloat(formData.discount_price),
+                    price: price,
+                    discount_price: (discountPrice === 0) ? null : discountPrice,
                     category: formData.category,
                     thumbnail_url: currentThumbnailUrl || null,
                     is_published: !!formData.is_published,
                   };
 
-                  console.log("[CourseSubmit] INSERT Payload:", JSON.stringify(payload, null, 2));
+                  console.log("[CourseSubmit] Payload:", JSON.stringify(payload, null, 2));
 
                   // 5. Database Operation
-                  console.log("[CourseSubmit] Payload keys:", Object.keys(payload));
-                  
-                  // Use upsert or explicitly separate based on editingCourse
                   let dbResult;
                   if (editingCourse) {
                     console.log("[CourseSubmit] Updating course:", editingCourse.id);
@@ -218,9 +236,7 @@ function CoursesAdmin() {
                   console.log("[CourseSubmit] Database operation successful. Result:", result);
                   
                   if (!result || result.length === 0) {
-                    console.warn("[CourseSubmit] Success but no data returned (RLS or policy mismatch?)");
-                    // We treat this as a failure if we expect data back
-                    throw new Error("COURSE NOT SAVED: The database accepted the request but returned no data. This usually means a security policy (RLS) blocked your specific account from seeing/creating this row despite being an admin.");
+                    throw new Error("COURSE NOT SAVED: The database accepted the request but returned no data. This usually means a security policy (RLS) blocked your specific account.");
                   }
                   
                   // 6. Finalize on SUCCESS ONLY
@@ -231,7 +247,6 @@ function CoursesAdmin() {
                   
                   toast.success(editingCourse ? "Course updated successfully" : "Course created successfully", { id: loadingToast });
                   
-                  // Reset state ONLY on success
                   setIsModalOpen(false);
                   setSelectedFile(null);
                   setEditingCourse(null);
@@ -245,11 +260,11 @@ function CoursesAdmin() {
                     is_published: true
                   });
                 } catch (err: any) {
-                  console.error("[CourseSubmit] Error:", err);
-                  // Keep modal open and values intact on failure
+                  console.error("[CourseSubmit] Catch block triggered:", err);
                   toast.error(err.message || "An unexpected error occurred", { id: loadingToast, duration: 6000 });
                 } finally {
                   setIsSubmitting(false);
+                  console.log("[CourseSubmit] Submission process finished.");
                 }
               }}
               className="p-8 space-y-4"
