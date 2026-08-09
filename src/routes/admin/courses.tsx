@@ -29,6 +29,138 @@ function CoursesAdmin() {
     is_published: true
   });
 
+  const handleCourseSubmit = async () => {
+    try {
+      console.log("[CourseSubmit] Form values:", formData);
+      console.log("[CourseSubmit] Selected file:", selectedFile);
+      
+      toast.info("Processing...", { duration: 2000 });
+      
+      if (isSubmitting) {
+        console.warn("[CourseSubmit] Submission already in progress, skipping.");
+        return;
+      }
+
+      const loadingToast = toast.loading(editingCourse ? "Updating course..." : "Creating course...");
+      setIsSubmitting(true);
+
+      console.log("[CourseSubmit] Starting submission flow...");
+      
+      // 1. Check Auth Session
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      if (authError) throw new Error(`Authentication Lookup Failed: ${authError.message}`);
+      if (!session) throw new Error("Authentication session missing. Please log in again.");
+      
+      console.log("[CourseSubmit] User:", session.user.email);
+
+      // 2. Validation
+      if (!formData.title?.trim()) {
+        throw new Error("Course title is required");
+      }
+      if (!formData.category) {
+        throw new Error("Please select a category");
+      }
+      
+      // Validate prices as numbers
+      const price = parseFloat(formData.price);
+      const discountPrice = formData.discount_price ? parseFloat(formData.discount_price) : null;
+      
+      if (isNaN(price)) {
+        throw new Error("Original Price must be a valid number");
+      }
+      if (formData.discount_price && isNaN(discountPrice as number)) {
+        throw new Error("Discount Price must be a valid number or empty");
+      }
+
+      let currentThumbnailUrl = formData.thumbnail_url;
+
+      // 3. Upload thumbnail (Independent Step)
+      if (selectedFile) {
+        console.log("[CourseSubmit] Uploading thumbnail to ImageKit...");
+        try {
+          setUploadingId('new');
+          currentThumbnailUrl = await uploadToImageKit(selectedFile, "/courses");
+          console.log("[CourseSubmit] ImageKit success:", currentThumbnailUrl);
+        } catch (uploadErr: any) {
+          console.error("[CourseSubmit] ImageKit failure:", uploadErr);
+          throw new Error(`THUMBNAIL UPLOAD FAILED: ${uploadErr.message}`);
+        } finally {
+          setUploadingId(null);
+        }
+      }
+      
+      // 4. Prepare Payload
+      const payload: any = {
+        title: formData.title.trim(),
+        details: formData.details?.trim() || null,
+        price: price,
+        discount_price: (discountPrice === 0) ? null : discountPrice,
+        category: formData.category,
+        thumbnail_url: currentThumbnailUrl || null,
+        is_published: !!formData.is_published,
+      };
+
+      console.log("[CourseSubmit] Payload:", JSON.stringify(payload, null, 2));
+
+      // 5. Database Operation
+      let dbResult;
+      if (editingCourse) {
+        console.log("[CourseSubmit] Updating course:", editingCourse.id);
+        dbResult = await supabase
+          .from("courses")
+          .update(payload)
+          .eq("id", editingCourse.id)
+          .select();
+      } else {
+        console.log("[CourseSubmit] Inserting new course...");
+        dbResult = await supabase
+          .from("courses")
+          .insert(payload)
+          .select();
+      }
+
+      const { data: result, error: dbError } = dbResult;
+
+      if (dbError) {
+        console.error("[CourseSubmit] Supabase DB Error:", dbError);
+        throw new Error(`DATABASE ERROR: [${dbError.code}] ${dbError.message}${dbError.hint ? ` | Hint: ${dbError.hint}` : ""}`);
+      }
+
+      console.log("[CourseSubmit] Database operation successful. Result:", result);
+      
+      if (!result || result.length === 0) {
+        throw new Error("COURSE NOT SAVED: The database accepted the request but returned no data. This usually means a security policy (RLS) blocked your specific account.");
+      }
+      
+      // 6. Finalize on SUCCESS ONLY
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin-courses"] }),
+        queryClient.invalidateQueries({ queryKey: ["courses"] })
+      ]);
+      
+      toast.success(editingCourse ? "Course updated successfully" : "Course created successfully", { id: loadingToast });
+      
+      setIsModalOpen(false);
+      setSelectedFile(null);
+      setEditingCourse(null);
+      setFormData({
+        title: "",
+        details: "",
+        price: "0",
+        discount_price: "0",
+        category: categories && categories.length > 0 ? categories[0].name : "",
+        thumbnail_url: "",
+        is_published: true
+      });
+    } catch (err: any) {
+      console.error("[CourseSubmit] Catch block triggered:", err);
+      toast.error(err.message || "An unexpected error occurred", { duration: 6000 });
+    } finally {
+      setIsSubmitting(false);
+      console.log("[CourseSubmit] Submission process finished.");
+    }
+  };
+
   const { data: categories } = useQuery({
     queryKey: ["admin-categories"],
     queryFn: async () => {
@@ -136,141 +268,7 @@ function CoursesAdmin() {
               </button>
             </div>
             
-            <form 
-              onSubmit={async (e) => {
-                try {
-                  e.preventDefault();
-                  console.log("[CourseSubmit] Form values:", formData);
-                  console.log("[CourseSubmit] Selected file:", selectedFile);
-                  
-                  toast.info("Processing...", { duration: 2000 });
-                  
-                  if (isSubmitting) {
-                    console.warn("[CourseSubmit] Submission already in progress, skipping.");
-                    return;
-                  }
-
-                  const loadingToast = toast.loading(editingCourse ? "Updating course..." : "Creating course...");
-                  setIsSubmitting(true);
-
-                  console.log("[CourseSubmit] Starting submission flow...");
-                  
-                  // 1. Check Auth Session
-                  const { data: { session }, error: authError } = await supabase.auth.getSession();
-                  if (authError) throw new Error(`Authentication Lookup Failed: ${authError.message}`);
-                  if (!session) throw new Error("Authentication session missing. Please log in again.");
-                  
-                  console.log("[CourseSubmit] User:", session.user.email);
-
-                  // 2. Validation
-                  if (!formData.title?.trim()) {
-                    throw new Error("Course title is required");
-                  }
-                  if (!formData.category) {
-                    throw new Error("Please select a category");
-                  }
-                  
-                  // Validate prices as numbers
-                  const price = parseFloat(formData.price);
-                  const discountPrice = formData.discount_price ? parseFloat(formData.discount_price) : null;
-                  
-                  if (isNaN(price)) {
-                    throw new Error("Original Price must be a valid number");
-                  }
-                  if (formData.discount_price && isNaN(discountPrice as number)) {
-                    throw new Error("Discount Price must be a valid number or empty");
-                  }
-
-                  let currentThumbnailUrl = formData.thumbnail_url;
-
-                  // 3. Upload thumbnail (Independent Step)
-                  if (selectedFile) {
-                    console.log("[CourseSubmit] Uploading thumbnail to ImageKit...");
-                    try {
-                      setUploadingId('new');
-                      currentThumbnailUrl = await uploadToImageKit(selectedFile, "/courses");
-                      console.log("[CourseSubmit] ImageKit success:", currentThumbnailUrl);
-                    } catch (uploadErr: any) {
-                      console.error("[CourseSubmit] ImageKit failure:", uploadErr);
-                      throw new Error(`THUMBNAIL UPLOAD FAILED: ${uploadErr.message}`);
-                    } finally {
-                      setUploadingId(null);
-                    }
-                  }
-                  
-                  // 4. Prepare Payload
-                  const payload: any = {
-                    title: formData.title.trim(),
-                    details: formData.details?.trim() || null,
-                    price: price,
-                    discount_price: (discountPrice === 0) ? null : discountPrice,
-                    category: formData.category,
-                    thumbnail_url: currentThumbnailUrl || null,
-                    is_published: !!formData.is_published,
-                  };
-
-                  console.log("[CourseSubmit] Payload:", JSON.stringify(payload, null, 2));
-
-                  // 5. Database Operation
-                  let dbResult;
-                  if (editingCourse) {
-                    console.log("[CourseSubmit] Updating course:", editingCourse.id);
-                    dbResult = await supabase
-                      .from("courses")
-                      .update(payload)
-                      .eq("id", editingCourse.id)
-                      .select();
-                  } else {
-                    console.log("[CourseSubmit] Inserting new course...");
-                    dbResult = await supabase
-                      .from("courses")
-                      .insert(payload)
-                      .select();
-                  }
-
-                  const { data: result, error: dbError } = dbResult;
-
-                  if (dbError) {
-                    console.error("[CourseSubmit] Supabase DB Error:", dbError);
-                    throw new Error(`DATABASE ERROR: [${dbError.code}] ${dbError.message}${dbError.hint ? ` | Hint: ${dbError.hint}` : ""}`);
-                  }
-
-                  console.log("[CourseSubmit] Database operation successful. Result:", result);
-                  
-                  if (!result || result.length === 0) {
-                    throw new Error("COURSE NOT SAVED: The database accepted the request but returned no data. This usually means a security policy (RLS) blocked your specific account.");
-                  }
-                  
-                  // 6. Finalize on SUCCESS ONLY
-                  await Promise.all([
-                    queryClient.invalidateQueries({ queryKey: ["admin-courses"] }),
-                    queryClient.invalidateQueries({ queryKey: ["courses"] })
-                  ]);
-                  
-                  toast.success(editingCourse ? "Course updated successfully" : "Course created successfully", { id: loadingToast });
-                  
-                  setIsModalOpen(false);
-                  setSelectedFile(null);
-                  setEditingCourse(null);
-                  setFormData({
-                    title: "",
-                    details: "",
-                    price: "0",
-                    discount_price: "0",
-                    category: categories && categories.length > 0 ? categories[0].name : "",
-                    thumbnail_url: "",
-                    is_published: true
-                  });
-                } catch (err: any) {
-                  console.error("[CourseSubmit] Catch block triggered:", err);
-                  toast.error(err.message || "An unexpected error occurred", { duration: 6000 });
-                } finally {
-                  setIsSubmitting(false);
-                  console.log("[CourseSubmit] Submission process finished.");
-                }
-              }}
-              className="p-8 space-y-4"
-            >
+            <div className="p-8 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Course Title</label>
@@ -392,14 +390,15 @@ function CoursesAdmin() {
               </div>
 
               <button 
-                type="submit"
+                type="button"
+                onClick={handleCourseSubmit}
                 disabled={isSubmitting}
                 className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-slate-200 hover:bg-black transition mt-4 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting && <Loader2 className="animate-spin" size={20} />}
                 {editingCourse ? "Save Changes" : "Create Course"}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
