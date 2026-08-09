@@ -280,6 +280,9 @@ function CoursesAdmin() {
                     value={formData.title}
                     onChange={e => setFormData({...formData, title: e.target.value})}
                   />
+                  {!formData.title?.trim() && (
+                    <p className="text-[10px] text-red-500 font-bold ml-1">Title is required</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
