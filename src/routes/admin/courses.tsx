@@ -46,12 +46,8 @@ function CoursesAdmin() {
 
       console.log("[CourseSubmit] Starting submission flow...");
       
-      // 1. Check Auth Session
-      const { data: { session }, error: authError } = await supabase.auth.getSession();
-      if (authError) throw new Error(`Authentication Lookup Failed: ${authError.message}`);
-      if (!session) throw new Error("Authentication session missing. Please log in again.");
-      
-      console.log("[CourseSubmit] User:", session.user.email);
+      // 1. Session check removed as requested
+      console.log("[CourseSubmit] Proceeding without manual session check...");
 
       // 2. Validation
       if (!formData.title?.trim()) {
