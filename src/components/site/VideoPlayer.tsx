@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import Plyr from "plyr-react";
+import { Plyr } from "plyr-react";
 import "plyr-react/plyr.css";
 
 export interface VideoPlayerProps {
