@@ -138,19 +138,21 @@ function CoursesAdmin() {
             
             <form 
               onSubmit={async (e) => {
-                e.preventDefault();
-                console.log("[CourseSubmit] Form onSubmit triggered");
-                toast.info("Processing...", { duration: 2000 });
-                
-                if (isSubmitting) {
-                  console.warn("[CourseSubmit] Submission already in progress, skipping.");
-                  return;
-                }
-
-                const loadingToast = toast.loading(editingCourse ? "Updating course..." : "Creating course...");
-                setIsSubmitting(true);
-
                 try {
+                  e.preventDefault();
+                  console.log("[CourseSubmit] Form values:", formData);
+                  console.log("[CourseSubmit] Selected file:", selectedFile);
+                  
+                  toast.info("Processing...", { duration: 2000 });
+                  
+                  if (isSubmitting) {
+                    console.warn("[CourseSubmit] Submission already in progress, skipping.");
+                    return;
+                  }
+
+                  const loadingToast = toast.loading(editingCourse ? "Updating course..." : "Creating course...");
+                  setIsSubmitting(true);
+
                   console.log("[CourseSubmit] Starting submission flow...");
                   
                   // 1. Check Auth Session
@@ -261,7 +263,7 @@ function CoursesAdmin() {
                   });
                 } catch (err: any) {
                   console.error("[CourseSubmit] Catch block triggered:", err);
-                  toast.error(err.message || "An unexpected error occurred", { id: loadingToast, duration: 6000 });
+                  toast.error(err.message || "An unexpected error occurred", { duration: 6000 });
                 } finally {
                   setIsSubmitting(false);
                   console.log("[CourseSubmit] Submission process finished.");
