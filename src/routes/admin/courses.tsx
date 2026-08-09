@@ -350,6 +350,9 @@ function CoursesAdmin() {
                     value={formData.price}
                     onChange={e => setFormData({...formData, price: e.target.value})}
                   />
+                  {isNaN(parseFloat(formData.price)) && (
+                    <p className="text-[10px] text-red-500 font-bold ml-1">Must be a valid number</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-wider ml-1">Discount Price</label>
@@ -359,6 +362,9 @@ function CoursesAdmin() {
                     value={formData.discount_price}
                     onChange={e => setFormData({...formData, discount_price: e.target.value})}
                   />
+                  {formData.discount_price !== "" && isNaN(parseFloat(formData.discount_price)) && (
+                    <p className="text-[10px] text-red-500 font-bold ml-1">Must be a valid number or empty</p>
+                  )}
                 </div>
               </div>
 
