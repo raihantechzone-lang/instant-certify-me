@@ -151,22 +151,32 @@
   let searchQuery = '';
 
   async function loadCourses() {
+    console.log("Loading courses from database...");
     // 1. Load Categories for the tabs
-    const { data: categoriesData } = await supabase
+    const { data: categoriesData, error: catError } = await supabase
       .from("categories")
       .select("name")
       .order("name", { ascending: true });
     
+    if (catError) console.error("Error loading categories:", catError);
     renderCategoryTabs(categoriesData || []);
 
     // 2. Load Courses
-    const { data: courses } = await supabase
+    const { data: courses, error: courseError } = await supabase
       .from("courses")
       .select("*")
-      .eq("is_published", true)
       .order("created_at", { ascending: false });
       
-    if (!courses) {
+    if (courseError) {
+      console.error("Error loading courses:", courseError);
+      allCourses = [];
+      renderFilteredCourses();
+      return;
+    }
+    
+    console.log(`Found ${courses?.length || 0} courses total.`);
+      
+    if (!courses || courses.length === 0) {
         allCourses = [];
         renderFilteredCourses();
         return;
@@ -182,15 +192,16 @@
       id: c.id,
       name: c.category || "Course",
       title: c.title,
-      category: (c.category || "versity").toLowerCase(),
+      category: "all",
       price: c.discount_price ?? c.price ?? 0,
-      discountPrice: c.price ?? 0, // Invert if price is original
+      discountPrice: c.price ?? 0,
       thumbnail: c.thumbnail_url || "https://ik.imagekit.io/n7rgjyaxh/default-course.jpg",
       videosCount: counts[c.id] || 0,
       videos: new Array(counts[c.id] || 0),
     }));
 
     window.db.courses = allCourses;
+    console.log("window.db.courses set to:", window.db.courses);
     renderFilteredCourses();
     
     // Global real-time synchronization
@@ -245,16 +256,15 @@
 
     // Filter courses based on currentFilter and searchQuery
     const filtered = allCourses.filter(c => {
-      const matchesFilter = currentFilter === 'all' || c.category === currentFilter;
-      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           (c.name && c.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesFilter && matchesSearch;
+      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
     });
 
     window.db.courses = filtered;
+    console.log("Filtered courses count:", filtered.length);
     grid.innerHTML = "";
     
-    if (filtered.length === 0) {
+    if (filtered.length === 0 && allCourses.length === 0) {
       grid.className = "col-span-full flex flex-col items-center justify-center py-20 text-center";
       grid.innerHTML = `
         <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm max-w-md mx-auto">
