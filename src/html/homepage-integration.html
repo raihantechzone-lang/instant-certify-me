@@ -403,7 +403,7 @@
     const { data: contents } = await supabase.from("course_contents")
       .select("*")
       .eq("course_id", id)
-      .order("created_at", { ascending: true });
+      .order("position", { ascending: true });
     
     const contentContainer = document.querySelector('section .bg-white.border.border-slate-200\\/60.rounded-3xl');
     if (contentContainer && contents) {
@@ -417,7 +417,7 @@
                 এখনও কোনো কন্টেন্ট আপলোড করা হয়নি।
               </div>`;
           }
-          const isEnrolled = !!(currentUser && await checkEnrollment(id));
+          
           contents.forEach((c, idx) => {
              const isLocked = !c.is_free && !isEnrolled;
              const item = document.createElement("div");
