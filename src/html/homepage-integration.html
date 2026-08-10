@@ -170,6 +170,9 @@
     if (courseError) console.error("Error loading courses:", courseError);
     console.log(`Found ${courses?.length || 0} courses total.`);
       
+    if (courseError) console.error("Error loading courses:", courseError);
+    console.log(`Found ${courses?.length || 0} courses total.`);
+      
     if (!courses) {
         allCourses = [];
         renderFilteredCourses();
