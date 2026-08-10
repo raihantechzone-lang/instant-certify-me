@@ -556,99 +556,13 @@
     await loadContents();
   }
 
-             if (!isLocked) {
-                item.innerHTML = `<div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>`;
-             }
-             item.innerHTML += `
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-100 text-slate-400' : 'bg-brand-50 text-brand-600'} flex items-center justify-center shrink-0">
-                        <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-play'} text-sm"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bengali ${isLocked ? 'font-medium text-slate-700' : 'font-semibold text-surface-900'} text-base">${c.title}</h4>
-                        <p class="text-xs text-slate-400 font-medium mt-1">${isLocked ? 'Locked' : 'Free Preview'}</p>
-                    </div>
-                </div>
-                ${!isLocked ? '<span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>' : ''}
-             `;
-             item.onclick = () => {
-                if (!isLocked) {
-                   // Video player logic
-                   const vidId = (url) => {
-                      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                      const match = url?.match(regExp);
-                      return (match && match[2].length === 11) ? match[2] : null;
-                   };
-                   const vId = vidId(c.youtube_url);
-                   if (vId) {
-                      const container = document.querySelector('.aspect-video');
-                      if (container) {
-                         container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                         
-                         // Update UI for the current playing lesson
-                         const overlay = document.getElementById('vid-title-overlay');
-                         if (overlay) overlay.innerText = c.title;
-                         
-                         const poster = document.getElementById('vid-poster');
-                         if (poster) poster.classList.add('hidden');
-                      }
-                   }
-                 } else if (c.is_free) {
-                    // Allow free content without login/enrollment
-                    const vidId = (url) => {
-                       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                       const match = url?.match(regExp);
-                       return (match && match[2].length === 11) ? match[2] : null;
-                    };
-                    const vId = vidId(c.youtube_url);
-                    if (vId) {
-                       const container = document.querySelector('.aspect-video');
-                       if (container) {
-                          container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                          
-                          const overlay = document.getElementById('vid-title-overlay');
-                          if (overlay) overlay.innerText = c.title;
-                          
-                          const poster = document.getElementById('vid-poster');
-                          if (poster) poster.classList.add('hidden');
-                       }
-                    }
-                 } else {
-                    window.showToast("Enroll to unlock this lesson.", "Locked Content");
-                 }
-             };
-           list.appendChild(item);
-          });
-
-          // Update Materials (PDFs) section as well
-          const materialsContainer = document.getElementById('materials-container') || document.getElementById('materials-container-enroll');
-          if (materialsContainer) {
-              const pdfs = contents.filter(c => c.lesson_type === 'pdf' || c.pdf_url);
-              materialsContainer.innerHTML = "";
-              if (pdfs.length === 0) {
-                  materialsContainer.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">কোনো কন্টেন্ট নেই</p>';
-              } else {
-                  pdfs.forEach(p => {
-                      const isLocked = !p.is_free && !isEnrolled;
-                      const div = document.createElement("div");
-                      div.className = "flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100";
-                      div.innerHTML = `
-                          <span class="font-medium text-sm text-slate-600 truncate mr-3">${p.title}</span>
-                          <button class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center note-btn">
-                            <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-download'} text-xs"></i>
-                          </button>
-                      `;
-                      div.onclick = () => {
-                          if (!isLocked && p.pdf_url) window.open(p.pdf_url, '_blank');
-                          else if (isLocked) window.showToast("Enroll to download materials.", "Locked");
-                      };
-                      materialsContainer.appendChild(div);
-                  });
-              }
-          }
-       }
-    }
+    // Realtime subscription for course changes
+    supabase.channel(`course-${id}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'courses', filter: `id=eq.${id}` }, () => loadCourseDetails(id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'course_contents', filter: `course_id=eq.${id}` }, () => loadContents())
+      .subscribe();
   }
+
 
   async function loadReviews() {
     const { data } = await supabase
