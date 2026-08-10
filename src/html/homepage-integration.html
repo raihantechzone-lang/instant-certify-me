@@ -165,6 +165,7 @@
     const { data: courses, error: courseError } = await supabase
       .from("courses")
       .select("*")
+      .eq("is_published", true)
       .order("created_at", { ascending: false });
       
     if (courseError) {
