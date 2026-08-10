@@ -256,10 +256,8 @@
 
     // Filter courses based on currentFilter and searchQuery
     const filtered = allCourses.filter(c => {
-      const matchesFilter = currentFilter === 'all' || c.category === currentFilter;
-      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           (c.name && c.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesFilter && matchesSearch;
+      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
     });
 
     window.db.courses = filtered;
