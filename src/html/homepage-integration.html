@@ -424,6 +424,10 @@
 
 
     // Load contents and populate the list
+    const { data: contents } = await supabase.from("course_contents")
+      .select("*")
+      .eq("course_id", id)
+      .order("position", { ascending: true });
     
     const contentContainer = document.querySelector('section .bg-white.border.border-slate-200\\/60.rounded-3xl');
     if (contentContainer && contents) {
