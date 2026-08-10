@@ -14,7 +14,6 @@ export const Route = createFileRoute('/api/public/enroll')({
           const existingUser = usersData?.users.find(u => u.email === data.email);
           
           if (!existingUser) {
-
             const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
               email: data.email,
               password: data.generatedPassword || data.rollNumber,
@@ -27,9 +26,9 @@ export const Route = createFileRoute('/api/public/enroll')({
             
             if (signUpError) throw signUpError;
             userId = newUser.user.id;
+          } else {
             userId = existingUser.id;
           }
-
 
           // 2. Ensure Profile exists
           await supabaseAdmin.from("profiles").upsert({
