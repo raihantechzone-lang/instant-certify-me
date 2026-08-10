@@ -151,20 +151,24 @@
   let searchQuery = '';
 
   async function loadCourses() {
+    console.log("Loading courses from database...");
     // 1. Load Categories for the tabs
-    const { data: categoriesData } = await supabase
+    const { data: categoriesData, error: catError } = await supabase
       .from("categories")
       .select("name")
       .order("name", { ascending: true });
     
+    if (catError) console.error("Error loading categories:", catError);
     renderCategoryTabs(categoriesData || []);
 
     // 2. Load Courses
-    const { data: courses } = await supabase
+    const { data: courses, error: courseError } = await supabase
       .from("courses")
       .select("*")
-      .eq("is_published", true)
       .order("created_at", { ascending: false });
+      
+    if (courseError) console.error("Error loading courses:", courseError);
+    console.log(`Found ${courses?.length || 0} courses total.`);
       
     if (!courses) {
         allCourses = [];
