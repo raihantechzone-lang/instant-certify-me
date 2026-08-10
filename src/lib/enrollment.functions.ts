@@ -18,9 +18,11 @@ export const processEnrollment = createServerFn({ method: "POST" })
     
     // 1. Create User if not exists
     let userId;
-    const { data: userData, error: getUserError } = await supabaseAdmin.auth.admin.getUserByEmail(data.email);
+    const { data: usersData, error: getUserError } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = usersData?.users.find(u => u.email === data.email);
     
-    if (getUserError || !userData?.user) {
+    if (!existingUser) {
+
       const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
         email: data.email,
         password: data.generatedPassword || data.rollNumber,
@@ -34,8 +36,9 @@ export const processEnrollment = createServerFn({ method: "POST" })
       if (signUpError) throw signUpError;
       userId = newUser.user.id;
     } else {
-      userId = userData.user.id;
+      userId = existingUser.id;
     }
+
 
     // 2. Ensure Profile exists with correct roll number
     await supabaseAdmin.from("profiles").upsert({
