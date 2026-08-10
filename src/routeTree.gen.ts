@@ -47,6 +47,7 @@ import { Route as AdminCertificatesRouteImport } from './routes/admin/certificat
 import { Route as AdminCategoriesRouteImport } from './routes/admin/categories'
 import { Route as AdminAttendanceRouteImport } from './routes/admin/attendance'
 import { Route as InstructorCoursesCourseIdRouteImport } from './routes/instructor.courses.$courseId'
+import { Route as ApiPublicEnrollRouteImport } from './routes/api/public/enroll'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -239,6 +240,11 @@ const InstructorCoursesCourseIdRoute =
     path: '/$courseId',
     getParentRoute: () => InstructorCoursesRoute,
   } as any)
+const ApiPublicEnrollRoute = ApiPublicEnrollRouteImport.update({
+  id: '/api/public/enroll',
+  path: '/api/public/enroll',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -278,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/instructors/$instructorId': typeof InstructorsInstructorIdRoute
   '/admin/': typeof AdminIndexRoute
   '/courses/': typeof CoursesIndexRoute
+  '/api/public/enroll': typeof ApiPublicEnrollRoute
   '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
 export interface FileRoutesByTo {
@@ -317,6 +324,7 @@ export interface FileRoutesByTo {
   '/instructors/$instructorId': typeof InstructorsInstructorIdRoute
   '/admin': typeof AdminIndexRoute
   '/courses': typeof CoursesIndexRoute
+  '/api/public/enroll': typeof ApiPublicEnrollRoute
   '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
 export interface FileRoutesById {
@@ -358,6 +366,7 @@ export interface FileRoutesById {
   '/instructors/$instructorId': typeof InstructorsInstructorIdRoute
   '/admin/': typeof AdminIndexRoute
   '/courses/': typeof CoursesIndexRoute
+  '/api/public/enroll': typeof ApiPublicEnrollRoute
   '/instructor/courses/$courseId': typeof InstructorCoursesCourseIdRoute
 }
 export interface FileRouteTypes {
@@ -400,6 +409,7 @@ export interface FileRouteTypes {
     | '/instructors/$instructorId'
     | '/admin/'
     | '/courses/'
+    | '/api/public/enroll'
     | '/instructor/courses/$courseId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -439,6 +449,7 @@ export interface FileRouteTypes {
     | '/instructors/$instructorId'
     | '/admin'
     | '/courses'
+    | '/api/public/enroll'
     | '/instructor/courses/$courseId'
   id:
     | '__root__'
@@ -479,6 +490,7 @@ export interface FileRouteTypes {
     | '/instructors/$instructorId'
     | '/admin/'
     | '/courses/'
+    | '/api/public/enroll'
     | '/instructor/courses/$courseId'
   fileRoutesById: FileRoutesById
 }
@@ -499,6 +511,7 @@ export interface RootRouteChildren {
   EnrollCourseIdRoute: typeof EnrollCourseIdRoute
   InstructorsInstructorIdRoute: typeof InstructorsInstructorIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
+  ApiPublicEnrollRoute: typeof ApiPublicEnrollRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -769,6 +782,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstructorCoursesCourseIdRouteImport
       parentRoute: typeof InstructorCoursesRoute
     }
+    '/api/public/enroll': {
+      id: '/api/public/enroll'
+      path: '/api/public/enroll'
+      fullPath: '/api/public/enroll'
+      preLoaderRoute: typeof ApiPublicEnrollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -860,17 +880,8 @@ const rootRouteChildren: RootRouteChildren = {
   EnrollCourseIdRoute: EnrollCourseIdRoute,
   InstructorsInstructorIdRoute: InstructorsInstructorIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  ApiPublicEnrollRoute: ApiPublicEnrollRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
