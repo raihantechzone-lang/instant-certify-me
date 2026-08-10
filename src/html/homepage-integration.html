@@ -317,24 +317,28 @@
     const posterImg = document.getElementById('vid-poster');
     if (posterImg && course.thumbnail_url) posterImg.src = course.thumbnail_url;
     
-    // Update breadcrumbs if they exist
+    // Update breadcrumbs
     const breadcrumbCourse = document.querySelector('nav span.text-surface-900.truncate');
     if (breadcrumbCourse) breadcrumbCourse.innerText = course.title;
 
     // Enrollment logic integration
     const enrollBtn = document.getElementById('enroll-main-btn');
+    const isEnrolled = !!(currentUser && await checkEnrollment(id));
+
     if (enrollBtn) {
-       // On /enroll/$id page, we might want to change behavior or just update price
-       if (window.location.pathname.startsWith('/details/')) {
-         enrollBtn.onclick = () => {
-           if (currentUser) {
-              window.location.href = "/enroll/" + id;
-           } else {
-              window.showToast("Please log in to enroll.", "Login Required");
-              window.openModal("authModal", "login");
-           }
-         };
-       }
+      if (isEnrolled) {
+        enrollBtn.innerText = "Continue Learning";
+        enrollBtn.onclick = () => window.location.href = "/courses/" + id;
+      } else {
+        enrollBtn.onclick = () => {
+          if (currentUser) {
+            window.location.href = "/enroll/" + id;
+          } else {
+            window.showToast("Please log in to enroll.", "Login Required");
+            window.openModal("authModal", "login");
+          }
+        };
+      }
     }
 
     // Payment form integration (for /enroll page)
@@ -399,7 +403,7 @@
     const { data: contents } = await supabase.from("course_contents")
       .select("*")
       .eq("course_id", id)
-      .order("created_at", { ascending: true });
+      .order("position", { ascending: true });
     
     const contentContainer = document.querySelector('section .bg-white.border.border-slate-200\\/60.rounded-3xl');
     if (contentContainer && contents) {
@@ -413,7 +417,7 @@
                 এখনও কোনো কন্টেন্ট আপলোড করা হয়নি।
               </div>`;
           }
-          const isEnrolled = !!(currentUser && await checkEnrollment(id));
+          
           contents.forEach((c, idx) => {
              const isLocked = !c.is_free && !isEnrolled;
              const item = document.createElement("div");
@@ -446,6 +450,13 @@
                       const container = document.querySelector('.aspect-video');
                       if (container) {
                          container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                         
+                         // Update UI for the current playing lesson
+                         const overlay = document.getElementById('vid-title-overlay');
+                         if (overlay) overlay.innerText = c.title;
+                         
+                         const poster = document.getElementById('vid-poster');
+                         if (poster) poster.classList.add('hidden');
                       }
                    }
                 } else {
