@@ -11,6 +11,7 @@ export interface VideoPlayerProps {
   watermark?: string;
   onProgress?: (seconds: number, duration: number) => void;
   onEnded?: () => void;
+  poster?: string;
 }
 
 /**
@@ -26,6 +27,7 @@ export function VideoPlayer({
   watermark,
   onProgress,
   onEnded,
+  poster,
 }: VideoPlayerProps) {
   const plyrRef = useRef<any>(null);
   const [uiVisible, setUiVisible] = useState(true);
@@ -103,6 +105,7 @@ export function VideoPlayer({
             provider: "youtube",
           },
         ],
+        poster: poster,
       }
     : videoUrl
     ? {
@@ -113,12 +116,13 @@ export function VideoPlayer({
             type: "video/mp4",
           },
         ],
+        poster: poster,
       }
     : null;
 
   if (!videoSource) {
     return (
-      <div className="w-full aspect-video flex items-center justify-center bg-ink rounded-2xl text-background/50 text-sm">
+      <div className="w-full aspect-video flex items-center justify-center bg-[#0F172A] rounded-2xl text-white/50 text-sm">
         No video source provided
       </div>
     );
@@ -126,21 +130,39 @@ export function VideoPlayer({
 
   return (
     <div
-      className="relative w-full aspect-video overflow-hidden rounded-2xl bg-ink group"
+      className="relative w-full aspect-video overflow-hidden rounded-2xl bg-[#0F172A] group"
       onClick={showUi}
       onMouseMove={showUi}
       onContextMenu={(e) => e.preventDefault()}
     >
+      <style dangerouslySetInnerHTML={{ __html: `
+        .plyr--full-ui.plyr--video .plyr__control--overlaid {
+          background: rgba(255, 255, 255, 0.2) !important;
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .plyr--video .plyr__controls {
+          background: rgba(15, 23, 42, 0.6) !important;
+          backdrop-filter: blur(12px);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .plyr--full-ui input[type=range] {
+          color: #10b981 !important;
+        }
+        .plyr__control--overlaid:hover {
+          background: #10b981 !important;
+        }
+      `}} />
       <Plyr ref={plyrRef} source={videoSource} options={plyrOptions} />
 
       {/* Title Overlay */}
       {title && (
         <div
-          className={`absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-ink/80 to-transparent transition-opacity duration-300 pointer-events-none z-10 ${
+          className={`absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-[#0F172A]/80 to-transparent transition-opacity duration-300 pointer-events-none z-10 ${
             uiVisible ? "opacity-100" : "opacity-0"
           }`}
         >
-          <p className="text-background text-sm font-semibold truncate">
+          <p className="text-white text-sm font-semibold truncate font-bengali">
             {title}
           </p>
         </div>
@@ -149,13 +171,16 @@ export function VideoPlayer({
       {/* Watermark */}
       {watermark && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <span className="text-background/10 text-sm sm:text-lg font-bold rotate-[-20deg] select-none uppercase tracking-widest">
+          <span className="text-white/10 text-sm sm:text-lg font-bold rotate-[-20deg] select-none uppercase tracking-widest">
             {watermark}
           </span>
         </div>
       )}
-      
-      {/* Custom UI Fading Logic for controls is handled by Plyr, but we keep our title overlay synced */}
     </div>
   );
+}
+
+// Window attachment for raw HTML pages
+if (typeof window !== "undefined") {
+  (window as any).VideoPlayerComponent = VideoPlayer;
 }
