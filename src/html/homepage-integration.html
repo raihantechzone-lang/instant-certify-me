@@ -490,22 +490,31 @@
         if (poster) poster.style.display = 'none';
         if (playBtn) playBtn.style.display = 'none';
         
-        // Use the existing React VideoPlayer component via a portal or just re-render
-        // Since this is HTML integration, we'll inject an iframe/plyr if needed, 
-        // but the request asks for the "fully functional custom plyr-react video player".
-        // In this architecture, we should use a global function that the React side provides or just 
-        // inject the player here.
-        
         container.innerHTML = `<div id="plyr-target" data-plyr-provider="youtube" data-plyr-embed-id="${videoId}"></div>`;
         
-        // Initialize Plyr if it's available globally or wait for it
+        // Load Plyr styles and script if not already present
+        if (!document.getElementById('plyr-css')) {
+          const link = document.createElement('link');
+          link.id = 'plyr-css';
+          link.rel = 'stylesheet';
+          link.href = 'https://cdn.plyr.io/3.7.8/plyr.css';
+          document.head.appendChild(link);
+        }
+
+        const initPlyr = () => {
+          new window.Plyr('#plyr-target', {
+            youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 },
+            speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3] }
+          });
+        };
+
         if (window.Plyr) {
-           new window.Plyr('#plyr-target', {
-             youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
-           });
+           initPlyr();
         } else {
-           // Fallback or load Plyr dynamically if not in bundle
-           container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0" class="w-full h-full border-0" allow="autoplay; encrypted-media; fullscreen"></iframe>`;
+           const script = document.createElement('script');
+           script.src = 'https://cdn.plyr.io/3.7.8/plyr.polyfilled.js';
+           script.onload = initPlyr;
+           document.head.appendChild(script);
         }
         
         if (window.showToast) window.showToast("Playing: " + title, "Video Player");
@@ -514,9 +523,9 @@
 
     // Initial poster play button logic
     const mainPlayBtn = document.getElementById('poster-play-btn');
-    if (mainPlayBtn && contents && contents.length > 0) {
+    if (mainPlayBtn) {
       mainPlayBtn.onclick = () => {
-        const firstFree = contents.find(c => c.is_free);
+        const firstFree = contents?.find(c => c.is_free);
         if (firstFree) {
           window.loadVideo(firstFree.youtube_url, firstFree.title);
         } else {
@@ -524,6 +533,7 @@
         }
       };
     }
+
 
                 ${!isLocked ? '<span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>' : ''}
              `;
