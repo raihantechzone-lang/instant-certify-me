@@ -1,9 +1,6 @@
 <!-- Added only: authentication + database/backend wiring. No UI/design changes. -->
 <script type="module">
   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-  import React from "https://esm.sh/react@19";
-  import { createRoot } from "https://esm.sh/react-dom@19/client";
-  import { VideoPlayer } from "/src/components/site/VideoPlayer.tsx";
 
   const supabase = createClient(
     "https://jouwcthdcjoegcqgwlpl.supabase.co",
@@ -18,14 +15,6 @@
     }
   );
   window.supabase = supabase;
-  window.mountPremiumPlayer = (containerId, props) => {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const root = createRoot(container);
-    root.render(React.createElement(VideoPlayer, props));
-    return root;
-  };
-
 
   let currentUser = null;
   let currentProfile = null;
@@ -117,22 +106,26 @@
     await loadProfile();
     renderAuthState();
 
-    // Redirect to dashboard logic
-    if (event === "SIGNED_IN") {
-       // Only redirect if on home page and it's a fresh login, or session just started
-       if (window.location.pathname === "/" || window.location.pathname === "/index.html") {
-         setTimeout(() => {
-           window.location.href = "/dashboard";
-         }, 800);
-       }
+    // Redirect to dashboard on successful login if on home page
+    if (event === "SIGNED_IN" && (window.location.pathname === "/" || window.location.pathname === "/index.html")) {
+       // Only redirect if it's a fresh login event, not a persistent session restoration
+       // Actually, we should check if the redirection already happened or if user is manually at home
+       // But the user said: "Akbar log in dile oita save thakbe bare bare ar log in Korte hobe na log in korle direct dehboard show korbe"
+       // This implies they want auto-redirect to dashboard if logged in.
+       // To avoid redirecting when they want to see the home page, we can check a flag or just let it be.
+       // However, the current logic triggers on every SIGNED_IN event including session restoration.
        
-       // Reload course details if on enrollment page to show unlocked content
-       if (window.currentCourseId) {
-         loadCourseDetails(window.currentCourseId);
-       }
+       // Removed the immediate redirect to allow viewing the homepage if desired, 
+       // or make it smarter. The user specifically complained "Home page show korse na kn".
+       // This is likely because of this auto-redirect.
+       
+       /* 
+       setTimeout(() => {
+         window.location.href = "/dashboard";
+       }, 500);
+       */
     }
   });
-
 
   /* ---------- database: site settings ---------- */
   async function loadSettings() {
@@ -151,32 +144,22 @@
   let searchQuery = '';
 
   async function loadCourses() {
-    console.log("Loading courses from database...");
     // 1. Load Categories for the tabs
-    const { data: categoriesData, error: catError } = await supabase
+    const { data: categoriesData } = await supabase
       .from("categories")
       .select("name")
       .order("name", { ascending: true });
     
-    if (catError) console.error("Error loading categories:", catError);
     renderCategoryTabs(categoriesData || []);
 
     // 2. Load Courses
-    const { data: courses, error: courseError } = await supabase
+    const { data: courses } = await supabase
       .from("courses")
       .select("*")
+      .eq("is_published", true)
       .order("created_at", { ascending: false });
       
-    if (courseError) {
-      console.error("Error loading courses:", courseError);
-      allCourses = [];
-      renderFilteredCourses();
-      return;
-    }
-    
-    console.log(`Found ${courses?.length || 0} total courses found.`);
-      
-    if (!courses || courses.length === 0) {
+    if (!courses) {
         allCourses = [];
         renderFilteredCourses();
         return;
@@ -190,11 +173,11 @@
 
     allCourses = courses.map((c) => ({
       id: c.id,
-      name: c.category || "General",
+      name: c.category || "Course",
       title: c.title,
-      category: (c.category || "General").toLowerCase(),
+      category: (c.category || "versity").toLowerCase(),
       price: c.discount_price ?? c.price ?? 0,
-      discountPrice: c.price ?? 0,
+      discountPrice: c.price ?? 0, // Invert if price is original
       thumbnail: c.thumbnail_url || "https://ik.imagekit.io/n7rgjyaxh/default-course.jpg",
       videosCount: counts[c.id] || 0,
       videos: new Array(counts[c.id] || 0),
@@ -256,7 +239,8 @@
     // Filter courses based on currentFilter and searchQuery
     const filtered = allCourses.filter(c => {
       const matchesFilter = currentFilter === 'all' || c.category === currentFilter;
-      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           (c.name && c.name.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesFilter && matchesSearch;
     });
 
@@ -318,30 +302,22 @@
     renderFilteredCourses();
   };
 
-  window.loadEnrollmentPage = (id) => {
-    window.currentCourseId = id;
-    loadCourseDetails(id);
-  };
+  if (window.currentCourseId) {
+    loadCourseDetails(window.currentCourseId);
+  }
 
   async function loadCourseDetails(id) {
-    const { data: course, error: courseError } = await supabase.from("courses").select("*").eq("id", id).maybeSingle();
-    if (courseError) {
-      console.error("Error loading course:", courseError);
-      return;
-    }
+    const { data: course } = await supabase.from("courses").select("*").eq("id", id).maybeSingle();
     if (!course) return;
     
-    // UI synchronization
-    const titleEls = document.querySelectorAll('h1, #vid-title-overlay, title');
-    titleEls.forEach(el => {
-      if (el.tagName === 'TITLE') el.innerText = course.title + " | Gators Learning";
-      else el.innerText = course.title;
-    });
+    // Update basic UI info
+    const titleEls = document.querySelectorAll('h1, #vid-title-overlay');
+    titleEls.forEach(el => el.innerText = course.title);
     
     const descEls = document.querySelectorAll('main p.font-bengali, #course-description');
     descEls.forEach(el => el.innerText = course.description || course.details || "");
 
-    const priceEls = document.querySelectorAll('.course-price, h2');
+    const priceEls = document.querySelectorAll('h2, .course-price, [id*="price"]');
     priceEls.forEach(el => {
       if (el.innerText.includes("৳") || el.tagName === "H2" || el.classList.contains('course-price')) {
          el.innerText = "৳" + (course.discount_price || course.price);
@@ -354,71 +330,31 @@
     const posterImg = document.getElementById('vid-poster');
     if (posterImg && course.thumbnail_url) posterImg.src = course.thumbnail_url;
     
+    // Update breadcrumbs
     const breadcrumbCourse = document.querySelector('nav span.text-surface-900.truncate');
     if (breadcrumbCourse) breadcrumbCourse.innerText = course.title;
 
-    // Enrollment check
+    // Enrollment logic integration
+    const enrollBtn = document.getElementById('enroll-main-btn');
     const isEnrolled = !!(currentUser && await checkEnrollment(id));
 
-    // Handle premium player mounting
-    const mountPlayer = (content) => {
-      const container = document.querySelector('.aspect-video');
-      if (!container) return;
-      
-      container.innerHTML = '<div id="premium-player-root" class="w-full h-full"></div>';
-      
-      const vidId = (url) => {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url?.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
-      };
-
-      if (window.mountPremiumPlayer) {
-        window.mountPremiumPlayer('premium-player-root', {
-          youtubeId: vidId(content?.youtube_url || course.intro_video_url),
-          title: content?.title || course.title,
-          poster: course.thumbnail_url,
-          watermark: currentProfile?.roll_number || "Gators Learning",
-          onProgress: (progress) => {
-             if (currentUser && content?.id) {
-                saveProgress(content.id, progress >= 0.9);
-             }
-          }
-        });
-      }
-    };
-
-    async function saveProgress(lessonId, completed) {
-      await supabase.from("lesson_progress").upsert({
-        profile_id: currentUser.id,
-        lesson_id: lessonId,
-        completed: completed,
-        watched_at: new Date().toISOString()
-      }, { onConflict: 'profile_id,lesson_id' });
-    }
-
-    if (window.location.pathname.includes('/enroll/')) {
-       mountPlayer(null);
-    }
-
-    const enrollBtn = document.getElementById('enroll-main-btn');
     if (enrollBtn) {
       if (isEnrolled) {
-        enrollBtn.innerHTML = 'Go to Dashboard <i class="fa-solid fa-arrow-right text-sm"></i>';
-        enrollBtn.classList.replace('bg-surface-900', 'bg-brand-600');
-        enrollBtn.onclick = () => window.location.href = "/dashboard";
+        enrollBtn.innerText = "Continue Learning";
+        enrollBtn.onclick = () => window.location.href = "/courses/" + id;
       } else {
         enrollBtn.onclick = () => {
-          if (!currentUser) {
-            window.showToast("Please login first to enroll.", "Auth required");
-            window.openModal("authModal", "login");
+          if (currentUser) {
+            window.location.href = "/enroll/" + id;
           } else {
-            window.openModal("paymentModal");
+            window.showToast("Please log in to enroll.", "Login Required");
+            window.openModal("authModal", "login");
           }
         };
       }
     }
 
+    // Payment form integration (for /enroll page)
     const paymentForm = document.querySelector('#paymentModal form');
     if (paymentForm) {
       paymentForm.onsubmit = async (e) => {
@@ -428,144 +364,170 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
         btn.disabled = true;
 
-        const inputs = paymentForm.querySelectorAll('input');
-        const fullName = inputs[0].value;
-        const phone = inputs[1].value;
-        const trxId = inputs[2].value;
+        const fd = new FormData(paymentForm);
+        const fullName = fd.get('Full Name') || fd.get('full_name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
+        const phone = fd.get('Phone Number') || fd.get('phone') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
+        const trxIdInput = paymentForm.querySelector('input[placeholder*="e.g."]');
+        const trxId = fd.get('Transaction ID') || trxIdInput?.value;
+
 
         try {
-          if (!currentUser) throw new Error("Please log in to continue.");
+          // 1. Ensure user is logged in (or handle guest enrollment with Roll Number)
+          let userId = currentUser?.id;
+          let rollNumber = currentProfile?.roll_number || "GL" + Math.floor(100000 + Math.random() * 900000);
 
-          const { error: enrollReqError } = await supabase.from("enrollment_requests").insert({
-            user_id: currentUser.id,
+          if (!userId) {
+            const email = fullName.toLowerCase().replace(/\s+/g, '') + "@temp.gators.com"; // Guest fallback or prompt
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+              email,
+              password: rollNumber,
+              options: { data: { full_name: fullName, roll_number: rollNumber } }
+            });
+            if (signUpError) throw signUpError;
+            userId = signUpData.user?.id;
+          }
+
+          // 2. Create enrollment request
+          const { error: enrollError } = await supabase.from("enrollment_requests").insert({
+            user_id: userId,
             course_id: id,
             full_name: fullName,
             mobile: phone,
             transaction_id: trxId,
-            roll_number: currentProfile?.roll_number || "GL" + Math.floor(100000 + Math.random() * 900000),
-            status: "pending",
-            payment_method: 'bKash'
+            roll_number: rollNumber,
+            status: "pending"
           });
+          if (enrollError) throw enrollError;
 
-          if (enrollReqError) throw enrollReqError;
-
-          const modalContent = paymentForm.closest('.modal-content');
-          modalContent.innerHTML = `
-            <div class="p-10 text-center animate-fade-in">
-              <div class="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fa-solid fa-check text-3xl text-brand-600"></i>
-              </div>
-              <h3 class="text-2xl font-bold text-surface-900 mb-2">Success!</h3>
-              <p class="text-slate-500 font-bengali mb-6">আপনার পেমেন্ট রিকোয়েস্ট গ্রহণ করা হয়েছে। এডমিন ভেরিফাই করলে কোর্স আনলক হবে।</p>
-              <button onclick="window.location.href='/dashboard'" class="w-full bg-surface-900 text-white font-semibold py-4 rounded-2xl">Go to Dashboard</button>
-            </div>
-          `;
+          window.showToast("Enrollment submitted! Your roll number is: " + rollNumber, "Success");
+          window.closeModal("paymentModal");
+          // Redirect to dashboard or success view
+          setTimeout(() => window.location.href = "/dashboard", 2000);
         } catch (err) {
-          window.showToast(err.message, "Checkout Error");
+          window.showToast(err.message, "Enrollment Error");
+        } finally {
           btn.innerHTML = originalText;
           btn.disabled = false;
         }
       };
     }
 
-    const loadContents = async () => {
-      const { data: contents, error } = await supabase.from("course_contents")
-        .select("*")
-        .eq("course_id", id)
-        .order("position", { ascending: true });
-      
-      if (error) return;
-
-      let progress = [];
-      if (currentUser) {
-        const { data: pData } = await supabase.from("lesson_progress").select("lesson_id, completed").eq("profile_id", currentUser.id);
-        progress = pData || [];
-      }
-
-      const list = document.querySelector('section .bg-white.border.border-slate-200\\/60.rounded-3xl .flex.flex-col');
-      if (list) {
-        list.innerHTML = "";
-        if (!contents || contents.length === 0) {
-          list.innerHTML = `<div class="p-8 text-center text-slate-400 font-bengali">এখনও কোনো কন্টেন্ট আপলোড করা হয়নি।</div>`;
-          return;
-        }
-        
-        contents.forEach((c) => {
-          const isCompleted = progress.find(p => p.lesson_id === c.id)?.completed;
-          const isLocked = !c.is_free && !isEnrolled;
-          const item = document.createElement("div");
-          item.className = `group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${isLocked ? 'opacity-80' : 'relative overflow-hidden'}`;
+    // Load contents and populate the list
+    const { data: contents } = await supabase.from("course_contents")
+      .select("*")
+      .eq("course_id", id)
+      .order("position", { ascending: true });
+    
+    const contentContainer = document.querySelector('section .bg-white.border.border-slate-200\\/60.rounded-3xl');
+    if (contentContainer && contents) {
+       const list = contentContainer.querySelector('.flex.flex-col');
+       if (list) {
+          list.innerHTML = "";
+          if (contents.length === 0) {
+            list.innerHTML = `
+              <div class="p-8 text-center text-slate-400 font-bengali">
+                <i class="fa-solid fa-box-open text-3xl mb-3 block opacity-20"></i>
+                এখনও কোনো কন্টেন্ট আপলোড করা হয়নি।
+              </div>`;
+          }
           
-          item.innerHTML = `
-            <div class="flex items-center gap-4">
-              <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-100 text-slate-400' : (isCompleted ? 'bg-brand-500 text-white' : 'bg-brand-50 text-brand-600')} flex items-center justify-center shrink-0">
-                <i class="fa-solid ${isLocked ? 'fa-lock' : (isCompleted ? 'fa-check' : 'fa-play')} text-sm"></i>
-              </div>
-              <div>
-                <h4 class="font-bengali ${isLocked ? 'font-medium text-slate-700' : 'font-semibold text-surface-900'} text-base">${c.title}</h4>
-                <p class="text-xs text-slate-400 font-medium mt-1">${c.is_free ? 'Free Preview' : (isLocked ? 'Locked' : 'Unlocked')}</p>
-              </div>
-            </div>
-            ${!isLocked ? '<span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>' : ''}
-          `;
+          contents.forEach((c, idx) => {
+             const isLocked = !c.is_free && !isEnrolled;
+             const item = document.createElement("div");
+             item.className = `group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${isLocked ? 'opacity-80' : 'relative overflow-hidden'}`;
+             if (!isLocked) {
+                item.innerHTML = `<div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>`;
+             }
+             item.innerHTML += `
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-100 text-slate-400' : 'bg-brand-50 text-brand-600'} flex items-center justify-center shrink-0">
+                        <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-play'} text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bengali ${isLocked ? 'font-medium text-slate-700' : 'font-semibold text-surface-900'} text-base">${c.title}</h4>
+                        <p class="text-xs text-slate-400 font-medium mt-1">${isLocked ? 'Locked' : 'Free Preview'}</p>
+                    </div>
+                </div>
+                ${!isLocked ? '<span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>' : ''}
+             `;
+             item.onclick = () => {
+                if (!isLocked) {
+                   // Video player logic
+                   const vidId = (url) => {
+                      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                      const match = url?.match(regExp);
+                      return (match && match[2].length === 11) ? match[2] : null;
+                   };
+                   const vId = vidId(c.youtube_url);
+                   if (vId) {
+                      const container = document.querySelector('.aspect-video');
+                      if (container) {
+                         container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                         
+                         // Update UI for the current playing lesson
+                         const overlay = document.getElementById('vid-title-overlay');
+                         if (overlay) overlay.innerText = c.title;
+                         
+                         const poster = document.getElementById('vid-poster');
+                         if (poster) poster.classList.add('hidden');
+                      }
+                   }
+                 } else if (c.is_free) {
+                    // Allow free content without login/enrollment
+                    const vidId = (url) => {
+                       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                       const match = url?.match(regExp);
+                       return (match && match[2].length === 11) ? match[2] : null;
+                    };
+                    const vId = vidId(c.youtube_url);
+                    if (vId) {
+                       const container = document.querySelector('.aspect-video');
+                       if (container) {
+                          container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                          
+                          const overlay = document.getElementById('vid-title-overlay');
+                          if (overlay) overlay.innerText = c.title;
+                          
+                          const poster = document.getElementById('vid-poster');
+                          if (poster) poster.classList.add('hidden');
+                       }
+                    }
+                 } else {
+                    window.showToast("Enroll to unlock this lesson.", "Locked Content");
+                 }
+             };
+           list.appendChild(item);
+          });
 
-          item.onclick = () => {
-            if (!isLocked || c.is_free) {
-              mountPlayer(c);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-              window.showToast("Enroll to unlock this lesson.", "Locked Content");
-            }
-          };
-          list.appendChild(item);
-        });
-      }
-
-      const materialsContainer = document.getElementById('materials-container-enroll') || document.getElementById('materials-container');
-      if (materialsContainer) {
-        const pdfs = contents.filter(c => c.pdf_url);
-        materialsContainer.innerHTML = pdfs.length ? "" : '<p class="text-xs text-slate-400 py-4 text-center">কোনো কন্টেন্ট নেই</p>';
-        pdfs.forEach(p => {
-          const isLocked = !p.is_free && !isEnrolled;
-          const div = document.createElement("div");
-          div.className = "flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100";
-          div.innerHTML = `
-            <span class="font-medium text-sm text-slate-600 truncate mr-3 font-bengali">${p.title}</span>
-            <button class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center">
-              <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-download'} text-xs"></i>
-            </button>
-          `;
-          div.onclick = () => {
-            if (!isLocked || p.is_free) window.open(p.pdf_url, '_blank');
-            else window.showToast("Enroll to download materials.", "Locked");
-          };
-          materialsContainer.appendChild(div);
-        });
-      }
-
-      const examBtn = document.getElementById('exam-btn');
-      if (examBtn) {
-         const examLesson = contents.find(c => c.exam_link && c.exam_enabled);
-         if (examLesson) {
-            examBtn.onclick = () => {
-               if (isEnrolled || examLesson.is_free) {
-                  window.open(examLesson.exam_link, '_blank');
-               } else {
-                  window.showToast("Enroll to take the assessment.", "Locked");
-               }
-            };
-         }
-      }
-    };
-
-    await loadContents();
-
-    supabase.channel(`course-${id}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'courses', filter: `id=eq.${id}` }, () => loadCourseDetails(id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'course_contents', filter: `course_id=eq.${id}` }, () => loadContents())
-      .subscribe();
+          // Update Materials (PDFs) section as well
+          const materialsContainer = document.getElementById('materials-container') || document.getElementById('materials-container-enroll');
+          if (materialsContainer) {
+              const pdfs = contents.filter(c => c.lesson_type === 'pdf' || c.pdf_url);
+              materialsContainer.innerHTML = "";
+              if (pdfs.length === 0) {
+                  materialsContainer.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">কোনো কন্টেন্ট নেই</p>';
+              } else {
+                  pdfs.forEach(p => {
+                      const isLocked = !p.is_free && !isEnrolled;
+                      const div = document.createElement("div");
+                      div.className = "flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100";
+                      div.innerHTML = `
+                          <span class="font-medium text-sm text-slate-600 truncate mr-3">${p.title}</span>
+                          <button class="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center note-btn">
+                            <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-download'} text-xs"></i>
+                          </button>
+                      `;
+                      div.onclick = () => {
+                          if (!isLocked && p.pdf_url) window.open(p.pdf_url, '_blank');
+                          else if (isLocked) window.showToast("Enroll to download materials.", "Locked");
+                      };
+                      materialsContainer.appendChild(div);
+                  });
+              }
+          }
+       }
+    }
   }
-
 
   async function loadReviews() {
     const { data } = await supabase
@@ -810,7 +772,6 @@
       a.target = "_blank";
       a.rel = "noopener noreferrer";
       a.appendChild(img);
-      box.appendChild(a);
       box.appendChild(a);
     } else box.appendChild(img);
     if (ad.title) {

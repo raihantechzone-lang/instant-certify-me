@@ -8,7 +8,7 @@ export const Route = createFileRoute("/enroll/$courseId")({
       GET: async ({ params }) => {
         const { courseId } = params;
         const page = enrollHtml
-          .replace("</body>", `${integrationHtml}\n<script>window.currentCourseId = "${courseId}"; window.loadEnrollmentPage("${courseId}");</script>\n</body>`);
+          .replace("</body>", `${integrationHtml}\n<script>window.currentCourseId = "${courseId}";</script>\n</body>`);
         return new Response(page, {
           headers: { "content-type": "text/html; charset=utf-8" },
         });

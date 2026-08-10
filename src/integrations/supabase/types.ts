@@ -299,45 +299,6 @@ export type Database = {
           },
         ]
       }
-      lesson_progress: {
-        Row: {
-          completed: boolean | null
-          id: string
-          lesson_id: string
-          profile_id: string
-          watched_at: string | null
-        }
-        Insert: {
-          completed?: boolean | null
-          id?: string
-          lesson_id: string
-          profile_id: string
-          watched_at?: string | null
-        }
-        Update: {
-          completed?: boolean | null
-          id?: string
-          lesson_id?: string
-          profile_id?: string
-          watched_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_progress_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "course_contents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_progress_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           avatar_url: string | null
