@@ -101,22 +101,50 @@
 </head>
 <body class="antialiased selection:bg-brand-500 selection:text-white">
 
-    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-4 px-4 sm:px-6 w-full max-w-[90rem] mx-auto">
-        <nav class="bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-soft rounded-2xl px-5 py-3 flex items-center justify-between">
+    <header class="fixed top-2 sm:top-6 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto transition-all duration-300" id="main-header">
+        <nav class="bg-white/90 backdrop-blur-xl border border-gray-100 shadow-[0_4px_30px_rgb(0,0,0,0.05)] rounded-2xl px-4 py-2 sm:px-6 sm:py-3 grid grid-cols-3 items-center">
             
-            <a href="#" class="flex items-center gap-2 group">
-                <img src="https://ik.imagekit.io/n7rgjyaxh/Untitled%20design_20260630_142739_0000.png" alt="Logo" class="h-8 sm:h-10 object-contain transition-transform group-hover:scale-105">
-            </a>
-
-            <div class="hidden md:flex items-center gap-8">
-                <a href="#" class="text-sm font-medium text-slate-500 hover:text-surface-900 transition-colors">Courses</a>
-                <a href="#" class="text-sm font-medium text-slate-500 hover:text-surface-900 transition-colors">Resources</a>
-                <a href="#" onclick="openModal('contactModal')" class="text-sm font-medium text-slate-500 hover:text-surface-900 transition-colors">Contact</a>
+            <div class="flex justify-start items-center">
+                <a href="/" class="block cursor-pointer">
+                    <img src="https://ik.imagekit.io/n7rgjyaxh/Untitled%20design_20260630_142739_0000.png" alt="Gators Learning" class="h-12 sm:h-16 w-auto object-contain">
+                </a>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button onclick="openModal('authModal', 'login')" class="hidden sm:block px-4 py-2 text-sm font-semibold text-surface-900 hover:text-brand-600 transition-colors">Sign in</button>
-                <button onclick="openModal('authModal', 'signup')" class="px-5 py-2.5 rounded-xl bg-surface-900 text-white text-sm font-semibold hover:bg-surface-800 transition-all shadow-md shadow-slate-900/10">Get Started</button>
+            <div class="flex justify-center items-center">
+                <div class="hidden lg:flex space-x-6 items-center">
+                    <a href="/" class="text-sm font-semibold text-surface-900 hover:text-brand-500 transition-colors">Home</a>
+                    <a href="/#courses" class="text-sm font-semibold text-surface-900 hover:text-brand-500 transition-colors">Our Courses</a>
+                    <a href="#" onclick="openModal('contactModal')" class="text-sm font-semibold text-surface-900 hover:text-brand-500 transition-colors">Contact Us</a>
+                </div>
+            </div>
+
+            <div class="flex justify-end items-center relative gap-4" id="auth-buttons-container">
+                <div id="auth-buttons" class="flex items-center gap-3">
+                    <button onclick="openModal('authModal', 'login')" class="hidden sm:block px-4 py-2 text-sm font-semibold text-surface-900 hover:text-brand-600 transition-colors">Sign in</button>
+                    <button onclick="openModal('authModal', 'signup')" class="px-5 py-2.5 rounded-xl bg-surface-900 text-white text-sm font-semibold hover:bg-surface-800 transition-all shadow-md shadow-slate-900/10">Get Started</button>
+                </div>
+                
+                <div id="profile-button" class="hidden items-center gap-3 cursor-pointer group relative">
+                     <div class="flex items-center gap-3">
+                        <div class="text-right hidden sm:block">
+                            <p id="dropdown-user-name" class="text-xs font-bold text-surface-900 leading-none mb-1">Student</p>
+                            <p id="dropdown-roll-number" class="text-[10px] font-medium text-slate-400 leading-none"></p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+                            <i id="header-profile-icon" class="fa-solid fa-user text-slate-400"></i>
+                            <img id="header-profile-img" src="" alt="Profile" class="w-full h-full object-cover hidden">
+                        </div>
+                     </div>
+                     <!-- Simple Dropdown -->
+                     <div class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                        <a href="/dashboard" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-surface-900">
+                            <i class="fa-solid fa-gauge-high w-4"></i> Dashboard
+                        </a>
+                        <button onclick="logoutUser()" class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50">
+                            <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+                        </button>
+                     </div>
+                </div>
             </div>
         </nav>
     </header>
