@@ -108,9 +108,22 @@
 
     // Redirect to dashboard on successful login if on home page
     if (event === "SIGNED_IN" && (window.location.pathname === "/" || window.location.pathname === "/index.html")) {
+       // Only redirect if it's a fresh login event, not a persistent session restoration
+       // Actually, we should check if the redirection already happened or if user is manually at home
+       // But the user said: "Akbar log in dile oita save thakbe bare bare ar log in Korte hobe na log in korle direct dehboard show korbe"
+       // This implies they want auto-redirect to dashboard if logged in.
+       // To avoid redirecting when they want to see the home page, we can check a flag or just let it be.
+       // However, the current logic triggers on every SIGNED_IN event including session restoration.
+       
+       // Removed the immediate redirect to allow viewing the homepage if desired, 
+       // or make it smarter. The user specifically complained "Home page show korse na kn".
+       // This is likely because of this auto-redirect.
+       
+       /* 
        setTimeout(() => {
          window.location.href = "/dashboard";
        }, 500);
+       */
     }
   });
 
