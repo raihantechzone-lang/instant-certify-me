@@ -152,12 +152,11 @@
         return;
     }
     
-    const { data: contentsCount } = await supabase.from("course_contents").select("id, course_id");
+    const { data: contents } = await supabase.from("course_contents").select("id, course_id");
     const counts = {};
-    (contentsCount || []).forEach((c) => {
+    (contents || []).forEach((c) => {
       counts[c.course_id] = (counts[c.course_id] || 0) + 1;
     });
-
 
     allCourses = courses.map((c) => ({
       id: c.id,
@@ -328,18 +327,22 @@
 
     if (enrollBtn) {
       if (isEnrolled) {
-        enrollBtn.innerHTML = 'Continue Learning <i class="fa-solid fa-arrow-right text-sm"></i>';
+        enrollBtn.innerText = "Continue Learning";
         enrollBtn.onclick = () => window.location.href = "/courses/" + id;
       } else {
         enrollBtn.onclick = () => {
-          // Instantly trigger checkout/payment segment
-          window.openModal("paymentModal");
+          if (currentUser) {
+            window.location.href = "/enroll/" + id;
+          } else {
+            window.showToast("Please log in to enroll.", "Login Required");
+            window.openModal("authModal", "login");
+          }
         };
       }
     }
 
     // Payment form integration (for /enroll page)
-    const paymentForm = document.getElementById('checkout-form');
+    const paymentForm = document.querySelector('#paymentModal form');
     if (paymentForm) {
       paymentForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -348,49 +351,27 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
         btn.disabled = true;
 
-        const fullName = document.getElementById('checkout-name').value;
-        const email = document.getElementById('checkout-email').value;
-        const phone = document.getElementById('checkout-phone').value;
-        const trxId = document.getElementById('checkout-trxid').value;
+        const fd = new FormData(paymentForm);
+        const fullName = fd.get('Full Name') || fd.get('full_name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
+        const phone = fd.get('Phone Number') || fd.get('phone') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
+        const trxIdInput = paymentForm.querySelector('input[placeholder*="e.g."]');
+        const trxId = fd.get('Transaction ID') || trxIdInput?.value;
+
 
         try {
-          // 1. Check if user is logged in
+          // 1. Ensure user is logged in (or handle guest enrollment with Roll Number)
           let userId = currentUser?.id;
-          let rollNumber = currentProfile?.roll_number;
-          let generatedPassword = null;
+          let rollNumber = currentProfile?.roll_number || "GL" + Math.floor(100000 + Math.random() * 900000);
 
           if (!userId) {
-            // Guest Checkout & Auto-Registration
-            rollNumber = "GL" + Math.floor(100000 + Math.random() * 900000);
-            generatedPassword = phone.length >= 6 ? phone : "123456";
-            
+            const email = fullName.toLowerCase().replace(/\s+/g, '') + "@temp.gators.com"; // Guest fallback or prompt
             const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-              email: email,
-              password: generatedPassword,
-              options: { 
-                data: { 
-                  full_name: fullName, 
-                  roll_number: rollNumber 
-                } 
-              }
+              email,
+              password: rollNumber,
+              options: { data: { full_name: fullName, roll_number: rollNumber } }
             });
-            
             if (signUpError) throw signUpError;
             userId = signUpData.user?.id;
-
-            // Save profile data explicitly if trigger didn't handle it
-            const { error: profileError } = await supabase.from("profiles").upsert({
-              id: userId,
-              full_name: fullName,
-              roll_number: rollNumber,
-              mobile: phone
-            });
-            if (profileError) console.error("Profile creation error:", profileError);
-          } else {
-             if (!rollNumber) {
-               rollNumber = "GL" + Math.floor(100000 + Math.random() * 900000);
-               await supabase.from("profiles").update({ roll_number: rollNumber }).eq("id", userId);
-             }
           }
 
           // 2. Create enrollment request
@@ -398,7 +379,6 @@
             user_id: userId,
             course_id: id,
             full_name: fullName,
-            email: email,
             mobile: phone,
             transaction_id: trxId,
             roll_number: rollNumber,
@@ -406,22 +386,18 @@
           });
           if (enrollError) throw enrollError;
 
-          // 3. Show Success Screen
-          document.getElementById('success-roll').innerText = rollNumber;
-          document.getElementById('success-pass').innerText = generatedPassword || "******";
-          
+          window.showToast("Enrollment submitted! Your roll number is: " + rollNumber, "Success");
           window.closeModal("paymentModal");
-          window.openModal("successModal");
-          
+          // Redirect to dashboard or success view
+          setTimeout(() => window.location.href = "/dashboard", 2000);
         } catch (err) {
-          window.showToast(err.message, "Checkout Error");
+          window.showToast(err.message, "Enrollment Error");
         } finally {
           btn.innerHTML = originalText;
           btn.disabled = false;
         }
       };
     }
-
 
     // Load contents and populate the list
     const { data: contents } = await supabase.from("course_contents")
@@ -446,16 +422,9 @@
              const isLocked = !c.is_free && !isEnrolled;
              const item = document.createElement("div");
              item.className = `group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${isLocked ? 'opacity-80' : 'relative overflow-hidden'}`;
-             
              if (!isLocked) {
                 item.innerHTML = `<div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>`;
-                item.onclick = () => {
-                  window.loadVideo(c.youtube_url, c.title);
-                };
-             } else {
-                item.onclick = () => window.showToast("এই ভিডিওটি দেখতে এনরোল করুন।", "Locked Content");
              }
-
              item.innerHTML += `
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-100 text-slate-400' : 'bg-brand-50 text-brand-600'} flex items-center justify-center shrink-0">
@@ -466,70 +435,6 @@
                         <p class="text-xs text-slate-400 font-medium mt-1">${isLocked ? 'Locked' : 'Free Preview'}</p>
                     </div>
                 </div>
-             `;
-             list.appendChild(item);
-          });
-       }
-    }
-
-    // Function to load video into the custom player
-    window.loadVideo = (youtubeUrl, title) => {
-      if (!youtubeUrl) return;
-      const videoId = youtubeUrl.split('v=')[1]?.split('&')[0] || youtubeUrl.split('/').pop();
-      const container = document.getElementById('video-player-container');
-      const poster = document.getElementById('vid-poster');
-      const playBtn = document.getElementById('poster-play-btn');
-      
-      if (container) {
-        // Hide poster and dummy play button
-        if (poster) poster.style.display = 'none';
-        if (playBtn) playBtn.style.display = 'none';
-        
-        container.innerHTML = `<div id="plyr-target" data-plyr-provider="youtube" data-plyr-embed-id="${videoId}"></div>`;
-        
-        // Load Plyr styles and script if not already present
-        if (!document.getElementById('plyr-css')) {
-          const link = document.createElement('link');
-          link.id = 'plyr-css';
-          link.rel = 'stylesheet';
-          link.href = 'https://cdn.plyr.io/3.7.8/plyr.css';
-          document.head.appendChild(link);
-        }
-
-        const initPlyr = () => {
-          new window.Plyr('#plyr-target', {
-            youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 },
-            speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3] }
-          });
-        };
-
-        if (window.Plyr) {
-           initPlyr();
-        } else {
-           const script = document.createElement('script');
-           script.src = 'https://cdn.plyr.io/3.7.8/plyr.polyfilled.js';
-           script.onload = initPlyr;
-           document.head.appendChild(script);
-        }
-        
-        if (window.showToast) window.showToast("Playing: " + title, "Video Player");
-      }
-    };
-
-    // Initial poster play button logic
-    const mainPlayBtn = document.getElementById('poster-play-btn');
-    if (mainPlayBtn) {
-      mainPlayBtn.onclick = () => {
-        const firstFree = contents?.find(c => c.is_free);
-        if (firstFree) {
-          window.loadVideo(firstFree.youtube_url, firstFree.title);
-        } else {
-          window.openModal("paymentModal");
-        }
-      };
-    }
-
-
                 ${!isLocked ? '<span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>' : ''}
              `;
              item.onclick = () => {
@@ -884,10 +789,5 @@
 
 
     // Redundant listeners removed. The 'public-site-sync' channel in loadCourses handles updates globally.
-    
-    // Ensure courses grid is rendered if not already (safeguard)
-    if (document.getElementById("courses-grid") && window.db.courses.length > 0 && !document.getElementById("courses-grid").children.length) {
-       window.renderDynamicCourses();
-    }
   })();
 </script>
