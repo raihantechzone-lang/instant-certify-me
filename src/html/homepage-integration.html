@@ -152,11 +152,6 @@
         return;
     }
     
-    const { data: contents } = await supabase.from("course_contents")
-      .select("*")
-      .eq("course_id", id)
-      .order("position", { ascending: true });
-    
     const { data: contentsCount } = await supabase.from("course_contents").select("id, course_id");
     const counts = {};
     (contentsCount || []).forEach((c) => {
@@ -889,5 +884,10 @@
 
 
     // Redundant listeners removed. The 'public-site-sync' channel in loadCourses handles updates globally.
+    
+    // Ensure courses grid is rendered if not already (safeguard)
+    if (document.getElementById("courses-grid") && window.db.courses.length > 0 && !document.getElementById("courses-grid").children.length) {
+       window.renderDynamicCourses();
+    }
   })();
 </script>
