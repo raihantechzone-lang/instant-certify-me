@@ -327,22 +327,18 @@
 
     if (enrollBtn) {
       if (isEnrolled) {
-        enrollBtn.innerText = "Continue Learning";
+        enrollBtn.innerHTML = 'Continue Learning <i class="fa-solid fa-arrow-right text-sm"></i>';
         enrollBtn.onclick = () => window.location.href = "/courses/" + id;
       } else {
         enrollBtn.onclick = () => {
-          if (currentUser) {
-            window.location.href = "/enroll/" + id;
-          } else {
-            window.showToast("Please log in to enroll.", "Login Required");
-            window.openModal("authModal", "login");
-          }
+          // Instantly trigger checkout/payment segment
+          window.openModal("paymentModal");
         };
       }
     }
 
     // Payment form integration (for /enroll page)
-    const paymentForm = document.querySelector('#paymentModal form');
+    const paymentForm = document.getElementById('checkout-form');
     if (paymentForm) {
       paymentForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -351,27 +347,49 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
         btn.disabled = true;
 
-        const fd = new FormData(paymentForm);
-        const fullName = fd.get('Full Name') || fd.get('full_name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
-        const phone = fd.get('Phone Number') || fd.get('phone') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
-        const trxIdInput = paymentForm.querySelector('input[placeholder*="e.g."]');
-        const trxId = fd.get('Transaction ID') || trxIdInput?.value;
-
+        const fullName = document.getElementById('checkout-name').value;
+        const email = document.getElementById('checkout-email').value;
+        const phone = document.getElementById('checkout-phone').value;
+        const trxId = document.getElementById('checkout-trxid').value;
 
         try {
-          // 1. Ensure user is logged in (or handle guest enrollment with Roll Number)
+          // 1. Check if user is logged in
           let userId = currentUser?.id;
-          let rollNumber = currentProfile?.roll_number || "GL" + Math.floor(100000 + Math.random() * 900000);
+          let rollNumber = currentProfile?.roll_number;
+          let generatedPassword = null;
 
           if (!userId) {
-            const email = fullName.toLowerCase().replace(/\s+/g, '') + "@temp.gators.com"; // Guest fallback or prompt
+            // Guest Checkout & Auto-Registration
+            rollNumber = "GL" + Math.floor(100000 + Math.random() * 900000);
+            generatedPassword = phone.length >= 6 ? phone : "123456";
+            
             const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-              email,
-              password: rollNumber,
-              options: { data: { full_name: fullName, roll_number: rollNumber } }
+              email: email,
+              password: generatedPassword,
+              options: { 
+                data: { 
+                  full_name: fullName, 
+                  roll_number: rollNumber 
+                } 
+              }
             });
+            
             if (signUpError) throw signUpError;
             userId = signUpData.user?.id;
+
+            // Save profile data explicitly if trigger didn't handle it
+            const { error: profileError } = await supabase.from("profiles").upsert({
+              id: userId,
+              full_name: fullName,
+              roll_number: rollNumber,
+              mobile: phone
+            });
+            if (profileError) console.error("Profile creation error:", profileError);
+          } else {
+             if (!rollNumber) {
+               rollNumber = "GL" + Math.floor(100000 + Math.random() * 900000);
+               await supabase.from("profiles").update({ roll_number: rollNumber }).eq("id", userId);
+             }
           }
 
           // 2. Create enrollment request
@@ -379,6 +397,7 @@
             user_id: userId,
             course_id: id,
             full_name: fullName,
+            email: email,
             mobile: phone,
             transaction_id: trxId,
             roll_number: rollNumber,
@@ -386,18 +405,22 @@
           });
           if (enrollError) throw enrollError;
 
-          window.showToast("Enrollment submitted! Your roll number is: " + rollNumber, "Success");
+          // 3. Show Success Screen
+          document.getElementById('success-roll').innerText = rollNumber;
+          document.getElementById('success-pass').innerText = generatedPassword || "******";
+          
           window.closeModal("paymentModal");
-          // Redirect to dashboard or success view
-          setTimeout(() => window.location.href = "/dashboard", 2000);
+          window.openModal("successModal");
+          
         } catch (err) {
-          window.showToast(err.message, "Enrollment Error");
+          window.showToast(err.message, "Checkout Error");
         } finally {
           btn.innerHTML = originalText;
           btn.disabled = false;
         }
       };
     }
+
 
     // Load contents and populate the list
     const { data: contents } = await supabase.from("course_contents")
