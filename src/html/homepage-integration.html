@@ -152,11 +152,17 @@
         return;
     }
     
-    const { data: contents } = await supabase.from("course_contents").select("id, course_id");
+    const { data: contents } = await supabase.from("course_contents")
+      .select("*")
+      .eq("course_id", id)
+      .order("position", { ascending: true });
+    
+    const { data: contentsCount } = await supabase.from("course_contents").select("id, course_id");
     const counts = {};
-    (contents || []).forEach((c) => {
+    (contentsCount || []).forEach((c) => {
       counts[c.course_id] = (counts[c.course_id] || 0) + 1;
     });
+
 
     allCourses = courses.map((c) => ({
       id: c.id,
