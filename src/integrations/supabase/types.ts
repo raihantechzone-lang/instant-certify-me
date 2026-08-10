@@ -73,6 +73,7 @@ export type Database = {
           live_expires_at: string | null
           live_url: string | null
           pdf_url: string | null
+          position: number | null
           thumbnail_url: string | null
           title: string
           youtube_url: string | null
@@ -87,6 +88,7 @@ export type Database = {
           live_expires_at?: string | null
           live_url?: string | null
           pdf_url?: string | null
+          position?: number | null
           thumbnail_url?: string | null
           title: string
           youtube_url?: string | null
@@ -101,6 +103,7 @@ export type Database = {
           live_expires_at?: string | null
           live_url?: string | null
           pdf_url?: string | null
+          position?: number | null
           thumbnail_url?: string | null
           title?: string
           youtube_url?: string | null

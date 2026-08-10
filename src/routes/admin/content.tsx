@@ -70,27 +70,50 @@ function ContentAdmin() {
 
   const addMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const { data: countData } = await supabase
+      console.log("Adding lesson to course:", selectedCourseId, "with payload:", payload);
+      
+      if (!selectedCourseId) {
+        throw new Error("No course selected");
+      }
+
+      const { data: countData, error: countError } = await supabase
         .from("course_contents")
-        .select("id", { count: "exact" })
+        .select("id")
         .eq("course_id", selectedCourseId);
         
+      if (countError) {
+        console.error("Error fetching content count:", countError);
+      }
+
       const position = (countData?.length || 0) + 1;
 
       const { error } = await supabase.from("course_contents").insert({
-        ...payload,
+        title: payload.title.trim(),
+        youtube_url: payload.youtube_url || null,
+        pdf_url: payload.pdf_url || null,
+        live_url: payload.live_url || null,
+        exam_link: payload.exam_link || null,
+        exam_enabled: !!payload.exam_enabled,
+        thumbnail_url: payload.thumbnail_url || null,
+        is_free: !!payload.is_free,
         course_id: selectedCourseId,
         position,
         live_expires_at: payload.live_url ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
       });
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase Error Details:", error.message, error.details, error.hint);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
       toast.success("Lesson added successfully");
       setForm({ title: "", youtube_url: "", pdf_url: "", live_url: "", exam_link: "", exam_enabled: false, thumbnail_url: "", is_free: false });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: any) => {
+      console.error("Content Creation Failed:", err);
+      toast.error(`Error: ${err.message || "Failed to add lesson"}`);
+    },
   });
 
   const getYoutubeId = (url: string) => {
@@ -278,10 +301,10 @@ function ContentAdmin() {
                                      .update({ title: newTitle, youtube_url: newYoutube })
                                      .eq("id", content.id);
                                    
-                                   if (error) {
-                                     console.error("Lesson update error:", error);
-                                     toast.error(`Error: ${error.message}`);
-                                   } else {
+                                    if (error) {
+                                      console.error("Supabase Error Details:", error.message, error.details, error.hint);
+                                      toast.error(`Error: ${error.message}`);
+                                    } else {
                                      queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
                                      toast.success("Lesson updated");
                                    }
