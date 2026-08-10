@@ -192,7 +192,7 @@
       id: c.id,
       name: c.category || "General",
       title: c.title,
-      category: "all",
+      category: (c.category || "General").toLowerCase(),
       price: c.discount_price ?? c.price ?? 0,
       discountPrice: c.price ?? 0,
       thumbnail: c.thumbnail_url || "https://ik.imagekit.io/n7rgjyaxh/default-course.jpg",
