@@ -167,13 +167,16 @@
       .select("*")
       .order("created_at", { ascending: false });
       
-    if (courseError) console.error("Error loading courses:", courseError);
+    if (courseError) {
+      console.error("Error loading courses:", courseError);
+      allCourses = [];
+      renderFilteredCourses();
+      return;
+    }
+    
     console.log(`Found ${courses?.length || 0} courses total.`);
       
-    if (courseError) console.error("Error loading courses:", courseError);
-    console.log(`Found ${courses?.length || 0} courses total.`);
-      
-    if (!courses) {
+    if (!courses || courses.length === 0) {
         allCourses = [];
         renderFilteredCourses();
         return;
