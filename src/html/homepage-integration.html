@@ -165,6 +165,7 @@
     const { data: courses, error: courseError } = await supabase
       .from("courses")
       .select("*")
+      .eq("is_published", true)
       .order("created_at", { ascending: false });
       
     if (courseError) {
@@ -174,7 +175,7 @@
       return;
     }
     
-    console.log(`Found ${courses?.length || 0} courses total.`);
+    console.log(`Found ${courses?.length || 0} published courses total.`);
       
     if (!courses || courses.length === 0) {
         allCourses = [];
@@ -190,9 +191,9 @@
 
     allCourses = courses.map((c) => ({
       id: c.id,
-      name: c.category || "Course",
+      name: c.category || "General",
       title: c.title,
-      category: "all",
+      category: (c.category || "General").toLowerCase(),
       price: c.discount_price ?? c.price ?? 0,
       discountPrice: c.price ?? 0,
       thumbnail: c.thumbnail_url || "https://ik.imagekit.io/n7rgjyaxh/default-course.jpg",
@@ -201,7 +202,6 @@
     }));
 
     window.db.courses = allCourses;
-    console.log("window.db.courses set to:", window.db.courses);
     renderFilteredCourses();
     
     // Global real-time synchronization
