@@ -884,5 +884,10 @@
 
 
     // Redundant listeners removed. The 'public-site-sync' channel in loadCourses handles updates globally.
+    
+    // Ensure courses grid is rendered if not already (safeguard)
+    if (document.getElementById("courses-grid") && window.db.courses.length > 0 && !document.getElementById("courses-grid").children.length) {
+       window.renderDynamicCourses();
+    }
   })();
 </script>
