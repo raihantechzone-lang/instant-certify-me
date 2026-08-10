@@ -264,7 +264,7 @@
     console.log("Filtered courses count:", filtered.length);
     grid.innerHTML = "";
     
-    if (filtered.length === 0) {
+    if (filtered.length === 0 && allCourses.length === 0) {
       grid.className = "col-span-full flex flex-col items-center justify-center py-20 text-center";
       grid.innerHTML = `
         <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm max-w-md mx-auto">
