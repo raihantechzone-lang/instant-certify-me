@@ -83,14 +83,20 @@ function ContentAdmin() {
         position,
         live_expires_at: payload.live_url ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
       });
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase Error Details:", error.message, error.details, error.hint);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
       toast.success("Lesson added successfully");
       setForm({ title: "", youtube_url: "", pdf_url: "", live_url: "", exam_link: "", exam_enabled: false, thumbnail_url: "", is_free: false });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: any) => {
+      console.error("Content Creation Failed:", err);
+      toast.error(`Error: ${err.message || "Failed to add lesson"}`);
+    },
   });
 
   const getYoutubeId = (url: string) => {
@@ -278,10 +284,10 @@ function ContentAdmin() {
                                      .update({ title: newTitle, youtube_url: newYoutube })
                                      .eq("id", content.id);
                                    
-                                   if (error) {
-                                     console.error("Lesson update error:", error);
-                                     toast.error(`Error: ${error.message}`);
-                                   } else {
+                                    if (error) {
+                                      console.error("Supabase Error Details:", error.message, error.details, error.hint);
+                                      toast.error(`Error: ${error.message}`);
+                                    } else {
                                      queryClient.invalidateQueries({ queryKey: ["course-content", selectedCourseId] });
                                      toast.success("Lesson updated");
                                    }
