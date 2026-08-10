@@ -135,7 +135,7 @@ export function VideoPlayer({
       onMouseMove={showUi}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .plyr--full-ui.plyr--video .plyr__control--overlaid {
           background: rgba(255, 255, 255, 0.2) !important;
           backdrop-filter: blur(8px);
@@ -152,7 +152,7 @@ export function VideoPlayer({
         .plyr__control--overlaid:hover {
           background: #10b981 !important;
         }
-      `}</style>
+      `}} />
       <Plyr ref={plyrRef} source={videoSource} options={plyrOptions} />
 
       {/* Title Overlay */}
@@ -178,4 +178,9 @@ export function VideoPlayer({
       )}
     </div>
   );
+}
+
+// Window attachment for raw HTML pages
+if (typeof window !== "undefined") {
+  (window as any).VideoPlayerComponent = VideoPlayer;
 }
