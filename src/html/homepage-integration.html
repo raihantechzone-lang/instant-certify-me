@@ -1,6 +1,9 @@
 <!-- Added only: authentication + database/backend wiring. No UI/design changes. -->
 <script type="module">
   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  import React from "https://esm.sh/react@19";
+  import { createRoot } from "https://esm.sh/react-dom@19/client";
+  import { VideoPlayer } from "/src/components/site/VideoPlayer.tsx";
 
   const supabase = createClient(
     "https://jouwcthdcjoegcqgwlpl.supabase.co",
@@ -15,6 +18,14 @@
     }
   );
   window.supabase = supabase;
+  window.mountPremiumPlayer = (containerId, props) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const root = createRoot(container);
+    root.render(React.createElement(VideoPlayer, props));
+    return root;
+  };
+
 
   let currentUser = null;
   let currentProfile = null;
