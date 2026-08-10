@@ -445,9 +445,16 @@
              const isLocked = !c.is_free && !isEnrolled;
              const item = document.createElement("div");
              item.className = `group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${isLocked ? 'opacity-80' : 'relative overflow-hidden'}`;
+             
              if (!isLocked) {
                 item.innerHTML = `<div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>`;
+                item.onclick = () => {
+                  window.loadVideo(c.youtube_url, c.title);
+                };
+             } else {
+                item.onclick = () => window.showToast("এই ভিডিওটি দেখতে এনরোল করুন।", "Locked Content");
              }
+
              item.innerHTML += `
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-100 text-slate-400' : 'bg-brand-50 text-brand-600'} flex items-center justify-center shrink-0">
@@ -458,6 +465,60 @@
                         <p class="text-xs text-slate-400 font-medium mt-1">${isLocked ? 'Locked' : 'Free Preview'}</p>
                     </div>
                 </div>
+             `;
+             list.appendChild(item);
+          });
+       }
+    }
+
+    // Function to load video into the custom player
+    window.loadVideo = (youtubeUrl, title) => {
+      if (!youtubeUrl) return;
+      const videoId = youtubeUrl.split('v=')[1]?.split('&')[0] || youtubeUrl.split('/').pop();
+      const container = document.getElementById('video-player-container');
+      const poster = document.getElementById('vid-poster');
+      const playBtn = document.getElementById('poster-play-btn');
+      
+      if (container) {
+        // Hide poster and dummy play button
+        if (poster) poster.style.display = 'none';
+        if (playBtn) playBtn.style.display = 'none';
+        
+        // Use the existing React VideoPlayer component via a portal or just re-render
+        // Since this is HTML integration, we'll inject an iframe/plyr if needed, 
+        // but the request asks for the "fully functional custom plyr-react video player".
+        // In this architecture, we should use a global function that the React side provides or just 
+        // inject the player here.
+        
+        container.innerHTML = `<div id="plyr-target" data-plyr-provider="youtube" data-plyr-embed-id="${videoId}"></div>`;
+        
+        // Initialize Plyr if it's available globally or wait for it
+        if (window.Plyr) {
+           new window.Plyr('#plyr-target', {
+             youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+           });
+        } else {
+           // Fallback or load Plyr dynamically if not in bundle
+           container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0" class="w-full h-full border-0" allow="autoplay; encrypted-media; fullscreen"></iframe>`;
+        }
+        
+        if (window.showToast) window.showToast("Playing: " + title, "Video Player");
+      }
+    };
+
+    // Initial poster play button logic
+    const mainPlayBtn = document.getElementById('poster-play-btn');
+    if (mainPlayBtn && contents && contents.length > 0) {
+      mainPlayBtn.onclick = () => {
+        const firstFree = contents.find(c => c.is_free);
+        if (firstFree) {
+          window.loadVideo(firstFree.youtube_url, firstFree.title);
+        } else {
+          window.openModal("paymentModal");
+        }
+      };
+    }
+
                 ${!isLocked ? '<span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>' : ''}
              `;
              item.onclick = () => {
