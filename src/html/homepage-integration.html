@@ -328,7 +328,10 @@
     oldPriceEls.forEach(el => el.innerText = "৳" + course.price);
 
     const posterImg = document.getElementById('vid-poster');
-    if (posterImg && course.thumbnail_url) posterImg.src = course.thumbnail_url;
+    if (posterImg && course.thumbnail_url) {
+      posterImg.src = course.thumbnail_url;
+      posterImg.classList.remove('hidden');
+    }
     
     // Update breadcrumbs
     const breadcrumbCourse = document.querySelector('nav span.text-surface-900.truncate');
@@ -462,13 +465,20 @@
                    if (vId) {
                       const container = document.querySelector('.aspect-video');
                       if (container) {
-                         container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                         // Find any existing player or poster
+                         const poster = document.getElementById('vid-poster');
+                         const existingIframe = container.querySelector('iframe');
+                         
+                         if (existingIframe) {
+                            existingIframe.src = `https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1`;
+                         } else {
+                            container.innerHTML = `<iframe class="w-full h-full absolute inset-0 z-20" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                         }
                          
                          // Update UI for the current playing lesson
                          const overlay = document.getElementById('vid-title-overlay');
                          if (overlay) overlay.innerText = c.title;
                          
-                         const poster = document.getElementById('vid-poster');
                          if (poster) poster.classList.add('hidden');
                       }
                    }
@@ -483,12 +493,18 @@
                     if (vId) {
                        const container = document.querySelector('.aspect-video');
                        if (container) {
-                          container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                          const poster = document.getElementById('vid-poster');
+                          const existingIframe = container.querySelector('iframe');
+                          
+                          if (existingIframe) {
+                             existingIframe.src = `https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1`;
+                          } else {
+                             container.innerHTML = `<iframe class="w-full h-full absolute inset-0 z-20" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                          }
                           
                           const overlay = document.getElementById('vid-title-overlay');
                           if (overlay) overlay.innerText = c.title;
                           
-                          const poster = document.getElementById('vid-poster');
                           if (poster) poster.classList.add('hidden');
                        }
                     }
