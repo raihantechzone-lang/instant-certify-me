@@ -328,7 +328,10 @@
     oldPriceEls.forEach(el => el.innerText = "৳" + course.price);
 
     const posterImg = document.getElementById('vid-poster');
-    if (posterImg && course.thumbnail_url) posterImg.src = course.thumbnail_url;
+    if (posterImg && course.thumbnail_url) {
+      posterImg.src = course.thumbnail_url;
+      posterImg.classList.remove('hidden');
+    }
     
     // Update breadcrumbs
     const breadcrumbCourse = document.querySelector('nav span.text-surface-900.truncate');

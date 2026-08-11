@@ -503,7 +503,8 @@
             // Ensure play state is toggled on if it was paused
             document.getElementById('play-icon').classList.add('hidden');
             document.getElementById('pause-icon').classList.remove('hidden');
-            document.getElementById('vid-poster').style.opacity = '0.3';
+            const poster = document.getElementById('vid-poster');
+            if (poster) poster.classList.add('hidden');
         }
 
         function promptEnrollment() {
