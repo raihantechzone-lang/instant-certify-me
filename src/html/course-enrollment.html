@@ -166,49 +166,91 @@
             <div class="lg:col-span-8 flex flex-col gap-10">
                 
                 <section class="flex flex-col gap-5">
-                    <div class="relative w-full aspect-video bg-black rounded-3xl overflow-hidden shadow-float group cursor-pointer border border-slate-800/50" id="video-container" onclick="togglePlayState()">
-                        
+                    <div class="rounded-3xl overflow-hidden shadow-float border border-slate-800/50 bg-black">
+                    <div class="relative w-full aspect-video bg-black overflow-hidden group" id="video-container">
+
+                        <!-- YouTube mount -->
+                        <div id="yt-mount" class="absolute inset-0 w-full h-full z-10"></div>
+
                         <!-- Video Poster -->
-                        <img id="vid-poster" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-60 transition-opacity duration-500 z-10" alt="Video">
-                        
-                        <!-- Top Badges -->
-                        <div class="absolute top-5 left-5 flex gap-2 z-10">
-                            <span class="bg-red-500/90 backdrop-blur text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full">Live / Rec</span>
+                        <img id="vid-poster" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" class="absolute inset-0 w-full h-full object-cover z-20" alt="Video">
+
+                        <!-- Click-catcher over the iframe so our controls work -->
+                        <div id="vid-clickcatch" class="absolute inset-0 z-20" onclick="window.vpToggle && window.vpToggle()"></div>
+
+                        <!-- Top bar -->
+                        <div class="vp-ui absolute top-0 left-0 right-0 flex items-start justify-between p-5 z-30 transition-opacity duration-300 pointer-events-none">
+                            <span class="flex items-center gap-2 bg-black/60 backdrop-blur text-white text-[11px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full">
+                                <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span> <span id="vp-live-label">Live</span>
+                            </span>
+                            <button onclick="event.stopPropagation(); window.vpPip && window.vpPip()" class="pointer-events-auto flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur text-white text-xs font-medium px-3 py-2 rounded-xl border border-white/20 transition-colors">
+                                <i class="fa-solid fa-clone"></i> Picture in Picture
+                            </button>
                         </div>
 
-                        <!-- Center Play Button (Minimalist Glass) -->
-                        <div class="absolute inset-0 flex items-center justify-center z-10">
-                            <div class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-2xl transition-transform duration-300 group-hover:scale-110">
+                        <!-- Center controls -->
+                        <div class="vp-ui absolute inset-0 flex items-center justify-center gap-8 sm:gap-12 z-30 transition-opacity duration-300 pointer-events-none">
+                            <button onclick="event.stopPropagation(); window.vpSeekBy && window.vpSeekBy(-10)" class="pointer-events-auto w-12 h-12 rounded-full border border-white/40 text-white flex items-center justify-center text-[11px] font-bold hover:bg-white/15 transition-colors">
+                                <i class="fa-solid fa-rotate-left absolute text-2xl opacity-70"></i><span class="relative">10</span>
+                            </button>
+                            <button onclick="event.stopPropagation(); window.vpToggle && window.vpToggle()" class="pointer-events-auto w-20 h-20 rounded-full bg-brand-500 ring-8 ring-brand-500/25 flex items-center justify-center text-white shadow-2xl transition-transform duration-300 hover:scale-105">
                                 <i id="play-icon" class="fa-solid fa-play text-2xl ml-1"></i>
                                 <i id="pause-icon" class="fa-solid fa-pause text-2xl hidden"></i>
-                            </div>
+                            </button>
+                            <button onclick="event.stopPropagation(); window.vpSeekBy && window.vpSeekBy(10)" class="pointer-events-auto w-12 h-12 rounded-full border border-white/40 text-white flex items-center justify-center text-[11px] font-bold hover:bg-white/15 transition-colors">
+                                <i class="fa-solid fa-rotate-right absolute text-2xl opacity-70"></i><span class="relative">10</span>
+                            </button>
                         </div>
 
-                        <!-- Bottom Controls (Sleek Glass Panel) -->
-                        <div class="absolute bottom-0 left-0 right-0 glass-panel p-5 transition-all duration-300 hide-controls z-20">
-                            <h4 id="vid-title-overlay" class="text-white font-medium text-sm mb-3 font-bengali truncate">১. Orientation & Guideline Class</h4>
-                            
+                        <!-- Bottom Controls -->
+                        <div class="vp-ui absolute bottom-0 left-0 right-0 p-5 pt-16 bg-gradient-to-t from-black/90 to-transparent z-30 transition-opacity duration-300">
+                            <h4 id="vid-title-overlay" class="text-white/90 font-medium text-sm mb-3 font-bengali truncate"></h4>
+
                             <!-- Progress bar -->
-                            <div class="w-full h-1 bg-white/20 rounded-full cursor-pointer relative mb-3 group/prog">
-                                <div class="absolute top-0 left-0 h-full w-[30%] bg-brand-500 rounded-full">
-                                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover/prog:opacity-100 transition-opacity"></div>
+                            <div id="vp-progress" onclick="event.stopPropagation(); window.vpSeekTo && window.vpSeekTo(event)" class="w-full h-1.5 bg-white/25 rounded-full cursor-pointer relative mb-4 group/prog">
+                                <div id="vp-progress-fill" class="absolute top-0 left-0 h-full w-0 bg-brand-500 rounded-full">
+                                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow"></div>
                                 </div>
                             </div>
-                            
+
                             <!-- Action buttons -->
-                            <div class="flex items-center justify-between text-white/80">
-                                <div class="flex items-center gap-6">
-                                    <button class="hover:text-white transition-colors"><i class="fa-solid fa-play text-sm"></i></button>
-                                    <button class="hover:text-white transition-colors"><i class="fa-solid fa-volume-high text-sm"></i></button>
-                                    <span class="text-xs font-medium tracking-wide">15:20 / 45:00</span>
+                            <div class="flex items-center justify-between text-white/85">
+                                <div class="flex items-center gap-4 sm:gap-5">
+                                    <button onclick="event.stopPropagation(); window.vpToggle && window.vpToggle()" class="hover:text-white transition-colors"><i id="vp-bar-icon" class="fa-solid fa-play text-sm"></i></button>
+                                    <button onclick="event.stopPropagation(); window.vpMute && window.vpMute()" class="hover:text-white transition-colors"><i id="vp-vol-icon" class="fa-solid fa-volume-high text-sm"></i></button>
+                                    <input id="vp-volume" type="range" min="0" max="100" value="100" onclick="event.stopPropagation()" oninput="window.vpVolume && window.vpVolume(this.value)" class="w-20 sm:w-28 accent-brand-500 cursor-pointer">
+                                    <span id="vp-time" class="text-xs font-medium tracking-wide hidden sm:inline">0:00 / 0:00</span>
                                 </div>
-                                <div class="flex items-center gap-5">
-                                    <button class="hover:text-white transition-colors"><i class="fa-solid fa-gear text-sm"></i></button>
-                                    <button class="hover:text-white transition-colors"><i class="fa-solid fa-expand text-sm"></i></button>
+                                <div class="flex items-center gap-4 sm:gap-5">
+                                    <button onclick="event.stopPropagation(); window.vpSpeed && window.vpSpeed()" class="text-xs font-semibold hover:text-white transition-colors"><span id="vp-speed-label">1x</span></button>
+                                    <button onclick="event.stopPropagation(); window.vpSpeed && window.vpSpeed()" class="hover:text-white transition-colors"><i class="fa-solid fa-gear text-sm"></i></button>
+                                    <button onclick="event.stopPropagation(); window.vpFullscreen && window.vpFullscreen()" class="hover:text-white transition-colors"><i class="fa-solid fa-expand text-sm"></i></button>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Info strip -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 bg-[#0b0f0d] text-white/80 divide-x divide-white/10 border-t border-white/10">
+                        <div class="flex items-center gap-3 px-4 py-4">
+                            <i class="fa-solid fa-gauge-high text-brand-500"></i>
+                            <div class="leading-tight"><p id="vp-quality" class="text-xs font-semibold text-white">Auto</p><p class="text-[11px] text-white/50">HD Quality</p></div>
+                        </div>
+                        <button onclick="window.vpSpeed && window.vpSpeed()" class="flex items-center gap-3 px-4 py-4 text-left hover:bg-white/5 transition-colors">
+                            <i class="fa-solid fa-forward text-brand-500"></i>
+                            <div class="leading-tight"><p id="vp-speed-label-2" class="text-xs font-semibold text-white">1x</p><p class="text-[11px] text-white/50">Playback Speed</p></div>
+                        </button>
+                        <button onclick="window.vpAutoNext && window.vpAutoNext()" class="flex items-center gap-3 px-4 py-4 text-left hover:bg-white/5 transition-colors">
+                            <i class="fa-solid fa-heart text-brand-500"></i>
+                            <div class="leading-tight"><p id="vp-autonext" class="text-xs font-semibold text-white">On</p><p class="text-[11px] text-white/50">Auto Next</p></div>
+                        </button>
+                        <button onclick="window.vpAddNote && window.vpAddNote()" class="flex items-center gap-3 px-4 py-4 text-left hover:bg-white/5 transition-colors">
+                            <i class="fa-solid fa-pen-to-square text-brand-500"></i>
+                            <div class="leading-tight"><p class="text-xs font-semibold text-white">Add Note</p><p class="text-[11px] text-white/50">Personal Notes</p></div>
+                        </button>
+                    </div>
+                    </div>
+
                     
                     <!-- Course Title & Meta Info -->
                     <div>
@@ -482,30 +524,167 @@
             showToast('Authentication successful!');
         }
 
-        // Course Logic
-        function togglePlayState() {
-            const playIcon = document.getElementById('play-icon');
-            const pauseIcon = document.getElementById('pause-icon');
-            playIcon.classList.toggle('hidden');
-            pauseIcon.classList.toggle('hidden');
-            
-            // Subtle visual feedback on poster
-            const poster = document.getElementById('vid-poster');
-            if(playIcon.classList.contains('hidden')) {
-                poster.style.opacity = '0.3';
-            } else {
-                poster.style.opacity = '0.7';
-            }
-        }
+        // ===== Real YouTube-powered custom player =====
+        (function () {
+            let player = null, ready = false, pendingId = null, ticker = null;
+            let autoNext = true, speedIdx = 2;
+            const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+            const $ = (id) => document.getElementById(id);
+            const fmt = (s) => {
+                s = Math.max(0, Math.floor(s || 0));
+                const m = Math.floor(s / 60), r = s % 60;
+                return m + ':' + String(r).padStart(2, '0');
+            };
 
-        function playVideo(title) {
-            document.getElementById('vid-title-overlay').innerText = title;
-            // Ensure play state is toggled on if it was paused
-            document.getElementById('play-icon').classList.add('hidden');
-            document.getElementById('pause-icon').classList.remove('hidden');
-            const poster = document.getElementById('vid-poster');
-            if (poster) poster.classList.add('hidden');
-        }
+            // Auto-hide UI after 3s, show on interaction
+            let hideTimer = null;
+            function showUi() {
+                document.querySelectorAll('.vp-ui').forEach(el => el.style.opacity = '1');
+                clearTimeout(hideTimer);
+                hideTimer = setTimeout(() => {
+                    if (player && player.getPlayerState && player.getPlayerState() === 1) {
+                        document.querySelectorAll('.vp-ui').forEach(el => el.style.opacity = '0');
+                    }
+                }, 3000);
+            }
+            const vc = $('video-container');
+            if (vc) { vc.addEventListener('mousemove', showUi); vc.addEventListener('click', showUi); vc.addEventListener('touchstart', showUi); }
+            showUi();
+
+            function setPlayIcons(playing) {
+                $('play-icon')?.classList.toggle('hidden', playing);
+                $('pause-icon')?.classList.toggle('hidden', !playing);
+                const bar = $('vp-bar-icon');
+                if (bar) bar.className = 'fa-solid ' + (playing ? 'fa-pause' : 'fa-play') + ' text-sm';
+            }
+
+            function tick() {
+                if (!player || !player.getDuration) return;
+                const d = player.getDuration() || 0, c = player.getCurrentTime() || 0;
+                const fill = $('vp-progress-fill');
+                if (fill) fill.style.width = (d ? (c / d) * 100 : 0) + '%';
+                const t = $('vp-time');
+                if (t) t.innerText = fmt(c) + ' / ' + fmt(d);
+                const q = $('vp-quality');
+                if (q && player.getPlaybackQuality) {
+                    const map = { hd1080: '1080p', hd720: '720p', large: '480p', medium: '360p', small: '240p' };
+                    q.innerText = map[player.getPlaybackQuality()] || 'Auto';
+                }
+            }
+
+            function loadApi(cb) {
+                if (window.YT && window.YT.Player) return cb();
+                const prev = window.onYouTubeIframeAPIReady;
+                window.onYouTubeIframeAPIReady = function () { prev && prev(); cb(); };
+                if (!document.getElementById('yt-api')) {
+                    const s = document.createElement('script');
+                    s.id = 'yt-api';
+                    s.src = 'https://www.youtube.com/iframe_api';
+                    document.head.appendChild(s);
+                }
+            }
+
+            window.loadLesson = function (videoId, title, index) {
+                if (typeof index === 'number') window.__currentLessonIndex = index;
+                const t = $('vid-title-overlay');
+                if (t && title) t.innerText = title;
+                $('vid-poster')?.classList.add('hidden');
+                const live = $('vp-live-label');
+                if (live) live.innerText = 'Now Playing';
+                showUi();
+
+                if (ready && player) { player.loadVideoById(videoId); return; }
+                pendingId = videoId;
+                loadApi(function () {
+                    if (player) { if (pendingId) player.loadVideoById(pendingId); return; }
+                    player = new YT.Player('yt-mount', {
+                        videoId: pendingId,
+                        playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, showinfo: 0, iv_load_policy: 3, playsinline: 1, disablekb: 1, fs: 0 },
+                        events: {
+                            onReady: (e) => {
+                                ready = true;
+                                e.target.playVideo();
+                                e.target.setPlaybackRate(speeds[speedIdx]);
+                                clearInterval(ticker);
+                                ticker = setInterval(tick, 500);
+                            },
+                            onStateChange: (e) => {
+                                setPlayIcons(e.data === 1);
+                                if (e.data === 1) showUi();
+                                else document.querySelectorAll('.vp-ui').forEach(el => el.style.opacity = '1');
+                                if (e.data === 0 && autoNext && window.playNextLesson) window.playNextLesson();
+                            }
+                        }
+                    });
+                });
+            };
+
+            window.vpToggle = function () {
+                if (!player || !ready) {
+                    if (window.__startFirstLesson) window.__startFirstLesson();
+                    else window.showToast && window.showToast('একটি ক্লাস সিলেক্ট করুন।');
+                    return;
+                }
+                player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo();
+            };
+            window.vpSeekBy = function (d) { if (player && ready) player.seekTo(Math.max(0, player.getCurrentTime() + d), true); };
+            window.vpSeekTo = function (ev) {
+                if (!player || !ready) return;
+                const bar = $('vp-progress'); const r = bar.getBoundingClientRect();
+                const pct = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
+                player.seekTo(pct * (player.getDuration() || 0), true);
+            };
+            window.vpMute = function () {
+                if (!player || !ready) return;
+                const icon = $('vp-vol-icon');
+                if (player.isMuted()) { player.unMute(); icon.className = 'fa-solid fa-volume-high text-sm'; $('vp-volume').value = player.getVolume(); }
+                else { player.mute(); icon.className = 'fa-solid fa-volume-xmark text-sm'; $('vp-volume').value = 0; }
+            };
+            window.vpVolume = function (v) {
+                if (!player || !ready) return;
+                player.unMute(); player.setVolume(Number(v));
+                $('vp-vol-icon').className = 'fa-solid ' + (Number(v) === 0 ? 'fa-volume-xmark' : 'fa-volume-high') + ' text-sm';
+            };
+            window.vpSpeed = function () {
+                speedIdx = (speedIdx + 1) % speeds.length;
+                const s = speeds[speedIdx];
+                if (player && ready) player.setPlaybackRate(s);
+                const lbl = s + 'x';
+                if ($('vp-speed-label')) $('vp-speed-label').innerText = lbl;
+                if ($('vp-speed-label-2')) $('vp-speed-label-2').innerText = lbl;
+                showUi();
+            };
+            window.vpFullscreen = function () {
+                const el = $('video-container');
+                if (!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen?.();
+            };
+            window.vpPip = function () {
+                const el = $('video-container');
+                const on = el.classList.toggle('vp-pip');
+                if (on) {
+                    el.classList.add('fixed', 'bottom-6', 'right-6', 'w-[320px]', 'z-[999]', 'rounded-2xl', 'shadow-2xl');
+                } else {
+                    el.classList.remove('fixed', 'bottom-6', 'right-6', 'w-[320px]', 'z-[999]', 'rounded-2xl', 'shadow-2xl');
+                }
+            };
+            window.vpAutoNext = function () {
+                autoNext = !autoNext;
+                if ($('vp-autonext')) $('vp-autonext').innerText = autoNext ? 'On' : 'Off';
+            };
+            window.vpAddNote = function () {
+                const note = window.prompt('আপনার নোট লিখুন:');
+                if (!note) return;
+                const key = 'notes-' + (window.currentCourseId || 'course');
+                const all = JSON.parse(localStorage.getItem(key) || '[]');
+                all.push({ t: ($('vid-title-overlay')?.innerText || ''), at: player && ready ? Math.floor(player.getCurrentTime()) : 0, note });
+                localStorage.setItem(key, JSON.stringify(all));
+                window.showToast && window.showToast('নোট সেভ হয়েছে।');
+            };
+
+            window.togglePlayState = () => window.vpToggle();
+            window.playVideo = (title) => { const t = $('vid-title-overlay'); if (t) t.innerText = title; };
+        })();
+
 
         function promptEnrollment() {
             if(isEnrolled) return;
