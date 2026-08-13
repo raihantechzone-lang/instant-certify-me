@@ -524,30 +524,163 @@
             showToast('Authentication successful!');
         }
 
-        // Course Logic
-        function togglePlayState() {
-            const playIcon = document.getElementById('play-icon');
-            const pauseIcon = document.getElementById('pause-icon');
-            playIcon.classList.toggle('hidden');
-            pauseIcon.classList.toggle('hidden');
-            
-            // Subtle visual feedback on poster
-            const poster = document.getElementById('vid-poster');
-            if(playIcon.classList.contains('hidden')) {
-                poster.style.opacity = '0.3';
-            } else {
-                poster.style.opacity = '0.7';
-            }
-        }
+        // ===== Real YouTube-powered custom player =====
+        (function () {
+            let player = null, ready = false, pendingId = null, ticker = null;
+            let autoNext = true, speedIdx = 2;
+            const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+            const $ = (id) => document.getElementById(id);
+            const fmt = (s) => {
+                s = Math.max(0, Math.floor(s || 0));
+                const m = Math.floor(s / 60), r = s % 60;
+                return m + ':' + String(r).padStart(2, '0');
+            };
 
-        function playVideo(title) {
-            document.getElementById('vid-title-overlay').innerText = title;
-            // Ensure play state is toggled on if it was paused
-            document.getElementById('play-icon').classList.add('hidden');
-            document.getElementById('pause-icon').classList.remove('hidden');
-            const poster = document.getElementById('vid-poster');
-            if (poster) poster.classList.add('hidden');
-        }
+            // Auto-hide UI after 3s, show on interaction
+            let hideTimer = null;
+            function showUi() {
+                document.querySelectorAll('.vp-ui').forEach(el => el.style.opacity = '1');
+                clearTimeout(hideTimer);
+                hideTimer = setTimeout(() => {
+                    if (player && player.getPlayerState && player.getPlayerState() === 1) {
+                        document.querySelectorAll('.vp-ui').forEach(el => el.style.opacity = '0');
+                    }
+                }, 3000);
+            }
+            const vc = $('video-container');
+            if (vc) { vc.addEventListener('mousemove', showUi); vc.addEventListener('click', showUi); vc.addEventListener('touchstart', showUi); }
+            showUi();
+
+            function setPlayIcons(playing) {
+                $('play-icon')?.classList.toggle('hidden', playing);
+                $('pause-icon')?.classList.toggle('hidden', !playing);
+                const bar = $('vp-bar-icon');
+                if (bar) bar.className = 'fa-solid ' + (playing ? 'fa-pause' : 'fa-play') + ' text-sm';
+            }
+
+            function tick() {
+                if (!player || !player.getDuration) return;
+                const d = player.getDuration() || 0, c = player.getCurrentTime() || 0;
+                const fill = $('vp-progress-fill');
+                if (fill) fill.style.width = (d ? (c / d) * 100 : 0) + '%';
+                const t = $('vp-time');
+                if (t) t.innerText = fmt(c) + ' / ' + fmt(d);
+                const q = $('vp-quality');
+                if (q && player.getPlaybackQuality) {
+                    const map = { hd1080: '1080p', hd720: '720p', large: '480p', medium: '360p', small: '240p' };
+                    q.innerText = map[player.getPlaybackQuality()] || 'Auto';
+                }
+            }
+
+            function loadApi(cb) {
+                if (window.YT && window.YT.Player) return cb();
+                const prev = window.onYouTubeIframeAPIReady;
+                window.onYouTubeIframeAPIReady = function () { prev && prev(); cb(); };
+                if (!document.getElementById('yt-api')) {
+                    const s = document.createElement('script');
+                    s.id = 'yt-api';
+                    s.src = 'https://www.youtube.com/iframe_api';
+                    document.head.appendChild(s);
+                }
+            }
+
+            window.loadLesson = function (videoId, title, index) {
+                if (typeof index === 'number') window.__currentLessonIndex = index;
+                const t = $('vid-title-overlay');
+                if (t && title) t.innerText = title;
+                $('vid-poster')?.classList.add('hidden');
+                const live = $('vp-live-label');
+                if (live) live.innerText = 'Now Playing';
+                showUi();
+
+                if (ready && player) { player.loadVideoById(videoId); return; }
+                pendingId = videoId;
+                loadApi(function () {
+                    if (player) { if (pendingId) player.loadVideoById(pendingId); return; }
+                    player = new YT.Player('yt-mount', {
+                        videoId: pendingId,
+                        playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, showinfo: 0, iv_load_policy: 3, playsinline: 1, disablekb: 1, fs: 0 },
+                        events: {
+                            onReady: (e) => {
+                                ready = true;
+                                e.target.playVideo();
+                                e.target.setPlaybackRate(speeds[speedIdx]);
+                                clearInterval(ticker);
+                                ticker = setInterval(tick, 500);
+                            },
+                            onStateChange: (e) => {
+                                setPlayIcons(e.data === 1);
+                                if (e.data === 1) showUi();
+                                else document.querySelectorAll('.vp-ui').forEach(el => el.style.opacity = '1');
+                                if (e.data === 0 && autoNext && window.playNextLesson) window.playNextLesson();
+                            }
+                        }
+                    });
+                });
+            };
+
+            window.vpToggle = function () {
+                if (!player || !ready) { window.showToast && window.showToast('একটি ক্লাস সিলেক্ট করুন।'); return; }
+                player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo();
+            };
+            window.vpSeekBy = function (d) { if (player && ready) player.seekTo(Math.max(0, player.getCurrentTime() + d), true); };
+            window.vpSeekTo = function (ev) {
+                if (!player || !ready) return;
+                const bar = $('vp-progress'); const r = bar.getBoundingClientRect();
+                const pct = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
+                player.seekTo(pct * (player.getDuration() || 0), true);
+            };
+            window.vpMute = function () {
+                if (!player || !ready) return;
+                const icon = $('vp-vol-icon');
+                if (player.isMuted()) { player.unMute(); icon.className = 'fa-solid fa-volume-high text-sm'; $('vp-volume').value = player.getVolume(); }
+                else { player.mute(); icon.className = 'fa-solid fa-volume-xmark text-sm'; $('vp-volume').value = 0; }
+            };
+            window.vpVolume = function (v) {
+                if (!player || !ready) return;
+                player.unMute(); player.setVolume(Number(v));
+                $('vp-vol-icon').className = 'fa-solid ' + (Number(v) === 0 ? 'fa-volume-xmark' : 'fa-volume-high') + ' text-sm';
+            };
+            window.vpSpeed = function () {
+                speedIdx = (speedIdx + 1) % speeds.length;
+                const s = speeds[speedIdx];
+                if (player && ready) player.setPlaybackRate(s);
+                const lbl = s + 'x';
+                if ($('vp-speed-label')) $('vp-speed-label').innerText = lbl;
+                if ($('vp-speed-label-2')) $('vp-speed-label-2').innerText = lbl;
+                showUi();
+            };
+            window.vpFullscreen = function () {
+                const el = $('video-container');
+                if (!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen?.();
+            };
+            window.vpPip = function () {
+                const el = $('video-container');
+                const on = el.classList.toggle('vp-pip');
+                if (on) {
+                    el.classList.add('fixed', 'bottom-6', 'right-6', 'w-[320px]', 'z-[999]', 'rounded-2xl', 'shadow-2xl');
+                } else {
+                    el.classList.remove('fixed', 'bottom-6', 'right-6', 'w-[320px]', 'z-[999]', 'rounded-2xl', 'shadow-2xl');
+                }
+            };
+            window.vpAutoNext = function () {
+                autoNext = !autoNext;
+                if ($('vp-autonext')) $('vp-autonext').innerText = autoNext ? 'On' : 'Off';
+            };
+            window.vpAddNote = function () {
+                const note = window.prompt('আপনার নোট লিখুন:');
+                if (!note) return;
+                const key = 'notes-' + (window.currentCourseId || 'course');
+                const all = JSON.parse(localStorage.getItem(key) || '[]');
+                all.push({ t: ($('vid-title-overlay')?.innerText || ''), at: player && ready ? Math.floor(player.getCurrentTime()) : 0, note });
+                localStorage.setItem(key, JSON.stringify(all));
+                window.showToast && window.showToast('নোট সেভ হয়েছে।');
+            };
+
+            window.togglePlayState = () => window.vpToggle();
+            window.playVideo = (title) => { const t = $('vid-title-overlay'); if (t) t.innerText = title; };
+        })();
+
 
         function promptEnrollment() {
             if(isEnrolled) return;
