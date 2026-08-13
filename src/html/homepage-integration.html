@@ -453,65 +453,41 @@
                 </div>
                 ${!isLocked ? '<span class="bg-white border border-slate-200 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm">Play</span>' : ''}
              `;
-             item.onclick = () => {
-                if (!isLocked) {
-                   // Video player logic
-                   const vidId = (url) => {
-                      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                      const match = url?.match(regExp);
-                      return (match && match[2].length === 11) ? match[2] : null;
-                   };
-                   const vId = vidId(c.youtube_url);
-                   if (vId) {
-                      const container = document.querySelector('.aspect-video');
-                      if (container) {
-                         // Find any existing player or poster
-                         const poster = document.getElementById('vid-poster');
-                         const existingIframe = container.querySelector('iframe');
-                         
-                         if (existingIframe) {
-                            existingIframe.src = `https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1`;
-                         } else {
-                            container.innerHTML = `<iframe class="w-full h-full absolute inset-0 z-20" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                         }
-                         
-                         // Update UI for the current playing lesson
-                         const overlay = document.getElementById('vid-title-overlay');
-                         if (overlay) overlay.innerText = c.title;
-                         
-                         if (poster) poster.classList.add('hidden');
-                      }
-                   }
-                 } else if (c.is_free) {
-                    // Allow free content without login/enrollment
-                    const vidId = (url) => {
-                       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                       const match = url?.match(regExp);
-                       return (match && match[2].length === 11) ? match[2] : null;
-                    };
-                    const vId = vidId(c.youtube_url);
-                    if (vId) {
-                       const container = document.querySelector('.aspect-video');
-                       if (container) {
-                          const poster = document.getElementById('vid-poster');
-                          const existingIframe = container.querySelector('iframe');
-                          
-                          if (existingIframe) {
-                             existingIframe.src = `https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1`;
-                          } else {
-                             container.innerHTML = `<iframe class="w-full h-full absolute inset-0 z-20" src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                          }
-                          
-                          const overlay = document.getElementById('vid-title-overlay');
-                          if (overlay) overlay.innerText = c.title;
-                          
-                          if (poster) poster.classList.add('hidden');
-                       }
-                    }
-                 } else {
-                    window.showToast("Enroll to unlock this lesson.", "Locked Content");
-                 }
+             const vidId = (url) => {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = url?.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
              };
+             const playableId = vidId(c.youtube_url);
+             let myIndex = -1;
+             if (!isLocked && playableId) {
+                window.__playable = window.__playable || [];
+                myIndex = window.__playable.length;
+                window.__playable.push({ vId: playableId, title: c.title });
+             }
+
+             item.onclick = () => {
+                if (isLocked) {
+                   window.showToast("Enroll to unlock this lesson.", "Locked Content");
+                   return;
+                }
+                if (!playableId) {
+                   window.showToast("এই ক্লাসে কোনো ভিডিও যুক্ত করা হয়নি।", "No Video");
+                   return;
+                }
+                if (window.loadLesson) {
+                   window.loadLesson(playableId, c.title, myIndex);
+                } else {
+                   const container = document.getElementById('yt-mount') || document.querySelector('.aspect-video');
+                   if (container) {
+                      container.innerHTML = `<iframe class="w-full h-full absolute inset-0 z-20" src="https://www.youtube.com/embed/${playableId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                      document.getElementById('vid-poster')?.classList.add('hidden');
+                   }
+                   const overlay = document.getElementById('vid-title-overlay');
+                   if (overlay) overlay.innerText = c.title;
+                }
+             };
+
            list.appendChild(item);
           });
 
