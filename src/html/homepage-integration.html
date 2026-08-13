@@ -498,6 +498,20 @@
            list.appendChild(item);
           });
 
+          // Prepare first playable lesson (title only, playback starts on user action)
+          if (window.__playable.length > 0) {
+            const first = window.__playable[0];
+            window.__currentLessonIndex = 0;
+            const overlay = document.getElementById('vid-title-overlay');
+            if (overlay) overlay.innerText = first.title;
+            const bigPlay = document.getElementById('play-icon');
+            if (bigPlay) {
+              window.vpToggle = () => window.loadLesson(first.vId, first.title, 0);
+            }
+          }
+
+
+
           // Update Materials (PDFs) section as well
           const materialsContainer = document.getElementById('materials-container') || document.getElementById('materials-container-enroll');
           if (materialsContainer) {
