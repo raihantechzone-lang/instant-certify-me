@@ -620,7 +620,11 @@
             };
 
             window.vpToggle = function () {
-                if (!player || !ready) { window.showToast && window.showToast('একটি ক্লাস সিলেক্ট করুন।'); return; }
+                if (!player || !ready) {
+                    if (window.__startFirstLesson) window.__startFirstLesson();
+                    else window.showToast && window.showToast('একটি ক্লাস সিলেক্ট করুন।');
+                    return;
+                }
                 player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo();
             };
             window.vpSeekBy = function (d) { if (player && ready) player.seekTo(Math.max(0, player.getCurrentTime() + d), true); };

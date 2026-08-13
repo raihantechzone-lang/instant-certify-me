@@ -504,10 +504,7 @@
             window.__currentLessonIndex = 0;
             const overlay = document.getElementById('vid-title-overlay');
             if (overlay) overlay.innerText = first.title;
-            const bigPlay = document.getElementById('play-icon');
-            if (bigPlay) {
-              window.vpToggle = () => window.loadLesson(first.vId, first.title, 0);
-            }
+            window.__startFirstLesson = () => window.loadLesson(first.vId, first.title, 0);
           }
 
 
