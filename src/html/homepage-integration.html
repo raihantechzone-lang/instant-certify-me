@@ -368,27 +368,21 @@
         btn.disabled = true;
 
         const fd = new FormData(paymentForm);
-        const fullName = fd.get('Full Name') || fd.get('full_name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
-        const phone = fd.get('Phone Number') || fd.get('phone') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
-        const trxIdInput = paymentForm.querySelector('input[placeholder*="e.g."]');
-        const trxId = fd.get('Transaction ID') || trxIdInput?.value;
-
+        // Match specific placeholders/labels from enrollment HTML
+        const fullName = fd.get('Full Name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
+        const phone = fd.get('Phone Number') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
+        const trxId = fd.get('Transaction ID') || paymentForm.querySelector('input[placeholder*="e.g."]')?.value;
 
         try {
-          // 1. Ensure user is logged in (or handle guest enrollment with Roll Number)
-          let userId = currentUser?.id;
-          let rollNumber = currentProfile?.roll_number || "GL" + Math.floor(100000 + Math.random() * 900000);
-
-          if (!userId) {
-            const email = fullName.toLowerCase().replace(/\s+/g, '') + "@temp.gators.com"; // Guest fallback or prompt
-            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-              email,
-              password: rollNumber,
-              options: { data: { full_name: fullName, roll_number: rollNumber } }
-            });
-            if (signUpError) throw signUpError;
-            userId = signUpData.user?.id;
+          // 1. Ensure user is logged in
+          if (!currentUser) {
+            window.showToast("Please log in first to enroll.", "Login required");
+            window.openModal("authModal", "login");
+            throw new Error("User not authenticated");
           }
+
+          let userId = currentUser.id;
+          let rollNumber = currentProfile?.roll_number || "GL" + Math.floor(100000 + Math.random() * 900000);
 
           // 2. Create enrollment request
           const { error: enrollError } = await supabase.from("enrollment_requests").insert({
@@ -402,12 +396,15 @@
           });
           if (enrollError) throw enrollError;
 
-          window.showToast("Enrollment submitted! Your roll number is: " + rollNumber, "Success");
+          window.showToast("Enrollment submitted! We will verify your payment shortly.", "Success");
           window.closeModal("paymentModal");
-          // Redirect to dashboard or success view
+          
+          // Redirect to dashboard where they can see pending status
           setTimeout(() => window.location.href = "/dashboard", 2000);
         } catch (err) {
-          window.showToast(err.message, "Enrollment Error");
+          if (err.message !== "User not authenticated") {
+            window.showToast(err.message, "Enrollment Error");
+          }
         } finally {
           btn.innerHTML = originalText;
           btn.disabled = false;
