@@ -693,26 +693,8 @@
         }
 
         function processPayment(e) {
-            e.preventDefault();
-            const btn = document.getElementById('pay-btn');
-            const originalContent = btn.innerHTML;
-            
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
-            btn.disabled = true;
-
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Order Complete';
-                btn.classList.replace('bg-brand-600', 'bg-brand-500');
-                
-                setTimeout(() => {
-                    closeModal('paymentModal');
-                    unlockCourse();
-                    btn.innerHTML = originalContent;
-                    btn.classList.replace('bg-brand-500', 'bg-brand-600');
-                    btn.disabled = false;
-                    e.target.reset();
-                }, 1000);
-            }, 2000);
+            // Handled by homepage-integration.html
+            console.log("Form submission handled by integration layer");
         }
 
         function unlockCourse() {
