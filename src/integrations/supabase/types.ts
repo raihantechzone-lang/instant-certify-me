@@ -302,26 +302,48 @@ export type Database = {
       lesson_progress: {
         Row: {
           completed: boolean | null
+          course_id: string | null
+          duration_seconds: number
           id: string
+          last_position_seconds: number
           lesson_id: string
           profile_id: string
+          progress_percent: number
+          updated_at: string
           watched_at: string | null
         }
         Insert: {
           completed?: boolean | null
+          course_id?: string | null
+          duration_seconds?: number
           id?: string
+          last_position_seconds?: number
           lesson_id: string
           profile_id: string
+          progress_percent?: number
+          updated_at?: string
           watched_at?: string | null
         }
         Update: {
           completed?: boolean | null
+          course_id?: string | null
+          duration_seconds?: number
           id?: string
+          last_position_seconds?: number
           lesson_id?: string
           profile_id?: string
+          progress_percent?: number
+          updated_at?: string
           watched_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lesson_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lesson_progress_lesson_id_fkey"
             columns: ["lesson_id"]
