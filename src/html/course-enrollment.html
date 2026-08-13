@@ -166,49 +166,91 @@
             <div class="lg:col-span-8 flex flex-col gap-10">
                 
                 <section class="flex flex-col gap-5">
-                    <div class="relative w-full aspect-video bg-black rounded-3xl overflow-hidden shadow-float group cursor-pointer border border-slate-800/50" id="video-container" onclick="togglePlayState()">
-                        
+                    <div class="rounded-3xl overflow-hidden shadow-float border border-slate-800/50 bg-black">
+                    <div class="relative w-full aspect-video bg-black overflow-hidden group" id="video-container">
+
+                        <!-- YouTube mount -->
+                        <div id="yt-mount" class="absolute inset-0 w-full h-full z-10"></div>
+
                         <!-- Video Poster -->
-                        <img id="vid-poster" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-60 transition-opacity duration-500 z-10" alt="Video">
-                        
-                        <!-- Top Badges -->
-                        <div class="absolute top-5 left-5 flex gap-2 z-10">
-                            <span class="bg-red-500/90 backdrop-blur text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full">Live / Rec</span>
+                        <img id="vid-poster" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" class="absolute inset-0 w-full h-full object-cover z-20" alt="Video">
+
+                        <!-- Click-catcher over the iframe so our controls work -->
+                        <div id="vid-clickcatch" class="absolute inset-0 z-20" onclick="window.vpToggle && window.vpToggle()"></div>
+
+                        <!-- Top bar -->
+                        <div class="vp-ui absolute top-0 left-0 right-0 flex items-start justify-between p-5 z-30 transition-opacity duration-300 pointer-events-none">
+                            <span class="flex items-center gap-2 bg-black/60 backdrop-blur text-white text-[11px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full">
+                                <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span> <span id="vp-live-label">Live</span>
+                            </span>
+                            <button onclick="event.stopPropagation(); window.vpPip && window.vpPip()" class="pointer-events-auto flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur text-white text-xs font-medium px-3 py-2 rounded-xl border border-white/20 transition-colors">
+                                <i class="fa-solid fa-clone"></i> Picture in Picture
+                            </button>
                         </div>
 
-                        <!-- Center Play Button (Minimalist Glass) -->
-                        <div class="absolute inset-0 flex items-center justify-center z-10">
-                            <div class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-2xl transition-transform duration-300 group-hover:scale-110">
+                        <!-- Center controls -->
+                        <div class="vp-ui absolute inset-0 flex items-center justify-center gap-8 sm:gap-12 z-30 transition-opacity duration-300 pointer-events-none">
+                            <button onclick="event.stopPropagation(); window.vpSeekBy && window.vpSeekBy(-10)" class="pointer-events-auto w-12 h-12 rounded-full border border-white/40 text-white flex items-center justify-center text-[11px] font-bold hover:bg-white/15 transition-colors">
+                                <i class="fa-solid fa-rotate-left absolute text-2xl opacity-70"></i><span class="relative">10</span>
+                            </button>
+                            <button onclick="event.stopPropagation(); window.vpToggle && window.vpToggle()" class="pointer-events-auto w-20 h-20 rounded-full bg-brand-500 ring-8 ring-brand-500/25 flex items-center justify-center text-white shadow-2xl transition-transform duration-300 hover:scale-105">
                                 <i id="play-icon" class="fa-solid fa-play text-2xl ml-1"></i>
                                 <i id="pause-icon" class="fa-solid fa-pause text-2xl hidden"></i>
-                            </div>
+                            </button>
+                            <button onclick="event.stopPropagation(); window.vpSeekBy && window.vpSeekBy(10)" class="pointer-events-auto w-12 h-12 rounded-full border border-white/40 text-white flex items-center justify-center text-[11px] font-bold hover:bg-white/15 transition-colors">
+                                <i class="fa-solid fa-rotate-right absolute text-2xl opacity-70"></i><span class="relative">10</span>
+                            </button>
                         </div>
 
-                        <!-- Bottom Controls (Sleek Glass Panel) -->
-                        <div class="absolute bottom-0 left-0 right-0 glass-panel p-5 transition-all duration-300 hide-controls z-20">
-                            <h4 id="vid-title-overlay" class="text-white font-medium text-sm mb-3 font-bengali truncate">১. Orientation & Guideline Class</h4>
-                            
+                        <!-- Bottom Controls -->
+                        <div class="vp-ui absolute bottom-0 left-0 right-0 p-5 pt-16 bg-gradient-to-t from-black/90 to-transparent z-30 transition-opacity duration-300">
+                            <h4 id="vid-title-overlay" class="text-white/90 font-medium text-sm mb-3 font-bengali truncate"></h4>
+
                             <!-- Progress bar -->
-                            <div class="w-full h-1 bg-white/20 rounded-full cursor-pointer relative mb-3 group/prog">
-                                <div class="absolute top-0 left-0 h-full w-[30%] bg-brand-500 rounded-full">
-                                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover/prog:opacity-100 transition-opacity"></div>
+                            <div id="vp-progress" onclick="event.stopPropagation(); window.vpSeekTo && window.vpSeekTo(event)" class="w-full h-1.5 bg-white/25 rounded-full cursor-pointer relative mb-4 group/prog">
+                                <div id="vp-progress-fill" class="absolute top-0 left-0 h-full w-0 bg-brand-500 rounded-full">
+                                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow"></div>
                                 </div>
                             </div>
-                            
+
                             <!-- Action buttons -->
-                            <div class="flex items-center justify-between text-white/80">
-                                <div class="flex items-center gap-6">
-                                    <button class="hover:text-white transition-colors"><i class="fa-solid fa-play text-sm"></i></button>
-                                    <button class="hover:text-white transition-colors"><i class="fa-solid fa-volume-high text-sm"></i></button>
-                                    <span class="text-xs font-medium tracking-wide">15:20 / 45:00</span>
+                            <div class="flex items-center justify-between text-white/85">
+                                <div class="flex items-center gap-4 sm:gap-5">
+                                    <button onclick="event.stopPropagation(); window.vpToggle && window.vpToggle()" class="hover:text-white transition-colors"><i id="vp-bar-icon" class="fa-solid fa-play text-sm"></i></button>
+                                    <button onclick="event.stopPropagation(); window.vpMute && window.vpMute()" class="hover:text-white transition-colors"><i id="vp-vol-icon" class="fa-solid fa-volume-high text-sm"></i></button>
+                                    <input id="vp-volume" type="range" min="0" max="100" value="100" onclick="event.stopPropagation()" oninput="window.vpVolume && window.vpVolume(this.value)" class="w-20 sm:w-28 accent-brand-500 cursor-pointer">
+                                    <span id="vp-time" class="text-xs font-medium tracking-wide hidden sm:inline">0:00 / 0:00</span>
                                 </div>
-                                <div class="flex items-center gap-5">
-                                    <button class="hover:text-white transition-colors"><i class="fa-solid fa-gear text-sm"></i></button>
-                                    <button class="hover:text-white transition-colors"><i class="fa-solid fa-expand text-sm"></i></button>
+                                <div class="flex items-center gap-4 sm:gap-5">
+                                    <button onclick="event.stopPropagation(); window.vpSpeed && window.vpSpeed()" class="text-xs font-semibold hover:text-white transition-colors"><span id="vp-speed-label">1x</span></button>
+                                    <button onclick="event.stopPropagation(); window.vpSpeed && window.vpSpeed()" class="hover:text-white transition-colors"><i class="fa-solid fa-gear text-sm"></i></button>
+                                    <button onclick="event.stopPropagation(); window.vpFullscreen && window.vpFullscreen()" class="hover:text-white transition-colors"><i class="fa-solid fa-expand text-sm"></i></button>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Info strip -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 bg-[#0b0f0d] text-white/80 divide-x divide-white/10 border-t border-white/10">
+                        <div class="flex items-center gap-3 px-4 py-4">
+                            <i class="fa-solid fa-gauge-high text-brand-500"></i>
+                            <div class="leading-tight"><p id="vp-quality" class="text-xs font-semibold text-white">Auto</p><p class="text-[11px] text-white/50">HD Quality</p></div>
+                        </div>
+                        <button onclick="window.vpSpeed && window.vpSpeed()" class="flex items-center gap-3 px-4 py-4 text-left hover:bg-white/5 transition-colors">
+                            <i class="fa-solid fa-forward text-brand-500"></i>
+                            <div class="leading-tight"><p id="vp-speed-label-2" class="text-xs font-semibold text-white">1x</p><p class="text-[11px] text-white/50">Playback Speed</p></div>
+                        </button>
+                        <button onclick="window.vpAutoNext && window.vpAutoNext()" class="flex items-center gap-3 px-4 py-4 text-left hover:bg-white/5 transition-colors">
+                            <i class="fa-solid fa-heart text-brand-500"></i>
+                            <div class="leading-tight"><p id="vp-autonext" class="text-xs font-semibold text-white">On</p><p class="text-[11px] text-white/50">Auto Next</p></div>
+                        </button>
+                        <button onclick="window.vpAddNote && window.vpAddNote()" class="flex items-center gap-3 px-4 py-4 text-left hover:bg-white/5 transition-colors">
+                            <i class="fa-solid fa-pen-to-square text-brand-500"></i>
+                            <div class="leading-tight"><p class="text-xs font-semibold text-white">Add Note</p><p class="text-[11px] text-white/50">Personal Notes</p></div>
+                        </button>
+                    </div>
+                    </div>
+
                     
                     <!-- Course Title & Meta Info -->
                     <div>
