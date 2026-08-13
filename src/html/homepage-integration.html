@@ -433,8 +433,15 @@
                 এখনও কোনো কন্টেন্ট আপলোড করা হয়নি।
               </div>`;
           }
-          
+          window.__playable = [];
+          window.playNextLesson = () => {
+            const list = window.__playable || [];
+            const next = (window.__currentLessonIndex ?? -1) + 1;
+            if (list[next] && window.loadLesson) window.loadLesson(list[next].vId, list[next].title, next);
+          };
+
           contents.forEach((c, idx) => {
+
              const isLocked = !c.is_free && !isEnrolled;
              const item = document.createElement("div");
              item.className = `group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${isLocked ? 'opacity-80' : 'relative overflow-hidden'}`;
