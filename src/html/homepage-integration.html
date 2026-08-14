@@ -497,9 +497,20 @@
                 item.onclick = () => {
                   const pIdx = window.__playable.findIndex(p => p.cId === c.id);
                   window.loadLesson(vId, c.title, pIdx, c.id);
+                  // Scroll to top if on mobile to see the video
+                  if (window.innerWidth < 1024) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
                 };
              } else {
-                item.onclick = () => window.openModal('paymentModal');
+                item.onclick = () => {
+                  if (!currentUser) {
+                    window.showToast("Please log in to enroll and access premium classes.", "Login Required");
+                    window.openModal("authModal", "login");
+                  } else {
+                    window.openModal('paymentModal');
+                  }
+                };
              }
              list.appendChild(item);
           });
