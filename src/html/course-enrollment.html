@@ -570,11 +570,6 @@
                     const map = { hd1080: '1080p', hd720: '720p', large: '480p', medium: '360p', small: '240p' };
                     q.innerText = map[player.getPlaybackQuality()] || 'Auto';
                 }
-                
-                // Save progress every 5 seconds
-                if (player.getPlayerState() === 1 && Math.floor(c) % 5 === 0) {
-                    if (window.__saveProgress) window.__saveProgress(c, d);
-                }
             }
 
             function loadApi(cb) {
@@ -589,7 +584,7 @@
                 }
             }
 
-            window.loadLesson = async function (videoId, title, index, contentId) {
+            window.loadLesson = function (videoId, title, index) {
                 if (typeof index === 'number') window.__currentLessonIndex = index;
                 const t = $('vid-title-overlay');
                 if (t && title) t.innerText = title;
@@ -598,36 +593,13 @@
                 if (live) live.innerText = 'Now Playing';
                 showUi();
 
-                // Get saved progress if any
-                let startSeconds = 0;
-                if (window.getLessonProgress && contentId) {
-                    const progress = await window.getLessonProgress(contentId);
-                    if (progress) {
-                        // Handle edge case: if video duration changed significantly, we might want to reset
-                        // But for now, we resume from saved point.
-                        // We also ensure we don't start too close to the end (e.g. within 2s)
-                        if (progress.duration_seconds > 0 && progress.last_position_seconds >= progress.duration_seconds - 2) {
-                            startSeconds = 0;
-                        } else {
-                            startSeconds = progress.last_position_seconds || 0;
-                        }
-                    }
-                }
-
-                if (ready && player) { 
-                    player.loadVideoById({ videoId, startSeconds }); 
-                    return; 
-                }
+                if (ready && player) { player.loadVideoById(videoId); return; }
                 pendingId = videoId;
-                pendingStart = startSeconds;
                 loadApi(function () {
-                    if (player) { 
-                        if (pendingId) player.loadVideoById({ videoId: pendingId, startSeconds: pendingStart }); 
-                        return; 
-                    }
+                    if (player) { if (pendingId) player.loadVideoById(pendingId); return; }
                     player = new YT.Player('yt-mount', {
                         videoId: pendingId,
-                        playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, showinfo: 0, iv_load_policy: 3, playsinline: 1, disablekb: 1, fs: 0, start: pendingStart },
+                        playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, showinfo: 0, iv_load_policy: 3, playsinline: 1, disablekb: 1, fs: 0 },
                         events: {
                             onReady: (e) => {
                                 ready = true;

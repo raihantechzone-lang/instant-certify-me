@@ -299,33 +299,6 @@
     loadCourseDetails(window.currentCourseId);
   }
 
-  async function updateLessonProgress(courseId, contentId, seconds, duration) {
-    if (!currentUser) return;
-    const percentage = duration > 0 ? Math.floor((seconds / duration) * 100) : 0;
-    const completed = percentage >= 95;
-    
-    // Using last_position_seconds and duration_seconds from our updated schema
-    await supabase.from("lesson_progress").upsert({
-      profile_id: currentUser.id, // Changed from user_id to profile_id to match schema
-      course_id: courseId,
-      lesson_id: contentId, // Changed from content_id to lesson_id to match schema
-      last_position_seconds: Math.floor(seconds),
-      duration_seconds: Math.floor(duration),
-      progress_percent: percentage, // Using the new column name
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'profile_id,lesson_id' });
-  }
-
-  async function getLessonProgress(contentId) {
-    if (!currentUser) return null;
-    const { data } = await supabase.from("lesson_progress")
-      .select("last_position_seconds, progress_percent, duration_seconds")
-      .eq("profile_id", currentUser.id)
-      .eq("lesson_id", contentId)
-      .maybeSingle();
-    return data;
-  }
-
   async function loadCourseDetails(id) {
     const { data: course } = await supabase.from("courses").select("*").eq("id", id).maybeSingle();
     if (!course) return;
@@ -454,73 +427,19 @@
           window.playNextLesson = () => {
             const list = window.__playable || [];
             const next = (window.__currentLessonIndex ?? -1) + 1;
-            if (list[next] && window.loadLesson) window.loadLesson(list[next].vId, list[next].title, next, list[next].cId);
+            if (list[next] && window.loadLesson) window.loadLesson(list[next].vId, list[next].title, next);
           };
-
-          window.__saveProgress = async (seconds, duration) => {
-            const currentLesson = window.__playable?.[window.__currentLessonIndex];
-            if (currentLesson && currentLesson.cId) {
-              await updateLessonProgress(id, currentLesson.cId, seconds, duration);
-            }
-          };
-
-          const progresses = currentUser ? await supabase.from("lesson_progress").select("lesson_id, progress_percent").eq("profile_id", currentUser.id).eq("course_id", id) : { data: [] };
-          const progressMap = {};
-          (progresses.data || []).forEach(p => progressMap[p.lesson_id] = p.progress_percent >= 95);
 
           contents.forEach((c, idx) => {
 
              const isLocked = !c.is_free && !isEnrolled;
-             const isCompleted = progressMap[c.id];
              const item = document.createElement("div");
              item.className = `group flex items-center justify-between p-4 sm:px-6 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${isLocked ? 'opacity-80' : 'relative overflow-hidden'}`;
              if (!isLocked) {
                 item.innerHTML = `<div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>`;
              }
-             
-             const vId = c.youtube_url?.split('v=')[1]?.split('&')[0] || c.youtube_url?.split('/').pop();
-             if (!isLocked && vId) window.__playable.push({ vId, title: c.title, cId: c.id });
-
              item.innerHTML += `
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl ${isLocked ? 'bg-slate-100' : 'bg-brand-50'} flex items-center justify-center shrink-0">
-                        <i class="fa-solid ${isLocked ? 'fa-lock text-slate-400' : (isCompleted ? 'fa-check text-brand-600' : 'fa-play text-brand-600')} text-xs"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <h4 class="text-sm font-bold ${isLocked ? 'text-slate-400' : 'text-surface-900'} font-bengali group-hover:text-brand-600 transition-colors">${c.title}</h4>
-                        <span class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">${c.is_free ? 'Free Sample' : (isLocked ? 'Premium Class' : 'Unlocked')}</span>
-                    </div>
-                </div>
-             `;
-             
-             if (!isLocked) {
-                item.onclick = () => {
-                  const pIdx = window.__playable.findIndex(p => p.cId === c.id);
-                  window.loadLesson(vId, c.title, pIdx, c.id);
-                  // Scroll to top if on mobile to see the video
-                  if (window.innerWidth < 1024) {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }
-                };
-             } else {
-                item.onclick = () => {
-                  if (!currentUser) {
-                    window.showToast("Please log in to enroll and access premium classes.", "Login Required");
-                    window.openModal("authModal", "login");
-                  } else {
-                    window.openModal('paymentModal');
-                  }
-                };
-             }
-             list.appendChild(item);
-          });
-          
-          window.__startFirstLesson = () => {
-            if (window.__playable && window.__playable.length > 0) {
-              const first = window.__playable[0];
-              window.loadLesson(first.vId, first.title, 0, first.cId);
-            }
-          };
                     <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-100 text-slate-400' : 'bg-brand-50 text-brand-600'} flex items-center justify-center shrink-0">
                         <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-play'} text-sm"></i>
                     </div>
