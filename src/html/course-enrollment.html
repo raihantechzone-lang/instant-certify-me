@@ -570,6 +570,11 @@
                     const map = { hd1080: '1080p', hd720: '720p', large: '480p', medium: '360p', small: '240p' };
                     q.innerText = map[player.getPlaybackQuality()] || 'Auto';
                 }
+                
+                // Save progress every 5 seconds
+                if (player.getPlayerState() === 1 && Math.floor(c) % 5 === 0) {
+                    if (window.__saveProgress) window.__saveProgress(c, d);
+                }
             }
 
             function loadApi(cb) {
@@ -584,7 +589,7 @@
                 }
             }
 
-            window.loadLesson = function (videoId, title, index) {
+            window.loadLesson = async function (videoId, title, index, contentId) {
                 if (typeof index === 'number') window.__currentLessonIndex = index;
                 const t = $('vid-title-overlay');
                 if (t && title) t.innerText = title;
@@ -593,13 +598,27 @@
                 if (live) live.innerText = 'Now Playing';
                 showUi();
 
-                if (ready && player) { player.loadVideoById(videoId); return; }
+                // Get saved progress if any
+                let startSeconds = 0;
+                if (window.getLessonProgress && contentId) {
+                    const progress = await window.getLessonProgress(contentId);
+                    if (progress) startSeconds = progress.last_position_seconds || 0;
+                }
+
+                if (ready && player) { 
+                    player.loadVideoById({ videoId, startSeconds }); 
+                    return; 
+                }
                 pendingId = videoId;
+                pendingStart = startSeconds;
                 loadApi(function () {
-                    if (player) { if (pendingId) player.loadVideoById(pendingId); return; }
+                    if (player) { 
+                        if (pendingId) player.loadVideoById({ videoId: pendingId, startSeconds: pendingStart }); 
+                        return; 
+                    }
                     player = new YT.Player('yt-mount', {
                         videoId: pendingId,
-                        playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, showinfo: 0, iv_load_policy: 3, playsinline: 1, disablekb: 1, fs: 0 },
+                        playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, showinfo: 0, iv_load_policy: 3, playsinline: 1, disablekb: 1, fs: 0, start: pendingStart },
                         events: {
                             onReady: (e) => {
                                 ready = true;
