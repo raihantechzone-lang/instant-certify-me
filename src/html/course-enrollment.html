@@ -602,7 +602,16 @@
                 let startSeconds = 0;
                 if (window.getLessonProgress && contentId) {
                     const progress = await window.getLessonProgress(contentId);
-                    if (progress) startSeconds = progress.last_position_seconds || 0;
+                    if (progress) {
+                        // Handle edge case: if video duration changed significantly, we might want to reset
+                        // But for now, we resume from saved point.
+                        // We also ensure we don't start too close to the end (e.g. within 2s)
+                        if (progress.duration_seconds > 0 && progress.last_position_seconds >= progress.duration_seconds - 2) {
+                            startSeconds = 0;
+                        } else {
+                            startSeconds = progress.last_position_seconds || 0;
+                        }
+                    }
                 }
 
                 if (ready && player) { 

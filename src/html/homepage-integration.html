@@ -301,26 +301,27 @@
 
   async function updateLessonProgress(courseId, contentId, seconds, duration) {
     if (!currentUser) return;
-    const percentage = Math.floor((seconds / duration) * 100);
+    const percentage = duration > 0 ? Math.floor((seconds / duration) * 100) : 0;
     const completed = percentage >= 95;
     
+    // Using last_position_seconds and duration_seconds from our updated schema
     await supabase.from("lesson_progress").upsert({
-      user_id: currentUser.id,
+      profile_id: currentUser.id, // Changed from user_id to profile_id to match schema
       course_id: courseId,
-      content_id: contentId,
+      lesson_id: contentId, // Changed from content_id to lesson_id to match schema
       last_position_seconds: Math.floor(seconds),
-      seconds_watched: Math.floor(seconds),
-      completed: completed,
+      duration_seconds: Math.floor(duration),
+      progress_percent: percentage, // Using the new column name
       updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,content_id' });
+    }, { onConflict: 'profile_id,lesson_id' });
   }
 
   async function getLessonProgress(contentId) {
     if (!currentUser) return null;
     const { data } = await supabase.from("lesson_progress")
-      .select("last_position_seconds, completed")
-      .eq("user_id", currentUser.id)
-      .eq("content_id", contentId)
+      .select("last_position_seconds, progress_percent, duration_seconds")
+      .eq("profile_id", currentUser.id)
+      .eq("lesson_id", contentId)
       .maybeSingle();
     return data;
   }
@@ -463,9 +464,9 @@
             }
           };
 
-          const progresses = currentUser ? await supabase.from("lesson_progress").select("content_id, completed").eq("user_id", currentUser.id).eq("course_id", id) : { data: [] };
+          const progresses = currentUser ? await supabase.from("lesson_progress").select("lesson_id, progress_percent").eq("profile_id", currentUser.id).eq("course_id", id) : { data: [] };
           const progressMap = {};
-          (progresses.data || []).forEach(p => progressMap[p.content_id] = p.completed);
+          (progresses.data || []).forEach(p => progressMap[p.lesson_id] = p.progress_percent >= 95);
 
           contents.forEach((c, idx) => {
 
