@@ -29,3 +29,4 @@ export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
   requestMiddleware: [errorMiddleware, csrfMiddleware],
 }));
+// Triggering redeploy at Tue Aug 18 17:31:26 UTC 2026
