@@ -341,10 +341,16 @@
       } else {
         enrollBtn.onclick = () => {
           if (currentUser) {
-            window.location.href = "/enroll/" + id;
+            if (typeof window.openModal === 'function') {
+                window.openModal("paymentModal");
+            } else {
+                window.location.href = "/enroll/" + id;
+            }
           } else {
             window.showToast("Please log in to enroll.", "Login Required");
-            window.openModal("authModal", "login");
+            if (typeof window.openModal === 'function') {
+                window.openModal("authModal", "login");
+            }
           }
         };
       }
