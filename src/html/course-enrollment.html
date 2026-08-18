@@ -684,6 +684,22 @@
         })();
 
 
+        function handleEnrollClick() {
+            // Check if currentUser exists (managed by integration layer)
+            if (window.supabase && typeof window.supabase.auth.getSession === 'function') {
+                window.supabase.auth.getSession().then(({data}) => {
+                    if (data.session) {
+                        openModal('paymentModal');
+                    } else {
+                        openModal('authModal', 'login');
+                    }
+                });
+            } else {
+                // Fallback for safety
+                openModal('authModal', 'login');
+            }
+        }
+
         function promptEnrollment() {
             if(isEnrolled) return;
             showToast('Enrollment required to access this content.');
