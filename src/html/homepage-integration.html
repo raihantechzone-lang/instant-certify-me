@@ -351,7 +351,7 @@
     }
 
     // Payment form integration (for /enroll page)
-    const paymentForm = document.querySelector('#paymentModal form');
+    const paymentForm = document.querySelector('#paymentModal form') || document.getElementById('payment-form');
     if (paymentForm) {
       paymentForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -362,9 +362,9 @@
 
         const fd = new FormData(paymentForm);
         // Match specific placeholders/labels from enrollment HTML
-        const fullName = fd.get('Full Name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
-        const phone = fd.get('Phone Number') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
-        const trxId = fd.get('Transaction ID') || paymentForm.querySelector('input[placeholder*="e.g."]')?.value;
+        const fullName = fd.get('full_name') || fd.get('Full Name') || paymentForm.querySelector('input[placeholder="Full Name"]')?.value;
+        const phone = fd.get('mobile') || fd.get('Phone Number') || paymentForm.querySelector('input[placeholder*="Phone Number"]')?.value;
+        const trxId = fd.get('transaction_id') || fd.get('Transaction ID') || paymentForm.querySelector('input[placeholder*="e.g."]')?.value;
 
         try {
           // 1. Ensure user is logged in
@@ -382,6 +382,7 @@
             user_id: userId,
             course_id: id,
             full_name: fullName,
+            email: currentUser.email,
             mobile: phone,
             transaction_id: trxId,
             roll_number: rollNumber,
