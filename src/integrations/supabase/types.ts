@@ -170,6 +170,8 @@ export type Database = {
           full_name: string
           id: string
           mobile: string
+          payment_method: string | null
+          payment_status: string | null
           roll_number: string | null
           status: string | null
           transaction_id: string
@@ -183,6 +185,8 @@ export type Database = {
           full_name: string
           id?: string
           mobile: string
+          payment_method?: string | null
+          payment_status?: string | null
           roll_number?: string | null
           status?: string | null
           transaction_id: string
@@ -196,6 +200,8 @@ export type Database = {
           full_name?: string
           id?: string
           mobile?: string
+          payment_method?: string | null
+          payment_status?: string | null
           roll_number?: string | null
           status?: string | null
           transaction_id?: string
