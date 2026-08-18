@@ -519,11 +519,8 @@
             }
         }
 
-        function handleAuth(e) {
-            e.preventDefault();
-            closeModal('authModal');
-            showToast('Authentication successful!');
-        }
+        // Handled by homepage-integration.html
+        window.logoutUser = window.logoutUser || (() => {});
 
         // ===== Real YouTube-powered custom player =====
         (function () {
