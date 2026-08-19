@@ -50,10 +50,10 @@ interface Review {
   id: string;
   user_id: string;
   rating: number;
-  message: string | null;
+  comment: string | null;
   student_name: string | null;
   student_photo: string | null;
-  status: string;
+  is_approved: boolean;
   created_at: string;
 }
 interface Assignment {
@@ -252,20 +252,20 @@ function CourseDetailPage() {
     const load = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("id, user_id, rating, message, student_name, student_photo, status, created_at")
+        .select("id, profile_id, rating, comment, student_name, student_photo, is_approved, created_at")
         .eq("course_id", courseId)
-        .eq("status", "approved")
+        .eq("is_approved", true)
         .order("created_at", { ascending: false });
       if (cancelled) return;
       setReviews((data as Review[]) ?? []);
       if (user) {
         const { data: mine } = await supabase
           .from("reviews")
-          .select("rating, message")
+          .select("rating, comment")
           .eq("course_id", courseId)
-          .eq("user_id", user.id)
+          .eq("profile_id", user.id)
           .maybeSingle();
-        if (!cancelled) setMyReview(mine ? { rating: (mine as any).rating, message: (mine as any).message ?? "" } : { rating: 5, message: "" });
+        if (!cancelled) setMyReview(mine ? { rating: (mine as any).rating, comment: (mine as any).comment ?? "" } : { rating: 5, comment: "" });
       }
     };
     load();
@@ -290,8 +290,8 @@ function CourseDetailPage() {
     await supabase
       .from("lesson_progress")
       .upsert(
-        { user_id: user.id, course_id: courseId, content_id: contentId, completed: next, updated_at: new Date().toISOString() },
-        { onConflict: "user_id,content_id" }
+        { profile_id: user.id, course_id: courseId, content_id: contentId, completed: next, updated_at: new Date().toISOString() },
+        { onConflict: "profile_id,content_id" }
       );
   };
 
@@ -299,14 +299,14 @@ function CourseDetailPage() {
     if (!user || !active) return;
     await supabase.from("lesson_progress").upsert(
       {
-        user_id: user.id,
+        profile_id: user.id,
         course_id: courseId,
         content_id: active.id,
         last_position_seconds: Math.floor(seconds),
         seconds_watched: Math.floor(seconds),
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "user_id,content_id" }
+      { onConflict: "profile_id,content_id" }
     );
   };
 
@@ -318,19 +318,19 @@ function CourseDetailPage() {
   const submitReview = async () => {
     if (!user || !myReview) return;
     const payload = {
-      user_id: user.id,
+      profile_id: user.id,
       course_id: courseId,
       rating: myReview.rating,
-      message: myReview.message,
+      comment: myReview.comment,
       student_name: profile?.full_name ?? user.email,
       student_photo: profile?.photo_url ?? null,
-      status: "pending",
+      is_approved: false,
     };
     const { data: existing } = await supabase
       .from("reviews")
       .select("id")
       .eq("course_id", courseId)
-      .eq("user_id", user.id)
+      .eq("profile_id", user.id)
       .maybeSingle();
     if (existing) {
       await supabase.from("reviews").update(payload).eq("id", (existing as any).id);

@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 export interface Review {
   id: string;
   rating: number;
-  message: string;
+  comment: string;
   student_name: string | null;
   student_photo: string | null;
   created_at: string;
@@ -20,8 +20,8 @@ export function useApprovedReviews() {
     const load = () =>
       supabase
         .from("reviews")
-        .select("id, rating, message, student_name, student_photo, created_at")
-        .eq("status", "approved")
+        .select("id, rating, comment, student_name, student_photo, created_at")
+        .eq("is_approved", true)
         .order("created_at", { ascending: false })
         .then(({ data }) => {
           if (!cancelled) setReviews((data as Review[]) ?? []);
@@ -68,7 +68,7 @@ export function ReviewCard({ review }: { review: Review }) {
           <Stars value={review.rating} />
         </div>
       </div>
-      <p className="text-sm leading-relaxed text-ink-muted font-bengali">{review.message}</p>
+      <p className="text-sm leading-relaxed text-ink-muted font-bengali">{review.comment}</p>
     </article>
   );
 }
@@ -76,7 +76,7 @@ export function ReviewCard({ review }: { review: Review }) {
 export function ReviewForm() {
   const { user, profile } = useAuth();
   const [rating, setRating] = useState(5);
-  const [message, setMessage] = useState("");
+  const [comment, setComment] = useState("");
   const [state, setState] = useState<"idle" | "saving" | "done" | "error">("idle");
 
   if (!user) {
@@ -98,15 +98,15 @@ export function ReviewForm() {
     e.preventDefault();
     setState("saving");
     const { error } = await supabase.from("reviews").insert({
-      user_id: user.id,
+      profile_id: user.id,
       rating,
-      message,
+      comment,
       student_name: profile?.full_name ?? user.email,
       student_photo: profile?.photo_url ?? user.user_metadata?.avatar_url ?? null,
-      status: "pending",
+      is_approved: false,
     });
     setState(error ? "error" : "done");
-    if (!error) setMessage("");
+    if (!error) setComment("");
   };
 
   if (state === "done") {
@@ -135,8 +135,8 @@ export function ReviewForm() {
       </div>
       <textarea
         required
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
         rows={4}
         placeholder="আপনার অভিজ্ঞতা লিখুন..."
         className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-sm outline-none focus:border-brand"
