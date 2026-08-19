@@ -88,7 +88,7 @@ function CourseDetailPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [instructor, setInstructor] = useState<InstructorProfile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [myReview, setMyReview] = useState<{ rating: number; message: string } | null>(null);
+  const [myReview, setMyReview] = useState<{ rating: number; comment: string } | null>(null);
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [submission, setSubmission] = useState<AssignmentSubmission | null>(null);
   const [assignBody, setAssignBody] = useState("");
@@ -557,12 +557,12 @@ function CourseDetailPage() {
                         </div>
                         <textarea
                           value={myReview.message}
-                          onChange={(e) => setMyReview((r) => (r ? { ...r, message: e.target.value } : r))}
+                          onChange={(e) => setMyReview((r) => (r ? { ...r, comment: e.target.value } : r))}
                           placeholder="Share your experience..."
                           className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm text-ink"
                         />
                         <button onClick={submitReview} className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-bold">
-                          {reviews.some((r) => r.user_id === user.id) ? "Update review" : "Submit review"}
+                          {reviews.some((r) => r.profile_id === user.id) ? "Update review" : "Submit review"}
                         </button>
                       </div>
                     )}
