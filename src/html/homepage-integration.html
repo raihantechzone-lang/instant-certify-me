@@ -202,7 +202,7 @@
             loadCourses();
           })
           .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => loadReviews())
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, () => showInterstitialAd())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'app_ads' }, () => showInterstitialAd())
           .subscribe();
     }
   }
@@ -748,8 +748,8 @@
   async function showInterstitialAd() {
     const existing = document.getElementById("gl-interstitial-ad");
     const { data: ad } = await supabase
-      .from("ads")
-      .select("id, image_url, title, link_url")
+      .from("app_ads")
+      .select("id, image_url, title, target_link")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -777,9 +777,9 @@
     img.src = ad.image_url;
     img.alt = ad.title || "Advertisement";
     img.style.cssText = "width:100%;height:auto;display:block;";
-    if (ad.link_url) {
+    if (ad.target_link) {
       const a = document.createElement("a");
-      a.href = ad.link_url;
+      a.href = ad.target_link;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
       a.appendChild(img);

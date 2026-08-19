@@ -28,7 +28,7 @@ function ReviewsAndAdsAdmin() {
     queryKey: ["admin-ads"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("ads")
+        .from("app_ads")
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -49,7 +49,7 @@ function ReviewsAndAdsAdmin() {
 
   const toggleAdMutation = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
-      const { error } = await supabase.from("ads").update({ is_active: active }).eq("id", id);
+      const { error } = await supabase.from("app_ads").update({ is_active: active }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -60,7 +60,7 @@ function ReviewsAndAdsAdmin() {
 
   const deleteAdMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("ads").delete().eq("id", id);
+      const { error } = await supabase.from("app_ads").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -132,7 +132,7 @@ function ReviewsAndAdsAdmin() {
                 const img = window.prompt("Image URL:");
                 const link = window.prompt("Link URL (optional):");
                 if (img) {
-                   supabase.from("ads").insert({ image_url: img, link_url: link, is_active: true }).then(() => {
+                   supabase.from("app_ads").insert({ image_url: img, target_link: link, is_active: true }).then(() => {
                      queryClient.invalidateQueries({ queryKey: ["admin-ads"] });
                      toast.success("Ad created");
                    });
@@ -169,7 +169,7 @@ function ReviewsAndAdsAdmin() {
                          }`}>
                            {ad.is_active ? 'Active' : 'Paused'}
                          </span>
-                         {ad.link_url && <p className="text-xs text-brand truncate max-w-[150px]">{ad.link_url}</p>}
+                         {ad.target_link && <p className="text-xs text-brand truncate max-w-[150px]">{ad.target_link}</p>}
                       </div>
                    </div>
                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">

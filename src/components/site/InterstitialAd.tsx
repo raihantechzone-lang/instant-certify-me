@@ -5,7 +5,7 @@ interface Ad {
   id: string;
   image_url: string | null;
   title: string | null;
-  link_url: string | null;
+  target_link: string | null;
 }
 
 /**
@@ -21,8 +21,8 @@ export function InterstitialAd({ placement }: { placement: "home" | "dashboard" 
     let cancelled = false;
     const load = () =>
       supabase
-        .from("ads")
-        .select("id, image_url, title, link_url")
+        .from("app_ads")
+        .select("id, image_url, title, target_link")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -41,7 +41,7 @@ export function InterstitialAd({ placement }: { placement: "home" | "dashboard" 
     load();
     const channel = supabase
       .channel("ads-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "ads" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "app_ads" }, () => load())
       .subscribe();
     return () => {
       cancelled = true;
@@ -62,8 +62,8 @@ export function InterstitialAd({ placement }: { placement: "home" | "dashboard" 
         >
           ✕
         </button>
-        {ad.link_url ? (
-          <a href={ad.link_url} target="_blank" rel="noopener noreferrer">
+        {ad.target_link ? (
+          <a href={ad.target_link} target="_blank" rel="noopener noreferrer">
             <img src={ad.image_url ?? ""} alt={ad.title ?? "Advertisement"} className="w-full h-auto" />
           </a>
         ) : (
