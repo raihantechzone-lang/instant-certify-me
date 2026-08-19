@@ -567,12 +567,12 @@
     const name = document.getElementById("fb-name")?.value;
     const text = document.getElementById("fb-text")?.value;
     const { error } = await supabase.from("reviews").insert({
-      user_id: currentUser.id,
+      profile_id: currentUser.id,
       rating: 5,
-      message: text,
+      comment: text,
       student_name: name || currentProfile?.full_name || currentUser.email,
       student_photo: currentProfile?.photo_url || currentUser.user_metadata?.avatar_url || null,
-      status: "pending",
+      is_approved: false,
     });
     e.target.reset();
     window.showToast(

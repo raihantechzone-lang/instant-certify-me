@@ -48,12 +48,12 @@ interface InstructorProfile {
 }
 interface Review {
   id: string;
-  user_id: string;
+  profile_id: string;
   rating: number;
-  message: string | null;
+  comment: string | null;
   student_name: string | null;
   student_photo: string | null;
-  status: string;
+  is_approved: boolean;
   created_at: string;
 }
 interface Assignment {
@@ -88,7 +88,7 @@ function CourseDetailPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [instructor, setInstructor] = useState<InstructorProfile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [myReview, setMyReview] = useState<{ rating: number; message: string } | null>(null);
+  const [myReview, setMyReview] = useState<{ rating: number; comment: string } | null>(null);
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [submission, setSubmission] = useState<AssignmentSubmission | null>(null);
   const [assignBody, setAssignBody] = useState("");
@@ -252,20 +252,20 @@ function CourseDetailPage() {
     const load = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("id, user_id, rating, message, student_name, student_photo, status, created_at")
+        .select("id, profile_id, rating, comment, student_name, student_photo, is_approved, created_at")
         .eq("course_id", courseId)
-        .eq("status", "approved")
+        .eq("is_approved", true)
         .order("created_at", { ascending: false });
       if (cancelled) return;
       setReviews((data as Review[]) ?? []);
       if (user) {
         const { data: mine } = await supabase
           .from("reviews")
-          .select("rating, message")
+          .select("rating, comment")
           .eq("course_id", courseId)
-          .eq("user_id", user.id)
+          .eq("profile_id", user.id)
           .maybeSingle();
-        if (!cancelled) setMyReview(mine ? { rating: (mine as any).rating, message: (mine as any).message ?? "" } : { rating: 5, message: "" });
+        if (!cancelled) setMyReview(mine ? { rating: (mine as any).rating, comment: (mine as any).comment ?? "" } : { rating: 5, comment: "" });
       }
     };
     load();
@@ -290,8 +290,8 @@ function CourseDetailPage() {
     await supabase
       .from("lesson_progress")
       .upsert(
-        { user_id: user.id, course_id: courseId, content_id: contentId, completed: next, updated_at: new Date().toISOString() },
-        { onConflict: "user_id,content_id" }
+        { profile_id: user.id, course_id: courseId, content_id: contentId, completed: next, updated_at: new Date().toISOString() },
+        { onConflict: "profile_id,content_id" }
       );
   };
 
@@ -299,14 +299,14 @@ function CourseDetailPage() {
     if (!user || !active) return;
     await supabase.from("lesson_progress").upsert(
       {
-        user_id: user.id,
+        profile_id: user.id,
         course_id: courseId,
         content_id: active.id,
         last_position_seconds: Math.floor(seconds),
         seconds_watched: Math.floor(seconds),
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "user_id,content_id" }
+      { onConflict: "profile_id,content_id" }
     );
   };
 
@@ -318,19 +318,19 @@ function CourseDetailPage() {
   const submitReview = async () => {
     if (!user || !myReview) return;
     const payload = {
-      user_id: user.id,
+      profile_id: user.id,
       course_id: courseId,
       rating: myReview.rating,
-      message: myReview.message,
+      comment: myReview.comment,
       student_name: profile?.full_name ?? user.email,
       student_photo: profile?.photo_url ?? null,
-      status: "pending",
+      is_approved: false,
     };
     const { data: existing } = await supabase
       .from("reviews")
       .select("id")
       .eq("course_id", courseId)
-      .eq("user_id", user.id)
+      .eq("profile_id", user.id)
       .maybeSingle();
     if (existing) {
       await supabase.from("reviews").update(payload).eq("id", (existing as any).id);
@@ -556,13 +556,13 @@ function CourseDetailPage() {
                           ))}
                         </div>
                         <textarea
-                          value={myReview.message}
-                          onChange={(e) => setMyReview((r) => (r ? { ...r, message: e.target.value } : r))}
+                          value={myReview.comment}
+                          onChange={(e) => setMyReview((r) => (r ? { ...r, comment: e.target.value } : r))}
                           placeholder="Share your experience..."
                           className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm text-ink"
                         />
                         <button onClick={submitReview} className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-bold">
-                          {reviews.some((r) => r.user_id === user.id) ? "Update review" : "Submit review"}
+                          {reviews.some((r) => r.profile_id === user.id) ? "Update review" : "Submit review"}
                         </button>
                       </div>
                     )}
@@ -574,7 +574,7 @@ function CourseDetailPage() {
                             <span className="text-xs font-bold text-ink">{r.student_name}</span>
                             <span className="text-brand text-xs">{"★".repeat(r.rating)}</span>
                           </div>
-                          <p className="text-sm text-ink-muted">{r.message}</p>
+                          <p className="text-sm text-ink-muted">{r.comment}</p>
                         </li>
                       ))}
                     </ul>

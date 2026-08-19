@@ -406,8 +406,8 @@ export type Database = {
           created_at: string | null
           id: string
           is_approved: boolean | null
+          profile_id: string
           rating: number | null
-          user_id: string
         }
         Insert: {
           comment?: string | null
@@ -415,8 +415,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_approved?: boolean | null
+          profile_id: string
           rating?: number | null
-          user_id: string
         }
         Update: {
           comment?: string | null
@@ -424,8 +424,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_approved?: boolean | null
+          profile_id?: string
           rating?: number | null
-          user_id?: string
         }
         Relationships: [
           {
@@ -436,8 +436,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reviews_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "reviews_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

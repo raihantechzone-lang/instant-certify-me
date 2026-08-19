@@ -91,7 +91,7 @@ function ReviewsAndAdsAdmin() {
                            <Users size={18} className="text-slate-400" />
                          </div>
                          <div>
-                            <p className="font-bold text-slate-900">{review.student_name || "Student"}</p>
+                             <p className="font-bold text-slate-900">{review.student_name || "Student"}</p>
                             <div className="flex items-center gap-1 text-amber-400">
                                {[...Array(review.rating || 5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
                             </div>
@@ -113,7 +113,7 @@ function ReviewsAndAdsAdmin() {
                          </span>
                       </div>
                    </div>
-                   <p className="mt-4 text-slate-600 text-sm leading-relaxed italic">"{review.comment}"</p>
+                    <p className="mt-4 text-slate-600 text-sm leading-relaxed italic">"{review.comment}"</p>
                 </div>
               ))
             )}
