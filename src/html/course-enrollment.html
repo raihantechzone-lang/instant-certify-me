@@ -170,13 +170,13 @@
                     <div class="relative w-full aspect-video bg-black overflow-hidden group" id="video-container">
 
                         <!-- YouTube mount -->
-                        <div id="yt-mount" class="absolute inset-0 w-full h-full z-10"></div>
+                        <div id="yt-mount" class="absolute inset-0 w-full h-full z-10" style="pointer-events: auto;"></div>
 
                         <!-- Video Poster -->
                         <img id="vid-poster" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" class="absolute inset-0 w-full h-full object-cover z-20" alt="Video">
 
                         <!-- Click-catcher over the iframe so our controls work -->
-                        <div id="vid-clickcatch" class="absolute inset-0 z-20" onclick="window.vpToggle && window.vpToggle()"></div>
+                        <div id="vid-clickcatch" class="absolute inset-0 z-20 pointer-events-none" onclick="window.vpToggle && window.vpToggle()"></div>
 
                         <!-- Top bar -->
                         <div class="vp-ui absolute top-0 left-0 right-0 flex items-start justify-between p-5 z-30 transition-opacity duration-300 pointer-events-none">
@@ -578,6 +578,7 @@
                     const s = document.createElement('script');
                     s.id = 'yt-api';
                     s.src = 'https://www.youtube.com/iframe_api';
+                    s.async = true;
                     document.head.appendChild(s);
                 }
             }
@@ -589,6 +590,7 @@
                 $('vid-poster')?.classList.add('hidden');
                 const live = $('vp-live-label');
                 if (live) live.innerText = 'Now Playing';
+                $('vid-clickcatch')?.classList.add('hidden');
                 showUi();
 
                 if (ready && player) { player.loadVideoById(videoId); return; }
@@ -597,7 +599,7 @@
                     if (player) { if (pendingId) player.loadVideoById(pendingId); return; }
                     player = new YT.Player('yt-mount', {
                         videoId: pendingId,
-                        playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, showinfo: 0, iv_load_policy: 3, playsinline: 1, disablekb: 1, fs: 0 },
+                        playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, showinfo: 0, iv_load_policy: 3, playsinline: 1, disablekb: 0, fs: 0, origin: window.location.origin },
                         events: {
                             onReady: (e) => {
                                 ready = true;
