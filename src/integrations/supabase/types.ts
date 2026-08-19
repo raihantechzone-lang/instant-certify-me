@@ -14,30 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      ads: {
+      app_ads: {
         Row: {
           created_at: string | null
           id: string
           image_url: string
           is_active: boolean | null
-          link_url: string | null
           placement: string | null
+          target_link: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           image_url: string
           is_active?: boolean | null
-          link_url?: string | null
           placement?: string | null
+          target_link?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           image_url?: string
           is_active?: boolean | null
-          link_url?: string | null
           placement?: string | null
+          target_link?: string | null
         }
         Relationships: []
       }
