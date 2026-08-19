@@ -484,13 +484,15 @@
                 if (window.loadLesson) {
                    window.loadLesson(playableId, c.title, myIndex);
                 } else {
-                   const container = document.getElementById('yt-mount') || document.querySelector('.aspect-video');
-                   if (container) {
-                      container.innerHTML = `<iframe class="w-full h-full absolute inset-0 z-20" src="https://www.youtube.com/embed/${playableId}?autoplay=1&rel=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                   // Fallback: Just mount an iframe if the custom player isn't ready
+                   const mount = document.getElementById('yt-mount');
+                   if (mount) {
+                      mount.innerHTML = `<iframe class="w-full h-full absolute inset-0 z-20" src="https://www.youtube.com/embed/${playableId}?autoplay=1&rel=0&showinfo=0&modestbranding=1&origin=${window.location.origin}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
                       document.getElementById('vid-poster')?.classList.add('hidden');
+                      document.getElementById('vid-clickcatch')?.classList.add('hidden');
+                      const overlay = document.getElementById('vid-title-overlay');
+                      if (overlay) overlay.innerText = c.title;
                    }
-                   const overlay = document.getElementById('vid-title-overlay');
-                   if (overlay) overlay.innerText = c.title;
                 }
              };
 
