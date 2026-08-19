@@ -556,7 +556,7 @@ function CourseDetailPage() {
                           ))}
                         </div>
                         <textarea
-                          value={myReview.message}
+                          value={myReview.comment}
                           onChange={(e) => setMyReview((r) => (r ? { ...r, comment: e.target.value } : r))}
                           placeholder="Share your experience..."
                           className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm text-ink"
