@@ -48,7 +48,7 @@ interface InstructorProfile {
 }
 interface Review {
   id: string;
-  user_id: string;
+  profile_id: string;
   rating: number;
   comment: string | null;
   student_name: string | null;
@@ -574,7 +574,7 @@ function CourseDetailPage() {
                             <span className="text-xs font-bold text-ink">{r.student_name}</span>
                             <span className="text-brand text-xs">{"★".repeat(r.rating)}</span>
                           </div>
-                          <p className="text-sm text-ink-muted">{r.message}</p>
+                          <p className="text-sm text-ink-muted">{r.comment}</p>
                         </li>
                       ))}
                     </ul>
