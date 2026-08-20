@@ -111,8 +111,6 @@ export function ReviewForm() {
       profile_id: user.id,
       rating,
       comment,
-      rating,
-      comment,
       is_approved: false,
     });
     setState(error ? "error" : "done");
