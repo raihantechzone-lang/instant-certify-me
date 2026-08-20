@@ -252,12 +252,17 @@ function CourseDetailPage() {
     const load = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("id, profile_id, rating, comment, student_name, student_photo, is_approved, created_at")
+        .select("id, profile_id, rating, comment, is_approved, created_at, profiles(full_name, photo_url)")
         .eq("course_id", courseId)
         .eq("is_approved", true)
         .order("created_at", { ascending: false });
       if (cancelled) return;
-      setReviews((data as Review[]) ?? []);
+      const formatted = (data || []).map((r: any) => ({
+        ...r,
+        student_name: r.profiles?.full_name,
+        student_photo: r.profiles?.photo_url
+      }));
+      setReviews(formatted as Review[]);
       if (user) {
         const { data: mine } = await supabase
           .from("reviews")
@@ -322,8 +327,6 @@ function CourseDetailPage() {
       course_id: courseId,
       rating: myReview.rating,
       comment: myReview.comment,
-      student_name: profile?.full_name ?? user.email,
-      student_photo: profile?.photo_url ?? null,
       is_approved: false,
     };
     const { data: existing } = await supabase

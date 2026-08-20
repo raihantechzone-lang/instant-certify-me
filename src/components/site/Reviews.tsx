@@ -20,11 +20,21 @@ export function useApprovedReviews() {
     const load = () =>
       supabase
         .from("reviews")
-        .select("id, rating, comment, student_name, student_photo, created_at")
+        .select("id, rating, comment, created_at, profiles(full_name, photo_url)")
         .eq("is_approved", true)
         .order("created_at", { ascending: false })
         .then(({ data }) => {
-          if (!cancelled) setReviews((data as Review[]) ?? []);
+          if (!cancelled) {
+            const formatted = (data || []).map((r: any) => ({
+              id: r.id,
+              rating: r.rating,
+              comment: r.comment,
+              student_name: r.profiles?.full_name,
+              student_photo: r.profiles?.photo_url,
+              created_at: r.created_at
+            }));
+            setReviews(formatted as Review[]);
+          }
         });
     load();
     const channel = supabase
@@ -101,8 +111,6 @@ export function ReviewForm() {
       profile_id: user.id,
       rating,
       comment,
-      student_name: profile?.full_name ?? user.email,
-      student_photo: profile?.photo_url ?? user.user_metadata?.avatar_url ?? null,
       is_approved: false,
     });
     setState(error ? "error" : "done");
