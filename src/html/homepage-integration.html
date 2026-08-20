@@ -543,15 +543,15 @@
   async function loadReviews() {
     const { data } = await supabase
       .from("reviews")
-      .select("student_name, student_photo, comment, rating, created_at")
+      .select("comment, rating, created_at, profiles(full_name, photo_url)")
       .eq("is_approved", true)
       .order("created_at", { ascending: false });
     window.db.feedbacks = (data || []).map((r) => ({
-      name: r.student_name || "Student",
+      name: r.profiles?.full_name || "Student",
       role: r.rating ? r.rating + " ★ Student Review" : "Student",
       text: r.comment,
       status: "approved",
-      photo: r.student_photo,
+      photo: r.profiles?.photo_url,
     }));
     window.renderTestimonialsList();
   }
@@ -570,8 +570,6 @@
       profile_id: currentUser.id,
       rating: 5,
       comment: text,
-      student_name: name || currentProfile?.full_name || currentUser.email,
-      student_photo: currentProfile?.photo_url || currentUser.user_metadata?.avatar_url || null,
       is_approved: false,
     });
     e.target.reset();

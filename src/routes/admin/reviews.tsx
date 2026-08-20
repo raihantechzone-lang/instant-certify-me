@@ -17,7 +17,7 @@ function ReviewsAndAdsAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reviews")
-        .select("*")
+        .select("*, profiles(full_name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -91,7 +91,7 @@ function ReviewsAndAdsAdmin() {
                            <Users size={18} className="text-slate-400" />
                          </div>
                          <div>
-                             <p className="font-bold text-slate-900">{review.student_name || "Student"}</p>
+                             <p className="font-bold text-slate-900">{(review as any).profiles?.full_name || "Student"}</p>
                             <div className="flex items-center gap-1 text-amber-400">
                                {[...Array(review.rating || 5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
                             </div>
