@@ -543,13 +543,13 @@
   async function loadReviews() {
     const { data } = await supabase
       .from("reviews")
-      .select("student_name, student_photo, message, rating, created_at")
-      .eq("status", "approved")
+      .select("student_name, student_photo, comment, rating, created_at")
+      .eq("is_approved", true)
       .order("created_at", { ascending: false });
     window.db.feedbacks = (data || []).map((r) => ({
       name: r.student_name || "Student",
       role: r.rating ? r.rating + " ★ Student Review" : "Student",
-      text: r.message,
+      text: r.comment,
       status: "approved",
       photo: r.student_photo,
     }));
